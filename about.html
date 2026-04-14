@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>About — Career Ops</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:     #07111E;
+  --surface:#0F1E30;
+  --card:   #142030;
+  --border: #1E3248;
+  --muted:  #4A6580;
+  --text:   #C8DDF0;
+  --bright: #EAF4FF;
+  --teal:   #0E9B8A;
+  --teal2:  #07C5B0;
+  --amber:  #F5A623;
+  --green:  #2ECC8F;
+  --red:    #E8504A;
+  --mono:   'DM Mono', monospace;
+  --sans:   'Syne', sans-serif;
+  --serif:  'Instrument Serif', Georgia, serif;
+}
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg); color: var(--text);
+  font-family: var(--mono); min-height: 100vh; overflow-x: hidden;
+}
+body::before {
+  content: ''; position: fixed; inset: 0;
+  background-image:
+    linear-gradient(rgba(14,155,138,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(14,155,138,0.03) 1px, transparent 1px);
+  background-size: 40px 40px; pointer-events: none; z-index: 0;
+}
+
+/* Topbar */
+.topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 28px; border-bottom: 1px solid var(--border);
+  background: rgba(7,17,30,0.92); backdrop-filter: blur(10px);
+  position: sticky; top: 0; z-index: 100;
+}
+.topbar-left { display: flex; align-items: center; gap: 14px; }
+.logo { font-family: var(--sans); font-size: 15px; font-weight: 800; color: var(--bright); text-decoration: none; letter-spacing: -0.02em; }
+.logo span { color: var(--teal); }
+.tool-tag { font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--teal); border: 1px solid var(--teal); padding: 2px 8px; border-radius: 2px; font-family: var(--mono); }
+.nav-links { display: flex; gap: 4px; }
+.nav-link { font-size: 11px; font-family: var(--mono); color: var(--muted); text-decoration: none; padding: 5px 11px; border: 1px solid var(--border); border-radius: 3px; transition: color 0.15s, border-color 0.15s; }
+.nav-link:hover { color: var(--teal); border-color: var(--teal); }
+.nav-link.active { color: var(--teal); border-color: var(--teal); background: rgba(14,155,138,0.08); }
+
+/* Main */
+.main { max-width: 760px; margin: 0 auto; padding: 60px 28px 100px; position: relative; z-index: 1; }
+
+/* Hero */
+.eyebrow { font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--teal); margin-bottom: 14px; }
+.hero-title { font-family: var(--serif); font-size: clamp(36px, 6vw, 56px); color: var(--bright); line-height: 1.15; margin-bottom: 16px; font-style: italic; }
+.hero-title strong { font-style: normal; color: var(--teal); }
+.hero-sub { font-size: 14px; color: var(--muted); line-height: 1.85; max-width: 580px; margin-bottom: 48px; }
+
+/* Divider */
+.divider { width: 100%; height: 1px; background: var(--border); margin: 48px 0; }
+
+/* Sections */
+.section { margin-bottom: 48px; }
+.section-label { font-family: var(--sans); font-size: 10px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: var(--teal); margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+.section-text { font-size: 13px; line-height: 1.9; color: var(--text); }
+.section-text p { margin-bottom: 14px; }
+.section-text strong { color: var(--bright); font-weight: 500; }
+
+/* Author card */
+.author-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 10px; padding: 28px; display: flex; gap: 24px; align-items: flex-start;
+  margin-bottom: 48px;
+}
+.author-avatar {
+  width: 60px; height: 60px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--teal), #0D6B5E);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--sans); font-size: 22px; font-weight: 800; color: var(--bg);
+  flex-shrink: 0;
+}
+.author-name { font-family: var(--sans); font-size: 18px; font-weight: 700; color: var(--bright); margin-bottom: 4px; }
+.author-title { font-size: 12px; color: var(--teal); margin-bottom: 12px; }
+.author-bio { font-size: 13px; line-height: 1.75; color: var(--muted); }
+
+/* Disclaimer box */
+.disclaimer {
+  background: rgba(245,166,35,0.06); border: 1px solid rgba(245,166,35,0.25);
+  border-radius: 8px; padding: 24px; margin-bottom: 48px;
+}
+.disclaimer-label { font-family: var(--sans); font-size: 10px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: var(--amber); margin-bottom: 14px; }
+.disclaimer-text { font-size: 12px; line-height: 1.85; color: var(--muted); }
+.disclaimer-text p { margin-bottom: 10px; }
+.disclaimer-text p:last-child { margin-bottom: 0; }
+.disclaimer-text strong { color: var(--text); font-weight: 500; }
+
+/* Tool grid */
+.tool-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.tool-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 8px; padding: 18px; text-decoration: none; transition: all 0.15s;
+}
+.tool-card:hover { border-color: var(--teal); transform: translateY(-2px); }
+.tool-card-name { font-family: var(--sans); font-size: 13px; font-weight: 700; color: var(--bright); margin-bottom: 4px; }
+.tool-card-desc { font-size: 11px; color: var(--muted); line-height: 1.6; }
+
+/* Footer */
+.site-footer {
+  text-align: center; padding: 32px 28px;
+  border-top: 1px solid var(--border);
+  font-size: 11px; color: var(--muted); line-height: 1.8;
+}
+.site-footer a { color: var(--teal); text-decoration: none; }
+.site-footer strong { color: var(--text); font-weight: 500; }
+
+@media(max-width: 600px) {
+  .author-card { flex-direction: column; }
+  .tool-grid { grid-template-columns: 1fr; }
+  .main { padding: 40px 16px 80px; }
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <a href="/pipeline.html" class="logo">Career<span>Ops</span></a>
+    <span class="tool-tag">about</span>
+    <nav class="nav-links">
+      <a class="nav-link" href="/jd-analyser.html">JD Analyser</a>
+      <a class="nav-link" href="/cv-tailor.html">CV Tailor</a>
+      <a class="nav-link" href="/search-kit.html">Search Kit</a>
+      <a class="nav-link" href="/compass.html">Compass</a>
+      <a class="nav-link" href="/pipeline.html">Pipeline</a>
+    </nav>
+  </div>
+</div>
+
+<div class="main">
+
+  <div class="eyebrow">Career Ops · About this project</div>
+  <h1 class="hero-title">Built by someone who<br><strong>lived the problem.</strong></h1>
+  <p class="hero-sub">Career Ops is a locally-run AI toolkit for professional job seekers in Australia. It was built to close the gap between what recruiters use and what candidates have access to — with no accounts, no subscriptions, and no data leaving your machine.</p>
+
+  <!-- Author -->
+  <div class="author-card">
+    <div class="author-avatar">JL</div>
+    <div>
+      <div class="author-name">Johan Lopez</div>
+      <div class="author-title">Creator · Career Ops</div>
+      <div class="author-bio">
+        Professional immigrant navigating the Australian job market — and frustrated enough to build a better system. Career Ops started as a personal tool and grew into something worth sharing.<br><br>
+        The system is designed with a specific person in mind: a qualified professional arriving in Australia with real credentials and real experience, but without local networks, without familiarity with how Australian hiring works, and without the tools that make a real difference.
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- Why it exists -->
+  <div class="section">
+    <div class="section-label">Why this exists</div>
+    <div class="section-text">
+      <p>The Australian job market is not broken — but it is asymmetric. Recruiters and ATS platforms use AI to filter applications before any human ever reads them. Most job seekers, especially those who are new to the market, don't have equivalent tools on their side.</p>
+      <p>Career Ops is designed to close that gap. It doesn't fabricate experience or game the system. It helps you <strong>reframe what you already have</strong> in the language that Australian hiring managers are actually screening for — and gives you the structure to apply consistently, track clearly, and improve with each attempt.</p>
+      <p>It is specifically useful for <strong>professional immigrants in Australia</strong> who hold overseas qualifications, carry international experience that doesn't translate directly, and are unfamiliar with local CV conventions, industry terminology, or how to position their background for roles here.</p>
+    </div>
+  </div>
+
+  <!-- What it does -->
+  <div class="section">
+    <div class="section-label">The tools</div>
+    <div class="tool-grid">
+      <a class="tool-card" href="/compass.html">
+        <div class="tool-card-name">🧭 Career Compass</div>
+        <div class="tool-card-desc">Maps a realistic path from where you are to where you want to be, including roles most people miss.</div>
+      </a>
+      <a class="tool-card" href="/jd-analyser.html">
+        <div class="tool-card-name">🔍 JD Analyser</div>
+        <div class="tool-card-desc">Decodes job descriptions — what's real, what's boilerplate, what's being screened for, and how well you fit.</div>
+      </a>
+      <a class="tool-card" href="/cv-tailor.html">
+        <div class="tool-card-name">📄 CV Tailor</div>
+        <div class="tool-card-desc">Rewrites your CV to match a specific role — in your voice, without fabrication. Downloads as a formatted .docx.</div>
+      </a>
+      <a class="tool-card" href="/search-kit.html">
+        <div class="tool-card-name">🎯 Search Kit</div>
+        <div class="tool-card-desc">Generates targeted search strategies, cover letter frameworks, and outreach templates for Australian roles.</div>
+      </a>
+      <a class="tool-card" href="/pipeline.html">
+        <div class="tool-card-name">📋 Pipeline</div>
+        <div class="tool-card-desc">Tracks every application — status, contacts, follow-ups, and which CV version you sent.</div>
+      </a>
+      <a class="tool-card" href="/setup.html">
+        <div class="tool-card-name">⚙ Setup</div>
+        <div class="tool-card-desc">One-time profile wizard. Everything the system generates is personalised to your background from here.</div>
+      </a>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- Disclaimer -->
+  <div class="disclaimer">
+    <div class="disclaimer-label">⚠ Important Disclaimer</div>
+    <div class="disclaimer-text">
+      <p><strong>Career Ops is a productivity and drafting tool — not a guarantee of employment outcomes.</strong> It assists with CV formatting, language repositioning, and application organisation. It does not apply for jobs on your behalf, contact employers, or guarantee that any generated content will result in interviews or offers.</p>
+      <p><strong>AI-generated content must be reviewed by you before use.</strong> The system uses a third-party AI model (Groq / Llama) to generate suggestions. All outputs should be read critically and edited to accurately represent your actual qualifications and experience. <strong>Do not submit content that misrepresents your background.</strong></p>
+      <p><strong>Your data stays local.</strong> Career Ops runs entirely on your own machine. Your CV data, job descriptions, and profile are stored only in <code>config.json</code> and <code>pipeline.json</code> on your computer. The only external connection made is to the Groq API for AI processing — no data is stored, logged, or shared by Career Ops itself.</p>
+      <p><strong>No warranties.</strong> This software is provided as-is for personal use. The creator accepts no liability for outcomes resulting from its use. The Groq free tier is subject to rate limits and availability outside the creator's control.</p>
+      <p>Career Ops is an independent product created by Johan Lopez. It is not affiliated with, endorsed by, or connected to any recruitment agency, employer, or Australian government body.</p>
+    </div>
+  </div>
+
+  <!-- Version -->
+  <div class="section">
+    <div class="section-label">Version & Acknowledgements</div>
+    <div class="section-text">
+      <p><strong>Career Ops v1.0</strong> · Built with Node.js, plain HTML, and Groq's Llama 3.3 70B model.</p>
+      <p>No frameworks. No cloud. No tracking. Just a tool that works.</p>
+    </div>
+  </div>
+
+</div>
+
+<footer class="site-footer">
+  <strong>Career Ops</strong> · Built by <strong>Johan Lopez</strong> · Australia · v1.0<br>
+  A personal project. Not affiliated with any recruiter, platform, or employer.<br>
+  <a href="/about.html">About & Disclaimer</a> · <a href="/setup.html">Setup</a> · <a href="/pipeline.html">Pipeline</a>
+</footer>
+
+</body>
+</html>

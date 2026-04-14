@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pipeline — Career Ops</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg:     #07111E;
+    --surface:#0F1E30;
+    --card:   #142030;
+    --border: #1E3248;
+    --muted:  #4A6580;
+    --text:   #C8DDF0;
+    --bright: #EAF4FF;
+    --navy:   #0D1F35;
+    --teal:   #0E9B8A;
+    --teal2:  #07C5B0;
+    --amber:  #F5A623;
+    --red:    #E8504A;
+    --green:  #2ECC8F;
+    --purple: #9B72CF;
+    --mono:   'DM Mono', monospace;
+    --sans:   'Syne', sans-serif;
+  }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--mono);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image:
+      linear-gradient(rgba(14,155,138,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(14,155,138,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none; z-index: 0;
+  }
+
+  /* Layout */
+  .app { position: relative; z-index: 1; display: flex; flex-direction: column; min-height: 100vh; }
+
+  /* Top bar */
+
+  /* Stats strip */
+  .stats-strip {
+    display: flex; gap: 0;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    overflow-x: auto;
+  }
+  .stat {
+    flex: 1; min-width: 100px;
+    padding: 14px 20px;
+    border-right: 1px solid var(--border);
+    text-align: center;
+  }
+  .stat:last-child { border-right: none; }
+  .stat-val {
+    font-family: var(--sans); font-size: 22px; font-weight: 800;
+    color: var(--bright); display: block;
+  }
+  .stat-label { font-size: 10px; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; margin-top: 2px; }
+  .stat.teal .stat-val { color: var(--teal); }
+  .stat.amber .stat-val { color: var(--amber); }
+  .stat.green .stat-val { color: var(--green); }
+  .stat.red .stat-val { color: var(--red); }
+
+  /* Main content */
+  .main { flex: 1; padding: 24px 28px; }
+
+  /* Toolbar */
+  .toolbar {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 20px; flex-wrap: wrap;
+  }
+  .search-box {
+    flex: 1; min-width: 200px;
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 4px; padding: 8px 14px;
+    color: var(--text); font-family: var(--mono); font-size: 12px;
+    outline: none; transition: border-color 0.2s;
+  }
+  .search-box:focus { border-color: var(--teal); }
+  .search-box::placeholder { color: var(--muted); }
+
+  .filter-btn {
+    font-family: var(--mono); font-size: 11px;
+    padding: 7px 14px; border-radius: 3px;
+    border: 1px solid var(--border);
+    background: transparent; color: var(--muted);
+    cursor: pointer; transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .filter-btn:hover { border-color: var(--teal); color: var(--teal); }
+  .filter-btn.active { background: var(--teal); border-color: var(--teal); color: var(--navy); font-weight: 500; }
+
+  .btn-add {
+    font-family: var(--sans); font-size: 12px; font-weight: 700;
+    padding: 8px 18px; border-radius: 4px;
+    background: var(--teal); color: var(--navy);
+    border: none; cursor: pointer; transition: all 0.2s;
+    white-space: nowrap; letter-spacing: 0.05em;
+  }
+  .btn-add:hover { background: var(--teal2); }
+
+  /* Table */
+  .table-wrap { overflow-x: auto; border-radius: 8px; border: 1px solid var(--border); }
+  table { width: 100%; border-collapse: collapse; }
+  thead tr { background: var(--surface); border-bottom: 1px solid var(--border); }
+  th {
+    padding: 11px 16px;
+    text-align: left; font-size: 10px;
+    font-family: var(--sans); font-weight: 700;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--muted); white-space: nowrap;
+    cursor: pointer; user-select: none;
+    transition: color 0.15s;
+  }
+  th:hover { color: var(--teal); }
+  th.sorted { color: var(--teal); }
+
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.1s; cursor: pointer;
+  }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: var(--surface); }
+  td { padding: 12px 16px; font-size: 12px; vertical-align: middle; }
+
+  .company-cell { font-family: var(--sans); font-weight: 700; color: var(--bright); font-size: 13px; }
+  .role-cell { color: var(--text); font-size: 12px; }
+  .date-cell { color: var(--muted); font-size: 11px; white-space: nowrap; }
+  .fit-cell { font-family: var(--sans); font-weight: 800; font-size: 14px; }
+  .fit-A { color: var(--green); }
+  .fit-B { color: #6BE08A; }
+  .fit-C { color: var(--amber); }
+  .fit-D { color: #F07B3F; }
+  .fit-F { color: var(--red); }
+
+  /* Status badges */
+  .badge {
+    display: inline-block; font-size: 10px;
+    padding: 3px 9px; border-radius: 3px;
+    font-family: var(--mono); letter-spacing: 0.06em;
+    font-weight: 500; white-space: nowrap;
+  }
+  .badge-draft     { background: rgba(74,101,128,0.2);  color: var(--muted);  border: 1px solid var(--border); }
+  .badge-applied   { background: rgba(14,155,138,0.12); color: var(--teal);   border: 1px solid rgba(14,155,138,0.3); }
+  .badge-screening { background: rgba(155,114,207,0.12);color: var(--purple); border: 1px solid rgba(155,114,207,0.3); }
+  .badge-interview { background: rgba(245,166,35,0.12); color: var(--amber);  border: 1px solid rgba(245,166,35,0.3); }
+  .badge-offer     { background: rgba(46,204,143,0.12); color: var(--green);  border: 1px solid rgba(46,204,143,0.3); }
+  .badge-rejected  { background: rgba(232,80,74,0.08);  color: var(--red);    border: 1px solid rgba(232,80,74,0.3); }
+  .badge-withdrawn { background: rgba(74,101,128,0.12); color: var(--muted);  border: 1px solid var(--border); }
+
+  .notes-cell { max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--muted); font-size: 11px; }
+  .follow-up-cell { font-size: 11px; white-space: nowrap; }
+  .overdue { color: var(--red); }
+  .due-soon { color: var(--amber); }
+  .on-track { color: var(--muted); }
+
+  .action-dots {
+    color: var(--muted); font-size: 16px; padding: 4px 8px;
+    border-radius: 3px; transition: all 0.15s;
+  }
+  .action-dots:hover { background: var(--surface); color: var(--bright); }
+
+  /* Empty state */
+  .empty {
+    text-align: center; padding: 80px 20px;
+    color: var(--muted);
+  }
+  .empty-icon { font-size: 40px; margin-bottom: 16px; }
+  .empty-title { font-family: var(--sans); font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+  .empty-sub { font-size: 13px; line-height: 1.7; }
+
+  /* Modal */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(7,17,30,0.85);
+    backdrop-filter: blur(4px);
+    z-index: 200; display: none;
+    align-items: center; justify-content: center;
+    padding: 20px;
+  }
+  .modal-overlay.show { display: flex; }
+  .modal {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    width: 100%; max-width: 560px;
+    max-height: 90vh; overflow-y: auto;
+    animation: slideUp 0.25s ease;
+  }
+  @keyframes slideUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+  .modal-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .modal-title { font-family: var(--sans); font-size: 16px; font-weight: 700; color: var(--bright); }
+  .modal-close {
+    background: none; border: none; color: var(--muted);
+    font-size: 20px; cursor: pointer; padding: 2px 6px;
+    border-radius: 3px; transition: all 0.15s; line-height: 1;
+  }
+  .modal-close:hover { color: var(--bright); background: var(--surface); }
+  .modal-body { padding: 20px 24px; }
+  .modal-footer { padding: 16px 24px; border-top: 1px solid var(--border); display: flex; gap: 10px; justify-content: flex-end; }
+
+  .form-row { margin-bottom: 16px; }
+  .form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+  label { display: block; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+  input, select, textarea.form-ta {
+    width: 100%; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 4px;
+    color: var(--text); font-family: var(--mono); font-size: 13px;
+    padding: 9px 12px; outline: none; transition: border-color 0.2s;
+  }
+  input:focus, select:focus, textarea.form-ta:focus { border-color: var(--teal); }
+  input::placeholder, textarea.form-ta::placeholder { color: var(--muted); }
+  select { cursor: pointer; }
+  select option { background: var(--card); }
+  textarea.form-ta { resize: vertical; min-height: 72px; font-size: 12px; line-height: 1.6; }
+
+  .btn-save {
+    font-family: var(--sans); font-size: 13px; font-weight: 700;
+    padding: 10px 24px; border-radius: 4px;
+    background: var(--teal); color: var(--navy);
+    border: none; cursor: pointer; transition: all 0.2s;
+  }
+  .btn-save:hover { background: var(--teal2); }
+  .btn-cancel {
+    font-family: var(--mono); font-size: 12px;
+    padding: 10px 18px; border-radius: 4px;
+    background: transparent; color: var(--muted);
+    border: 1px solid var(--border); cursor: pointer; transition: all 0.15s;
+  }
+  .btn-cancel:hover { color: var(--text); border-color: var(--muted); }
+  .btn-delete {
+    font-family: var(--mono); font-size: 12px;
+    padding: 10px 18px; border-radius: 4px;
+    background: transparent; color: var(--red);
+    border: 1px solid rgba(232,80,74,0.3); cursor: pointer; transition: all 0.15s;
+    margin-right: auto;
+  }
+  .btn-delete:hover { background: rgba(232,80,74,0.08); }
+
+  /* Kanban toggle */
+  .view-toggle { display: flex; border: 1px solid var(--border); border-radius: 4px; overflow: hidden; }
+  .view-btn {
+    padding: 6px 12px; font-size: 11px; font-family: var(--mono);
+    background: transparent; color: var(--muted);
+    border: none; cursor: pointer; transition: all 0.15s;
+  }
+  .view-btn.active { background: var(--card); color: var(--teal); }
+
+  /* Kanban */
+  .kanban {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 14px; margin-top: 4px;
+  }
+  .kanban-col { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+  .kanban-head {
+    padding: 10px 14px; font-size: 10px;
+    font-family: var(--sans); font-weight: 700;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .kanban-count {
+    font-size: 11px; font-family: var(--mono);
+    background: var(--card); color: var(--muted);
+    padding: 1px 7px; border-radius: 10px;
+  }
+  .kanban-cards { padding: 10px; display: flex; flex-direction: column; gap: 8px; min-height: 40px; }
+  .kanban-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 5px; padding: 10px 12px;
+    cursor: pointer; transition: all 0.15s;
+    font-size: 12px;
+  }
+  .kanban-card:hover { border-color: var(--teal); transform: translateY(-1px); }
+  .kc-company { font-family: var(--sans); font-weight: 700; color: var(--bright); font-size: 12px; margin-bottom: 3px; }
+  .kc-role { color: var(--muted); font-size: 11px; margin-bottom: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .kc-footer { display: flex; align-items: center; justify-content: space-between; }
+  .kc-fit { font-family: var(--sans); font-weight: 800; font-size: 13px; }
+  .kc-date { font-size: 10px; color: var(--muted); }
+
+  @media(max-width: 640px) {
+  
+    .main { padding: 16px; }
+    .form-row-2 { grid-template-columns: 1fr; }
+    .stats-strip { display: grid; grid-template-columns: repeat(3, 1fr); }
+    .stat { border-right: none; border-bottom: 1px solid var(--border); }
+  }
+
+  /* ── Global nav ──────────────────────────────────────────────────── */
+  .topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 28px; border-bottom: 1px solid var(--border);
+    background: rgba(7,17,30,0.92); backdrop-filter: blur(10px);
+    position: sticky; top: 0; z-index: 100;
+  }
+  .topbar-left  { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+  .topbar-right { display: flex; align-items: center; gap: 8px; }
+  .logo { font-family: var(--sans); font-size: 15px; font-weight: 800; color: var(--bright); letter-spacing: -0.02em; text-decoration: none; }
+  .logo span { color: var(--teal); }
+  .tool-tag {
+    font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--teal); border: 1px solid var(--teal);
+    padding: 2px 8px; border-radius: 2px; font-family: var(--mono);
+  }
+  .nav-links { display: flex; gap: 4px; flex-wrap: wrap; }
+  .nav-link {
+    font-size: 11px; font-family: var(--mono); color: var(--muted);
+    text-decoration: none; padding: 5px 11px;
+    border: 1px solid var(--border); border-radius: 3px;
+    transition: color 0.15s, border-color 0.15s; white-space: nowrap;
+  }
+  .nav-link:hover { color: var(--teal); border-color: var(--teal); }
+  .nav-link.active { color: var(--teal); border-color: var(--teal); background: rgba(14,155,138,0.08); }
+
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- Top bar -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <a href="/pipeline.html" class="logo">Career<span>Ops</span></a>
+      <span class="tool-tag">pipeline</span>
+      <nav class="nav-links">
+        <a class="nav-link" href="/jd-analyser.html">JD Analyser</a>
+        <a class="nav-link" href="/cv-tailor.html">CV Tailor</a>
+        <a class="nav-link" href="/search-kit.html">Search Kit</a>
+        <a class="nav-link" href="/compass.html">Compass</a>
+        <a class="nav-link active" href="/pipeline.html">Pipeline</a>
+      </nav>
+    </div>
+    <div class="topbar-right"><span id="user-greeting" style="font-size:11px;color:var(--muted);font-family:var(--mono);"></span><div class="view-toggle" style="display:flex;gap:4px;"><button class="view-btn active" id="vbtn-table" onclick="setView('table')">≡ List</button><button class="view-btn" id="vbtn-kanban" onclick="setView('kanban')">⬛ Board</button></div><button class="btn-add" onclick="openModal()">+ Add Role</button></div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-strip" id="stats-strip"></div>
+
+  <!-- Main -->
+  <div class="main">
+    <div class="toolbar">
+      <input class="search-box" id="search" placeholder="Search company, role, notes..." oninput="render()">
+      <button class="filter-btn active" data-filter="all" onclick="setFilter(this)">All</button>
+      <button class="filter-btn" data-filter="applied" onclick="setFilter(this)">Applied</button>
+      <button class="filter-btn" data-filter="interview" onclick="setFilter(this)">Interview</button>
+      <button class="filter-btn" data-filter="offer" onclick="setFilter(this)">Offer</button>
+      <button class="filter-btn" data-filter="rejected" onclick="setFilter(this)">Rejected</button>
+    </div>
+
+    <div id="list-view">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th onclick="sort('company')">Company</th>
+              <th onclick="sort('role')">Role</th>
+              <th onclick="sort('status')">Status</th>
+              <th onclick="sort('fit')">Fit</th>
+              <th onclick="sort('applied_date')">Applied</th>
+              <th onclick="sort('follow_up')">Follow-up</th>
+              <th>Notes</th>
+              <th>CV</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="table-body"></tbody>
+        </table>
+      </div>
+      <div class="empty" id="empty-state" style="display:none;">
+        <div class="empty-icon">📋</div>
+        <div class="empty-title">Pipeline is empty</div>
+        <div class="empty-sub">Hit "+ Add Role" to log your first application, or use CV Tailor to generate and auto-log one.<br>Your pipeline starts here.</div>
+      </div>
+    </div>
+
+    <div id="kanban-view" style="display:none;">
+      <div class="kanban" id="kanban-board"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModalOutside(event)">
+  <div class="modal" id="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-title">Add Application</div>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="edit-id">
+      <div class="form-row-2">
+        <div>
+          <label>Company *</label>
+          <input type="text" id="f-company" placeholder="e.g. Woodside Energy">
+        </div>
+        <div>
+          <label>Role Title *</label>
+          <input type="text" id="f-role" placeholder="e.g. Graduate Petroleum Engineer">
+        </div>
+      </div>
+      <div class="form-row-2">
+        <div>
+          <label>Status</label>
+          <select id="f-status">
+            <option value="draft">Draft</option>
+            <option value="applied" selected>Applied</option>
+            <option value="screening">Screening</option>
+            <option value="interview">Interview</option>
+            <option value="offer">Offer</option>
+            <option value="rejected">Rejected</option>
+            <option value="withdrawn">Withdrawn</option>
+          </select>
+        </div>
+        <div>
+          <label>Fit Score</label>
+          <select id="f-fit">
+            <option value="">— Not scored</option>
+            <option value="A">A — Strong fit</option>
+            <option value="B">B — Good fit</option>
+            <option value="C">C — Partial fit</option>
+            <option value="D">D — Stretch role</option>
+            <option value="F">F — Poor fit</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row-2">
+        <div>
+          <label>Applied Date</label>
+          <input type="date" id="f-applied-date">
+        </div>
+        <div>
+          <label>Follow-up Date</label>
+          <input type="date" id="f-follow-up">
+        </div>
+      </div>
+      <div class="form-row">
+        <label>Location</label>
+        <input type="text" id="f-location" placeholder="e.g. Perth, WA / Remote / FIFO">
+      </div>
+      <div class="form-row">
+        <label>Job URL</label>
+        <input type="text" id="f-url" placeholder="https://...">
+      </div>
+      <div class="form-row">
+        <label>CV Used</label>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <select id="f-resume" style="flex:1;">
+            <option value="">— Select saved CV</option>
+          </select>
+          <button type="button" onclick="openResume()"
+            style="padding:9px 14px;background:transparent;border:1px solid var(--border);border-radius:4px;color:var(--muted);font-family:var(--mono);font-size:11px;cursor:pointer;white-space:nowrap;transition:all 0.15s;"
+            onmouseover="this.style.color='var(--teal)';this.style.borderColor='var(--teal)'"
+            onmouseout="this.style.color='var(--muted)';this.style.borderColor='var(--border)'">Open ↗</button>
+        </div>
+      </div>
+      <div class="form-row">
+        <label>Notes</label>
+        <textarea class="form-ta" id="f-notes" placeholder="Recruiter name, salary range, interview notes, next steps..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-delete" id="btn-delete" onclick="deleteEntry()" style="display:none;">Delete</button>
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-save" onclick="saveEntry()">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Storage — server-side pipeline.json ───────────────────────────────────
+const LEGACY_KEY = 'career_ops_pipeline_v1';
+
+async function load() {
+  try {
+    const res = await fetch('/api/pipeline');
+    if (!res.ok) throw new Error('server error');
+    return await res.json();
+  } catch { return []; }
+}
+
+async function save(data) {
+  try {
+    await fetch('/api/pipeline', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+  } catch (err) { console.error('Pipeline save failed:', err); }
+}
+
+async function migrateFromLocalStorage() {
+  const raw = localStorage.getItem(LEGACY_KEY);
+  if (!raw) return;
+  try {
+    const entries = JSON.parse(raw);
+    if (Array.isArray(entries) && entries.length > 0) {
+      await save(entries);
+      console.log(`Migrated ${entries.length} pipeline entries from localStorage → server`);
+    }
+    localStorage.removeItem(LEGACY_KEY);
+  } catch { localStorage.removeItem(LEGACY_KEY); }
+}
+
+let db = [];
+
+// ── State ──────────────────────────────────────────────────────────────────
+let currentFilter = 'all';
+let currentSort = { key: 'applied_date', dir: -1 };
+let currentView = 'table';
+
+// ── Status config ──────────────────────────────────────────────────────────
+const STATUS_META = {
+  draft:     { label: 'Draft',      cls: 'badge-draft',     color: '#4A6580' },
+  applied:   { label: 'Applied',    cls: 'badge-applied',   color: '#0E9B8A' },
+  screening: { label: 'Screening',  cls: 'badge-screening', color: '#9B72CF' },
+  interview: { label: 'Interview',  cls: 'badge-interview', color: '#F5A623' },
+  offer:     { label: 'Offer ✓',    cls: 'badge-offer',     color: '#2ECC8F' },
+  rejected:  { label: 'Rejected',   cls: 'badge-rejected',  color: '#E8504A' },
+  withdrawn: { label: 'Withdrawn',  cls: 'badge-withdrawn', color: '#4A6580' },
+};
+const STATUS_ORDER = ['draft','applied','screening','interview','offer','rejected','withdrawn'];
+
+
+// ── Stats ──────────────────────────────────────────────────────────────────
+function renderStats() {
+  const total = db.length;
+  const active = db.filter(r => !['rejected','withdrawn'].includes(r.status)).length;
+  const interviews = db.filter(r => r.status === 'interview').length;
+  const offers = db.filter(r => r.status === 'offer').length;
+  const rejected = db.filter(r => r.status === 'rejected').length;
+  const responseRate = total > 0 ? Math.round(((interviews + offers) / total) * 100) : 0;
+
+  document.getElementById('stats-strip').innerHTML = `
+    <div class="stat"><span class="stat-val">${total}</span><span class="stat-label">Total</span></div>
+    <div class="stat teal"><span class="stat-val">${active}</span><span class="stat-label">Active</span></div>
+    <div class="stat amber"><span class="stat-val">${interviews}</span><span class="stat-label">Interviews</span></div>
+    <div class="stat green"><span class="stat-val">${offers}</span><span class="stat-label">Offers</span></div>
+    <div class="stat red"><span class="stat-val">${rejected}</span><span class="stat-label">Rejected</span></div>
+    <div class="stat"><span class="stat-val">${responseRate}%</span><span class="stat-label">Response Rate</span></div>
+  `;
+}
+
+// ── Filtering & sorting ────────────────────────────────────────────────────
+function filtered() {
+  const q = document.getElementById('search').value.toLowerCase();
+  return db.filter(r => {
+    const matchFilter = currentFilter === 'all' || r.status === currentFilter;
+    const matchSearch = !q || [r.company, r.role, r.notes, r.location].some(f => (f||'').toLowerCase().includes(q));
+    return matchFilter && matchSearch;
+  }).sort((a, b) => {
+    const k = currentSort.key;
+    const av = a[k] || '', bv = b[k] || '';
+    return av < bv ? -currentSort.dir : av > bv ? currentSort.dir : 0;
+  });
+}
+
+function sort(key) {
+  if (currentSort.key === key) currentSort.dir *= -1;
+  else { currentSort.key = key; currentSort.dir = -1; }
+  document.querySelectorAll('th').forEach(t => t.classList.remove('sorted'));
+  render();
+}
+
+function setFilter(btn) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  currentFilter = btn.dataset.filter;
+  render();
+}
+
+function setView(v) {
+  currentView = v;
+  document.getElementById('list-view').style.display = v === 'table' ? 'block' : 'none';
+  document.getElementById('kanban-view').style.display = v === 'kanban' ? 'block' : 'none';
+  document.getElementById('vbtn-table').classList.toggle('active', v === 'table');
+  document.getElementById('vbtn-kanban').classList.toggle('active', v === 'kanban');
+  render();
+}
+
+// ── Follow-up logic ────────────────────────────────────────────────────────
+function followUpClass(dateStr) {
+  if (!dateStr) return '';
+  const diff = (new Date(dateStr) - new Date()) / 86400000;
+  if (diff < 0) return 'overdue';
+  if (diff <= 3) return 'due-soon';
+  return 'on-track';
+}
+function followUpLabel(dateStr) {
+  if (!dateStr) return '—';
+  const diff = Math.round((new Date(dateStr) - new Date()) / 86400000);
+  if (diff < 0) return `${Math.abs(diff)}d overdue`;
+  if (diff === 0) return 'Today';
+  if (diff === 1) return 'Tomorrow';
+  return dateStr;
+}
+
+// ── Render ─────────────────────────────────────────────────────────────────
+function render() {
+  renderStats();
+  const rows = filtered();
+
+  if (currentView === 'table') renderTable(rows);
+  else renderKanban(rows);
+}
+
+function renderTable(rows) {
+  const tbody = document.getElementById('table-body');
+  const empty = document.getElementById('empty-state');
+
+  if (!rows.length) {
+    tbody.innerHTML = '';
+    empty.style.display = 'block';
+    document.querySelector('.table-wrap').style.display = 'none';
+    return;
+  }
+  empty.style.display = 'none';
+  document.querySelector('.table-wrap').style.display = 'block';
+
+  const fitClass = { A:'fit-A', B:'fit-B', C:'fit-C', D:'fit-D', F:'fit-F' };
+  tbody.innerHTML = rows.map(r => {
+    const sm = STATUS_META[r.status] || STATUS_META.draft;
+    const fc = followUpClass(r.follow_up);
+    const fl = followUpLabel(r.follow_up);
+    return `<tr onclick="openModal('${r.id}')">
+      <td>
+        <div class="company-cell">${esc(r.company)}</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:2px;">${esc(r.location||'')}</div>
+      </td>
+      <td>
+        <div class="role-cell">${esc(r.role)}</div>
+      </td>
+      <td><span class="badge ${sm.cls}">${sm.label}</span></td>
+      <td><span class="fit-cell ${fitClass[r.fit]||''}">${r.fit||'—'}</span></td>
+      <td class="date-cell">${r.applied_date||'—'}</td>
+      <td class="follow-up-cell ${fc}">${fl}</td>
+      <td class="notes-cell">${esc(r.notes||'')}</td>
+      <td>${r.resume ? `<a onclick="event.stopPropagation();window.location='/api/resumes/'+encodeURIComponent('${esc(r.resume)}')" href="#" style="font-size:11px;color:var(--teal);text-decoration:none;font-family:var(--mono);" title="${esc(r.resume)}">📄 CV</a>` : ''}</td>
+      <td><span class="action-dots">⋯</span></td>
+    </tr>`;
+  }).join('');
+}
+
+function renderKanban(rows) {
+  const board = document.getElementById('kanban-board');
+  const fitClass = { A:'fit-A', B:'fit-B', C:'fit-C', D:'fit-D', F:'fit-F' };
+  const cols = STATUS_ORDER.map(status => {
+    const items = rows.filter(r => r.status === status);
+    const sm = STATUS_META[status];
+    const cards = items.map(r => `
+      <div class="kanban-card" onclick="openModal('${r.id}')">
+        <div class="kc-company">${esc(r.company)}</div>
+        <div class="kc-role">${esc(r.role)}</div>
+        <div class="kc-footer">
+          <span class="kc-fit ${fitClass[r.fit]||''}">${r.fit||'—'}</span>
+          <span class="kc-date">${r.applied_date||''}</span>
+        </div>
+        ${r.resume ? `<div style="margin-top:6px;"><a onclick="event.stopPropagation();window.location='/api/resumes/'+encodeURIComponent('${r.resume}')" href="#" style="font-size:10px;color:var(--teal);text-decoration:none;">📄 ${r.resume}</a></div>` : ''}
+      </div>`).join('');
+    return `<div class="kanban-col">
+      <div class="kanban-head" style="color:${sm.color}">
+        ${sm.label}
+        <span class="kanban-count">${items.length}</span>
+      </div>
+      <div class="kanban-cards">${cards || '<div style="font-size:11px;color:var(--muted);text-align:center;padding:12px 0;">Empty</div>'}</div>
+    </div>`;
+  });
+  board.innerHTML = cols.join('');
+}
+
+// ── Modal ──────────────────────────────────────────────────────────────────
+function openModal(id = null) {
+  clearForm();
+  const overlay = document.getElementById('modal-overlay');
+  const delBtn = document.getElementById('btn-delete');
+
+  if (id) {
+    const r = db.find(x => x.id === id);
+    if (!r) return;
+    document.getElementById('modal-title').textContent = 'Edit Application';
+    document.getElementById('edit-id').value = id;
+    document.getElementById('f-company').value = r.company || '';
+    document.getElementById('f-role').value = r.role || '';
+    document.getElementById('f-status').value = r.status || 'applied';
+    document.getElementById('f-fit').value = r.fit || '';
+    document.getElementById('f-applied-date').value = r.applied_date || '';
+    document.getElementById('f-follow-up').value = r.follow_up || '';
+    document.getElementById('f-location').value = r.location || '';
+    document.getElementById('f-url').value = r.url || '';
+    document.getElementById('f-resume').value = r.resume || '';
+    document.getElementById('f-notes').value = r.notes || '';
+    delBtn.style.display = 'block';
+  } else {
+    document.getElementById('modal-title').textContent = 'Add Application';
+    document.getElementById('edit-id').value = '';
+    document.getElementById('f-applied-date').value = new Date().toISOString().split('T')[0];
+    delBtn.style.display = 'none';
+  }
+
+  overlay.classList.add('show');
+  setTimeout(() => document.getElementById('f-company').focus(), 100);
+}
+
+function closeModal() { document.getElementById('modal-overlay').classList.remove('show'); }
+function closeModalOutside(e) { if (e.target === document.getElementById('modal-overlay')) closeModal(); }
+
+function clearForm() {
+  ['f-company','f-role','f-applied-date','f-follow-up','f-location','f-url','f-notes'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  document.getElementById('f-status').value = 'applied';
+  document.getElementById('f-fit').value = '';
+  document.getElementById('edit-id').value = '';
+}
+
+async function saveEntry() {
+  const company = document.getElementById('f-company').value.trim();
+  const role = document.getElementById('f-role').value.trim();
+  if (!company || !role) {
+    document.getElementById('f-company').style.borderColor = company ? 'var(--border)' : 'var(--red)';
+    document.getElementById('f-role').style.borderColor = role ? 'var(--border)' : 'var(--red)';
+    return;
+  }
+
+  const id = document.getElementById('edit-id').value;
+  const entry = {
+    id: id || Date.now().toString(36) + Math.random().toString(36).slice(2,6),
+    company,
+    role,
+    status: document.getElementById('f-status').value,
+    fit: document.getElementById('f-fit').value,
+    applied_date: document.getElementById('f-applied-date').value,
+    follow_up: document.getElementById('f-follow-up').value,
+    location: document.getElementById('f-location').value.trim(),
+    url: document.getElementById('f-url').value.trim(),
+    resume: document.getElementById('f-resume').value,
+    notes: document.getElementById('f-notes').value.trim(),
+    updated: new Date().toISOString(),
+  };
+
+  if (id) db = db.map(r => r.id === id ? entry : r);
+  else db.push(entry);
+
+  await save(db);
+  closeModal();
+  render();
+}
+
+async function deleteEntry() {
+  const id = document.getElementById('edit-id').value;
+  if (!id || !confirm('Delete this application?')) return;
+  db = db.filter(r => r.id !== id);
+  await save(db);
+  closeModal();
+  render();
+}
+
+// ── Keyboard shortcut ──────────────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeModal();
+  if ((e.metaKey || e.ctrlKey) && e.key === 'k') { e.preventDefault(); openModal(); }
+});
+
+function esc(s) {
+  return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// No seed data — pipeline starts empty for each user
+
+// ── Load resume list into dropdown ────────────────────────────────────────
+async function loadResumes(selectValue = '') {
+  try {
+    const res = await fetch('/api/resumes');
+    const files = await res.json();
+    const sel = document.getElementById('f-resume');
+    if (!sel) return;
+    sel.innerHTML = '<option value="">— Select saved CV</option>';
+    files.forEach(f => {
+      const opt = document.createElement('option');
+      opt.value = f; opt.textContent = f;
+      if (f === selectValue) opt.selected = true;
+      sel.appendChild(opt);
+    });
+  } catch {}
+}
+
+function openResume() {
+  const sel = document.getElementById('f-resume');
+  const filename = sel?.value;
+  if (!filename) return;
+  window.open('/api/resumes/' + encodeURIComponent(filename), '_blank');
+}
+
+// ── Read URL params → prefill modal (from cv-tailor) ──────────────────────
+function checkUrlParams() {
+  const p = new URLSearchParams(window.location.search);
+  if (!p.get('company')) return;
+  openModal();
+  loadResumes(p.get('resume') || '');
+  if (p.get('company'))  document.getElementById('f-company').value  = p.get('company');
+  if (p.get('role'))     document.getElementById('f-role').value     = p.get('role');
+  if (p.get('status'))   document.getElementById('f-status').value   = p.get('status');
+  if (p.get('fit'))      document.getElementById('f-fit').value      = p.get('fit');
+  if (p.get('resume'))   setTimeout(() => { document.getElementById('f-resume').value = p.get('resume'); }, 600);
+  document.getElementById('f-applied-date').value = new Date().toISOString().split('T')[0];
+  // Clean URL without reload
+  window.history.replaceState({}, '', '/pipeline.html');
+}
+
+// ── Init ───────────────────────────────────────────────────────────────────
+async function init() {
+  await migrateFromLocalStorage();
+  db = await load();
+
+  try {
+    const res = await fetch('/api/config');
+    const cfg = await res.json();
+    checkConfigCompleteness(cfg);
+    const name = cfg?.personal?.first_name || '';
+    if (name) {
+      const greet = document.getElementById('user-greeting');
+      if (greet) greet.textContent = `👤 ${name}`;
+    }
+    const emptyTitle = document.querySelector('.empty-title');
+    if (emptyTitle && name) emptyTitle.textContent = `${name}'s pipeline is empty`;
+  } catch {}
+
+  render();
+  loadResumes();
+  checkUrlParams();
+}
+init();
+
+// ── Config completeness guard ─────────────────────────────────────────────
+function checkConfigCompleteness(cfg) {
+  if (!cfg || Object.keys(cfg).length === 0) {
+    showConfigWarning('No profile found. Please complete setup before using this tool.');
+    return false;
+  }
+  const issues = [];
+  const p = cfg.personal || {};
+  if (!p.first_name || !p.last_name) issues.push('personal details incomplete');
+  if (!cfg.experience || cfg.experience.length === 0) issues.push('no work experience entries');
+  if (!(cfg.skills?.technical) && !(cfg.skills?.differentiator)) issues.push('skills section empty');
+  if (!cfg.targets?.summary) issues.push('professional summary missing');
+  if (issues.length > 0) {
+    showConfigWarning(
+      'Profile incomplete (' + issues.join(' · ') + ') — AI outputs may be generic. ' +
+      '<a href="/setup.html" style="color:var(--teal);text-decoration:underline;">Complete setup \u2192</a>'
+    );
+    return false;
+  }
+  return true;
+}
+
+function showConfigWarning(msg) {
+  const existing = document.getElementById('config-warning');
+  if (existing) return;
+  const div = document.createElement('div');
+  div.id = 'config-warning';
+  div.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:rgba(245,166,35,0.12);border:1px solid rgba(245,166,35,0.4);border-radius:6px;padding:12px 20px;font-size:12px;color:var(--amber);font-family:var(--mono);z-index:9999;max-width:600px;text-align:center;box-shadow:0 4px 24px rgba(0,0,0,0.4);line-height:1.6;';
+  div.innerHTML = '\u26a0 ' + msg + ' <span onclick="this.parentElement.remove()" style="cursor:pointer;margin-left:14px;opacity:0.6;font-size:14px;">\u2715</span>';
+  document.body.appendChild(div);
+  setTimeout(() => div.remove(), 12000);
+}
+
+</script>
+
+<!-- ── Attribution footer ───────────────────────── -->
+<footer style="text-align:center;padding:28px 20px;border-top:1px solid var(--border);font-size:11px;color:var(--muted);font-family:var(--mono);line-height:1.9;position:relative;z-index:1;">
+  <strong style="color:var(--text);">Career Ops</strong> &nbsp;&middot;&nbsp; Built by <strong style="color:var(--text);">Johan Lopez</strong> &nbsp;&middot;&nbsp; Australia &nbsp;&middot;&nbsp; v1.0
+  &nbsp;&middot;&nbsp; <a href="/about.html" style="color:var(--teal);text-decoration:none;">About &amp; Disclaimer</a>
+</footer>
+</body>
+</html>

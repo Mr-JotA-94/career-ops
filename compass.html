@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Career Compass — Career Ops</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:     #07111E;
+  --surface:#0F1E30;
+  --card:   #142030;
+  --border: #1E3248;
+  --muted:  #4A6580;
+  --text:   #C8DDF0;
+  --bright: #EAF4FF;
+  --teal:   #0E9B8A;
+  --teal2:  #07C5B0;
+  --amber:  #F5A623;
+  --green:  #2ECC8F;
+  --red:    #E8504A;
+  --purple: #9B72CF;
+  --mono:   'DM Mono', monospace;
+  --sans:   'Syne', sans-serif;
+  --serif:  'Instrument Serif', Georgia, serif;
+}
+html { scroll-behavior: smooth; }
+body { background: var(--bg); color: var(--text); font-family: var(--mono); min-height: 100vh; overflow-x: hidden; }
+body::before {
+  content: ''; position: fixed; inset: 0;
+  background-image: linear-gradient(rgba(14,155,138,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(14,155,138,0.03) 1px, transparent 1px);
+  background-size: 40px 40px; pointer-events: none; z-index: 0;
+}
+
+/* ── Topbar ─────────────────────────────────────────────────────────── */
+.topbar-left { display: flex; align-items: center; gap: 14px; }
+.logo { font-family: var(--sans); font-size: 15px; font-weight: 800; color: var(--bright); }
+.logo span { color: var(--teal); }
+.tag { font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--teal); border: 1px solid var(--teal); padding: 2px 7px; border-radius: 2px; }
+.nav-links { display: flex; gap: 6px; }
+.nav-link { font-size: 11px; font-family: var(--mono); color: var(--muted); text-decoration: none; padding: 4px 10px; border: 1px solid var(--border); border-radius: 3px; transition: all 0.15s; }
+.nav-link:hover { color: var(--teal); border-color: var(--teal); }
+
+/* ── Main ───────────────────────────────────────────────────────────── */
+.main { max-width: 960px; margin: 0 auto; padding: 40px 28px 100px; position: relative; z-index: 1; }
+
+/* ── Header ─────────────────────────────────────────────────────────── */
+.page-eyebrow { font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--teal); margin-bottom: 12px; }
+.page-title { font-family: var(--serif); font-size: clamp(32px, 5vw, 52px); color: var(--bright); line-height: 1.15; margin-bottom: 12px; font-style: italic; }
+.page-title strong { font-style: normal; color: var(--teal); }
+.page-sub { font-size: 13px; color: var(--muted); line-height: 1.8; max-width: 560px; margin-bottom: 40px; }
+
+/* ── Input panel ────────────────────────────────────────────────────── */
+.input-panel {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 10px; padding: 28px; margin-bottom: 24px;
+}
+.panel-label {
+  font-family: var(--sans); font-size: 10px; font-weight: 700;
+  letter-spacing: 0.12em; text-transform: uppercase; color: var(--teal);
+  margin-bottom: 10px; display: flex; align-items: center; gap: 8px;
+}
+.panel-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+textarea, input[type="text"] {
+  width: 100%; background: var(--surface); border: 1px solid var(--border);
+  border-radius: 4px; color: var(--text); font-family: var(--mono);
+  font-size: 13px; padding: 12px 16px; outline: none;
+  transition: border-color 0.2s; line-height: 1.6;
+}
+textarea:focus, input[type="text"]:focus { border-color: var(--teal); }
+textarea::placeholder, input[type="text"]::placeholder { color: var(--muted); }
+textarea { resize: vertical; min-height: 80px; }
+
+.horizon-row { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
+.horizon-btn {
+  font-family: var(--mono); font-size: 11px; padding: 7px 16px;
+  border-radius: 3px; border: 1px solid var(--border);
+  background: transparent; color: var(--muted); cursor: pointer; transition: all 0.15s;
+}
+.horizon-btn:hover { border-color: var(--teal); color: var(--teal); }
+.horizon-btn.active { background: var(--teal); border-color: var(--teal); color: var(--bg); font-weight: 500; }
+
+.btn-generate {
+  width: 100%; padding: 16px; background: var(--teal); color: var(--bg);
+  font-family: var(--sans); font-size: 14px; font-weight: 700;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  border: none; border-radius: 6px; cursor: pointer; transition: all 0.2s;
+}
+.btn-generate:hover:not(:disabled) { background: var(--teal2); transform: translateY(-1px); }
+.btn-generate:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+
+/* ── Loading ─────────────────────────────────────────────────────────── */
+.loading { display: none; text-align: center; padding: 60px 0; }
+.loading.show { display: block; }
+.spinner { width: 36px; height: 36px; border: 2px solid var(--border); border-top-color: var(--teal); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 20px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-label { font-family: var(--sans); font-size: 15px; font-weight: 600; color: var(--teal); margin-bottom: 6px; }
+.loading-sub { font-size: 12px; color: var(--muted); }
+.progress-bar { width: 300px; height: 2px; background: var(--border); border-radius: 2px; margin: 20px auto 0; overflow: hidden; }
+.progress-fill { height: 100%; background: var(--teal); width: 0%; transition: width 0.8s ease; border-radius: 2px; }
+
+/* ── Results ─────────────────────────────────────────────────────────── */
+#results { display: none; }
+#results.show { display: block; animation: fadeUp 0.4s ease; }
+@keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+
+/* ── Assessment block ───────────────────────────────────────────────── */
+.assessment-block {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 10px; padding: 28px; margin-bottom: 24px;
+}
+.block-title {
+  font-family: var(--sans); font-size: 11px; font-weight: 700;
+  letter-spacing: 0.12em; text-transform: uppercase; color: var(--teal);
+  margin-bottom: 16px; padding-bottom: 10px; border-bottom: 1px solid var(--border);
+}
+.assessment-text { font-size: 13px; line-height: 1.85; color: var(--text); }
+.assessment-text strong { color: var(--bright); font-weight: 500; }
+
+.context-pills { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+.context-pill {
+  font-size: 11px; padding: 5px 12px; border-radius: 3px;
+  font-family: var(--mono); display: flex; align-items: center; gap: 6px;
+}
+.pill-ok     { background: rgba(46,204,143,0.1);  color: var(--green);  border: 1px solid rgba(46,204,143,0.25); }
+.pill-warn   { background: rgba(245,166,35,0.1);  color: var(--amber);  border: 1px solid rgba(245,166,35,0.25); }
+.pill-info   { background: rgba(14,155,138,0.08); color: var(--teal);   border: 1px solid rgba(14,155,138,0.2); }
+.pill-visa   { background: rgba(155,114,207,0.1); color: var(--purple); border: 1px solid rgba(155,114,207,0.25); }
+
+/* ── Path diagram ───────────────────────────────────────────────────── */
+.path-section { margin-bottom: 24px; }
+.path-header { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
+.path-header-title { font-family: var(--serif); font-size: 28px; font-style: italic; color: var(--bright); }
+.path-header-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+.path-diagram { position: relative; }
+
+/* Connecting line */
+.path-connector {
+  position: absolute; left: 31px; top: 64px;
+  width: 2px; background: linear-gradient(180deg, var(--teal), var(--amber), var(--green));
+  opacity: 0.3; border-radius: 2px;
+  transition: height 1.2s ease;
+}
+
+.path-stage {
+  display: flex; gap: 20px; margin-bottom: 16px;
+  animation: stageIn 0.5s ease both;
+}
+@keyframes stageIn { from { opacity:0; transform:translateX(-12px); } to { opacity:1; transform:translateX(0); } }
+.path-stage:nth-child(2) { animation-delay: 0.1s; }
+.path-stage:nth-child(3) { animation-delay: 0.2s; }
+.path-stage:nth-child(4) { animation-delay: 0.3s; }
+.path-stage:nth-child(5) { animation-delay: 0.4s; }
+
+.stage-icon {
+  flex-shrink: 0; width: 64px; height: 64px;
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-family: var(--sans); font-weight: 800; font-size: 20px;
+  border: 2px solid; position: relative; z-index: 1;
+  background: var(--card);
+}
+.stage-now    { border-color: var(--teal);   color: var(--teal); }
+.stage-bridge { border-color: var(--amber);  color: var(--amber); }
+.stage-target { border-color: var(--green);  color: var(--green); }
+.stage-hidden { border-color: var(--purple); color: var(--purple); }
+
+.stage-card {
+  flex: 1; background: var(--card); border: 1px solid var(--border);
+  border-radius: 8px; padding: 20px 22px; position: relative; overflow: hidden;
+}
+.stage-card::before {
+  content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+}
+.stage-now    .stage-card::before { background: var(--teal); }
+.stage-bridge .stage-card::before { background: var(--amber); }
+.stage-target .stage-card::before { background: var(--green); }
+.stage-hidden .stage-card::before { background: var(--purple); }
+
+.stage-label {
+  font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase;
+  font-family: var(--sans); font-weight: 700; margin-bottom: 6px;
+}
+.stage-now    .stage-label { color: var(--teal); }
+.stage-bridge .stage-label { color: var(--amber); }
+.stage-target .stage-label { color: var(--green); }
+.stage-hidden .stage-label { color: var(--purple); }
+
+.stage-role { font-family: var(--sans); font-size: 16px; font-weight: 700; color: var(--bright); margin-bottom: 8px; }
+.stage-why { font-size: 12px; color: var(--text); line-height: 1.7; margin-bottom: 12px; }
+.stage-meta { display: flex; flex-wrap: wrap; gap: 6px; }
+.stage-tag {
+  font-size: 10px; padding: 3px 9px; border-radius: 2px; font-family: var(--mono);
+}
+.tag-time    { background: rgba(74,101,128,0.2); color: var(--muted); border: 1px solid var(--border); }
+.tag-accel   { background: rgba(14,155,138,0.1); color: var(--teal);  border: 1px solid rgba(14,155,138,0.2); }
+.tag-visa    { background: rgba(155,114,207,0.1);color: var(--purple);border: 1px solid rgba(155,114,207,0.2); }
+.tag-demand  { background: rgba(46,204,143,0.1); color: var(--green); border: 1px solid rgba(46,204,143,0.2); }
+.tag-warning { background: rgba(245,166,35,0.1); color: var(--amber); border: 1px solid rgba(245,166,35,0.2); }
+
+/* Hidden roles divider */
+.hidden-divider {
+  display: flex; align-items: center; gap: 14px;
+  margin: 28px 0 20px;
+}
+.hidden-divider-line { flex: 1; height: 1px; background: var(--border); }
+.hidden-divider-label {
+  font-family: var(--sans); font-size: 11px; font-weight: 700;
+  letter-spacing: 0.1em; text-transform: uppercase; color: var(--purple);
+  white-space: nowrap;
+}
+
+/* Disclaimer */
+.disclaimer {
+  background: rgba(74,101,128,0.08); border: 1px solid var(--border);
+  border-radius: 6px; padding: 14px 18px; margin-top: 24px;
+  font-size: 11px; color: var(--muted); line-height: 1.7;
+}
+.disclaimer strong { color: var(--text); }
+
+/* Action row */
+.action-row { display: flex; gap: 10px; margin-top: 24px; flex-wrap: wrap; }
+.btn-secondary {
+  font-family: var(--mono); font-size: 12px; padding: 10px 20px;
+  border-radius: 4px; border: 1px solid var(--teal);
+  background: transparent; color: var(--teal); cursor: pointer; transition: all 0.15s;
+}
+.btn-secondary:hover { background: var(--teal); color: var(--bg); }
+.btn-muted {
+  font-family: var(--mono); font-size: 12px; padding: 10px 20px;
+  border-radius: 4px; border: 1px solid var(--border);
+  background: transparent; color: var(--muted); cursor: pointer; transition: all 0.15s;
+}
+.btn-muted:hover { color: var(--text); border-color: var(--muted); }
+
+@media(max-width:600px) { .main { padding: 24px 16px 80px; }  }
+
+  /* ── Global nav ──────────────────────────────────────────────────── */
+  .topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 28px; border-bottom: 1px solid var(--border);
+    background: rgba(7,17,30,0.92); backdrop-filter: blur(10px);
+    position: sticky; top: 0; z-index: 100;
+  }
+  .topbar-left  { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+  .topbar-right { display: flex; align-items: center; gap: 8px; }
+  .logo { font-family: var(--sans); font-size: 15px; font-weight: 800; color: var(--bright); letter-spacing: -0.02em; text-decoration: none; }
+  .logo span { color: var(--teal); }
+  .tool-tag {
+    font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--teal); border: 1px solid var(--teal);
+    padding: 2px 8px; border-radius: 2px; font-family: var(--mono);
+  }
+  .nav-links { display: flex; gap: 4px; flex-wrap: wrap; }
+  .nav-link {
+    font-size: 11px; font-family: var(--mono); color: var(--muted);
+    text-decoration: none; padding: 5px 11px;
+    border: 1px solid var(--border); border-radius: 3px;
+    transition: color 0.15s, border-color 0.15s; white-space: nowrap;
+  }
+  .nav-link:hover { color: var(--teal); border-color: var(--teal); }
+  .nav-link.active { color: var(--teal); border-color: var(--teal); background: rgba(14,155,138,0.08); }
+
+</style>
+</head>
+<body>
+<div class="topbar">
+    <div class="topbar-left">
+      <a href="/pipeline.html" class="logo">Career<span>Ops</span></a>
+      <span class="tool-tag">compass</span>
+      <nav class="nav-links">
+        <a class="nav-link" href="/jd-analyser.html">JD Analyser</a>
+        <a class="nav-link" href="/cv-tailor.html">CV Tailor</a>
+        <a class="nav-link" href="/search-kit.html">Search Kit</a>
+        <a class="nav-link active" href="/compass.html">Compass</a>
+        <a class="nav-link" href="/pipeline.html">Pipeline</a>
+      </nav>
+    </div>
+  </div>
+
+<div class="main">
+  <div class="page-eyebrow">Career Compass</div>
+  <h1 class="page-title">Not just where to apply.<br><strong>How to get there.</strong></h1>
+  <p class="page-sub">Based on your background, skills, and city — Career Compass maps a realistic path from where you are now to where you want to be. Including the roles most people miss.</p>
+
+  <!-- Input -->
+  <div class="input-panel">
+    <div class="panel-label">Your dream role</div>
+    <textarea id="dream-role" rows="2" placeholder="Describe where you want to end up — be specific. e.g. 'Reservoir engineer at a major Australian O&G company' or 'Lead data analyst in the energy sector'"></textarea>
+
+    <div style="margin-top:20px;">
+      <div class="panel-label">Time horizon</div>
+      <div class="horizon-row">
+        <button class="horizon-btn" data-val="1">1 year</button>
+        <button class="horizon-btn active" data-val="2">2 years</button>
+        <button class="horizon-btn" data-val="3">3 years</button>
+        <button class="horizon-btn" data-val="5">5 years</button>
+      </div>
+    </div>
+  </div>
+
+  <button class="btn-generate" id="gen-btn" onclick="generate()">Map My Career Path</button>
+
+  <!-- Loading -->
+  <div class="loading" id="loading">
+    <div class="spinner"></div>
+    <div class="loading-label" id="loading-label">Analysing your profile...</div>
+    <div class="loading-sub" id="loading-sub">Understanding your current position</div>
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+  </div>
+
+  <!-- Results -->
+  <div id="results">
+
+    <!-- Assessment -->
+    <div class="assessment-block" id="assessment-block">
+      <div class="block-title">Where You Actually Stand</div>
+      <div class="assessment-text" id="assessment-text"></div>
+      <div class="context-pills" id="context-pills"></div>
+    </div>
+
+    <!-- Path -->
+    <div class="path-section">
+      <div class="path-header">
+        <div>
+          <div class="path-header-title">Your Path</div>
+          <div class="path-header-sub" id="path-sub"></div>
+        </div>
+      </div>
+
+      <div class="path-diagram" id="path-diagram">
+        <div class="path-connector" id="path-connector" style="height:0px;"></div>
+      </div>
+
+      <!-- Hidden roles -->
+      <div class="hidden-divider">
+        <div class="hidden-divider-line"></div>
+        <div class="hidden-divider-label">✦ Hidden accelerators — roles most people miss</div>
+        <div class="hidden-divider-line"></div>
+      </div>
+      <div id="hidden-roles"></div>
+    </div>
+
+    <div class="disclaimer">
+      <strong>About this analysis:</strong> Career Compass uses AI reasoning based on general knowledge of Australian industry patterns, city-specific markets, and immigration context. It is informed guidance, not live market data. Verify visa and qualification recognition specifics with a registered migration agent or Engineers Australia. Job market availability figures are estimates based on typical patterns, not real-time postings.
+    </div>
+
+    <div class="action-row">
+      <button class="btn-secondary" onclick="copyPath()">📋 Copy Full Path</button>
+      <button class="btn-muted" onclick="reset()">← New Path</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let CFG = null;
+let horizonVal = '2';
+let pathData = null;
+
+// ── Config ────────────────────────────────────────────────────────────────
+async function loadConfig() {
+  if (CFG) return CFG;
+  try { const r = await fetch('/api/config'); CFG = await r.json(); }
+  catch { CFG = {}; }
+  return CFG;
+}
+
+function buildProfileString(cfg) {
+  const p = cfg.personal || {};
+  const t = cfg.targets  || {};
+  const s = cfg.skills   || {};
+  const exp = (cfg.experience || []).map(e => `${e.title} at ${e.company} (${e.start}–${e.end}): ${(e.bullets||[]).slice(0,2).join('; ')}`).join('\n');
+  const edu = (cfg.education  || []).map(e => `${e.degree} from ${e.institution} (${e.start}–${e.end})${e.focus?', focus: '+e.focus:''}`).join('\n');
+  return `
+Name: ${p.first_name} ${p.last_name}
+Location: ${p.location}
+Availability: ${(p.availability||[]).map(a=>a.replace(/_/g,' ')).join(', ')}
+Background summary: ${t.summary || ''}
+Experience:\n${exp}
+Education:\n${edu}
+Technical skills: ${s.technical || ''}
+Tools: ${s.tools || ''}
+Certifications: ${s.certifications || ''}
+Key differentiator: ${s.differentiator || ''}
+  `.trim();
+}
+
+// ── Horizon ───────────────────────────────────────────────────────────────
+document.querySelectorAll('.horizon-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.horizon-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    horizonVal = btn.dataset.val;
+  });
+});
+
+// ── Animate progress ──────────────────────────────────────────────────────
+function animateProgress(stages) {
+  let i = 0;
+  const lbl = document.getElementById('loading-label');
+  const sub = document.getElementById('loading-sub');
+  const fill = document.getElementById('progress-fill');
+  function next() {
+    if (i >= stages.length) return;
+    const s = stages[i++];
+    lbl.textContent = s.label; sub.textContent = s.sub;
+    fill.style.width = s.pct + '%';
+    if (i < stages.length) setTimeout(next, s.dur || 2000);
+  }
+  next();
+}
+
+// ── Generate ──────────────────────────────────────────────────────────────
+async function generate() {
+  const dreamRole = document.getElementById('dream-role').value.trim();
+  if (!dreamRole) { alert('Please describe your dream role first.'); return; }
+
+  await loadConfig();
+  checkConfigCompleteness(CFG);
+
+  document.getElementById('gen-btn').disabled = true;
+  document.getElementById('loading').classList.add('show');
+  document.getElementById('results').style.display = 'none';
+
+  animateProgress([
+    { label: 'Analysing your profile...', sub: 'Understanding your current position in the Australian market', pct: 20, dur: 2200 },
+    { label: 'Mapping the path...', sub: 'Identifying realistic stepping stones to your goal', pct: 45, dur: 2500 },
+    { label: 'Finding hidden roles...', sub: 'Surfacing overlooked accelerators for your specific profile', pct: 65, dur: 2000 },
+    { label: 'Assessing city context...', sub: 'Factoring in local market conditions and demand', pct: 82, dur: 1800 },
+    { label: 'Finalising your compass...', sub: 'Building your complete career map', pct: 95, dur: 1500 },
+  ]);
+
+  const profile = buildProfileString(CFG);
+  const city = CFG?.personal?.location || 'Australia';
+
+  const prompt = `You are a career mentor with 30+ years as a senior HR leader, hiring manager, and career strategist across ${dreamRole} and related fields in the Australian market. You have helped hundreds of internationally-trained professionals navigate the specific challenges of building a career in Australia — credential recognition, visa pathways, local experience catch-22s, and the unspoken hiring patterns that textbooks never cover. You give honest, grounded advice. You do not sugarcoat gaps, and you do not invent opportunities that aren't there.
+
+Return ONLY valid JSON — no markdown, no explanation.
+
+CANDIDATE PROFILE:
+${profile}
+
+DREAM ROLE: ${dreamRole}
+TIME HORIZON: ${horizonVal} years
+CITY/LOCATION: ${city}
+
+---
+
+Your output is a realistic career map — not an aspirational one. Every stage must be genuinely achievable given the candidate's current profile. City demand notes should reflect real hiring patterns where you have confidence; if you are uncertain about a specific market, say "demand varies — check Seek for current volume" rather than inventing a number. Visa notes should name the relevant subclass but always include a caveat that immigration advice should be verified with a registered migration agent — policy changes and individual circumstances vary. Credential recognition notes should name the relevant body (Engineers Australia, AICD, CPA, etc.) but note that assessment outcomes depend on individual qualifications. Hidden roles must be genuinely non-obvious — lateral moves, adjacent industries, vendor-side roles, consulting support — not just "junior version of the dream role."
+
+{
+  "assessment": {
+    "honest_summary": "3-4 sentences. Honest and direct — not harsh, not sugarcoated. Assess their real current position in the Australian market for their dream role. Name specific strengths that are genuinely competitive and specific gaps that need addressing. Where relevant, note city-specific context.",
+    "context_flags": [
+      {
+        "type": "ok or warn or info or visa",
+        "text": "Short, specific flag — e.g. 'Engineering degree may require Engineers Australia assessment before roles requiring chartered status', 'Brisbane resources sector hiring is cyclical — timing matters', 'TSS 482 visa sponsorship is available in this occupation but employer willingness varies'. Always factual, never alarmist."
+      }
+    ]
+  },
+  "path": {
+    "summary": "One sentence describing the overall arc of this path — honest about timeframe and what it requires",
+    "stages": [
+      {
+        "stage_type": "now",
+        "role_title": "Specific role title to target immediately — must be realistic given current profile",
+        "why": "2-3 sentences: why this role is achievable now with their profile, and how it specifically builds toward the dream role. Be concrete about what it gives them — local experience, industry contacts, credential pathways.",
+        "timeframe": "Realistic timeframe to land this role from today",
+        "city_demand": "Honest demand note for their city — if uncertain, say so rather than inventing a number",
+        "accelerator": "One specific certification, course, or action that meaningfully speeds up the move to next stage — or null if none applies",
+        "visa_note": "Relevant visa subclass if applicable, with caveat to verify with migration agent — or null",
+        "qualification_note": "Whether overseas qualification is typically accepted for this role and what assessment may be needed — or null"
+      },
+      {
+        "stage_type": "bridge",
+        "role_title": "Role to target after building local experience from Stage 1",
+        "why": "Why Stage 1 makes this achievable, and how this bridges to the dream role specifically",
+        "timeframe": "Realistic timeframe after Stage 1",
+        "city_demand": "Demand note — honest about uncertainty if present",
+        "accelerator": "Specific accelerator or null",
+        "visa_note": null,
+        "qualification_note": null
+      },
+      {
+        "stage_type": "target",
+        "role_title": "The dream role or the closest realistic version of it within the time horizon",
+        "why": "What the path has genuinely built that makes this achievable. What still needs to happen.",
+        "timeframe": "Realistic timeframe from today",
+        "city_demand": "Demand note",
+        "accelerator": null,
+        "visa_note": null,
+        "qualification_note": null
+      }
+    ]
+  },
+  "hidden_roles": [
+    {
+      "role_title": "Genuinely non-obvious role — lateral move, adjacent industry, vendor-side, consulting support",
+      "why_hidden": "One sentence: why most people in this situation don't think of this role",
+      "why_powerful": "2 sentences: what specific, concrete advantage this role provides for their path — local networks, industry exposure, credential shortcut, or a hiring pattern that bypasses the overseas experience catch-22",
+      "city_demand": "Demand note",
+      "stage_relevance": "now or bridge — which stage this replaces or supplements"
+    }
+  ]
+}`;
+
+  try {
+    const res = await fetch('/api/claude', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ max_tokens: 3000, messages: [{ role: 'user', content: prompt }] })
+    });
+    const raw = await res.json();
+    if (!res.ok) throw new Error(raw.error?.message || 'API error');
+    const text = raw.content[0].text;
+    pathData = safeParseJSON(text);
+
+    document.getElementById('loading').classList.remove('show');
+    document.getElementById('progress-fill').style.width = '100%';
+    renderResults(pathData);
+
+  } catch(err) {
+    document.getElementById('loading').classList.remove('show');
+    alert('Generation failed: ' + err.message);
+  }
+  document.getElementById('gen-btn').disabled = false;
+}
+
+// ── Render ────────────────────────────────────────────────────────────────
+function renderResults(data) {
+  // Assessment
+  document.getElementById('assessment-text').innerHTML =
+    (data.assessment?.honest_summary || '').replace(/\n/g, '<br>');
+
+  const pillsEl = document.getElementById('context-pills');
+  pillsEl.innerHTML = (data.assessment?.context_flags || []).map(f => {
+    const cls = { ok:'pill-ok', warn:'pill-warn', info:'pill-info', visa:'pill-visa' }[f.type] || 'pill-info';
+    const icon = { ok:'✓', warn:'⚠', info:'→', visa:'🛂' }[f.type] || '→';
+    return `<span class="context-pill ${cls}">${icon} ${f.text}</span>`;
+  }).join('');
+
+  // Path summary
+  document.getElementById('path-sub').textContent = data.path?.summary || '';
+
+  // Stages
+  const diagram = document.getElementById('path-diagram');
+  const connector = document.getElementById('path-connector');
+  const stages = data.path?.stages || [];
+
+  // Remove old stages (keep connector)
+  [...diagram.children].forEach(el => { if (!el.classList.contains('path-connector')) el.remove(); });
+
+  const stageColors = { now: 'stage-now', bridge: 'stage-bridge', target: 'stage-target' };
+  const stageLabels = { now: 'Apply Now', bridge: 'Stage 2 — Bridge', target: 'Stage 3 — Target' };
+  const stageIcons  = { now: '01', bridge: '02', target: '★' };
+
+  stages.forEach((s, i) => {
+    const cls = stageColors[s.stage_type] || 'stage-now';
+    const div = document.createElement('div');
+    div.className = `path-stage ${cls}`;
+    div.style.animationDelay = (i * 0.12) + 's';
+
+    const tags = [
+      s.timeframe    ? `<span class="stage-tag tag-time">⏱ ${s.timeframe}</span>` : '',
+      s.city_demand  ? `<span class="stage-tag tag-demand">📍 ${s.city_demand}</span>` : '',
+      s.accelerator  ? `<span class="stage-tag tag-accel">⚡ ${s.accelerator}</span>` : '',
+      s.visa_note    ? `<span class="stage-tag tag-visa">🛂 ${s.visa_note}</span>` : '',
+      s.qualification_note ? `<span class="stage-tag tag-warning">📋 ${s.qualification_note}</span>` : '',
+    ].filter(Boolean).join('');
+
+    div.innerHTML = `
+      <div class="stage-icon ${cls}"><span>${stageIcons[s.stage_type]||'→'}</span></div>
+      <div class="stage-card">
+        <div class="stage-label">${stageLabels[s.stage_type] || s.stage_type}</div>
+        <div class="stage-role">${s.role_title}</div>
+        <div class="stage-why">${s.why}</div>
+        <div class="stage-meta">${tags}</div>
+      </div>`;
+    diagram.appendChild(div);
+  });
+
+  // Animate connector height
+  setTimeout(() => {
+    connector.style.height = (stages.length * 100) + 'px';
+  }, 100);
+
+  // Hidden roles
+  const hiddenEl = document.getElementById('hidden-roles');
+  hiddenEl.innerHTML = (data.hidden_roles || []).map((h, i) => `
+    <div class="path-stage stage-hidden" style="animation-delay:${(stages.length + i) * 0.12}s;">
+      <div class="stage-icon stage-hidden"><span>✦</span></div>
+      <div class="stage-card">
+        <div class="stage-label">Hidden Accelerator — ${h.stage_relevance === 'now' ? 'Available Now' : 'Bridge Stage'}</div>
+        <div class="stage-role">${h.role_title}</div>
+        <div class="stage-why">
+          <strong style="color:var(--purple);font-size:11px;display:block;margin-bottom:4px;">Why people miss it:</strong>
+          ${h.why_hidden}<br><br>
+          <strong style="color:var(--teal);font-size:11px;display:block;margin-bottom:4px;">Why it's powerful for you:</strong>
+          ${h.why_powerful}
+        </div>
+        <div class="stage-meta">
+          ${h.city_demand ? `<span class="stage-tag tag-demand">📍 ${h.city_demand}</span>` : ''}
+        </div>
+      </div>
+    </div>`).join('');
+
+  document.getElementById('results').style.display = 'block';
+  document.getElementById('results').classList.add('show');
+  document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ── Copy ──────────────────────────────────────────────────────────────────
+function copyPath() {
+  if (!pathData) return;
+  let out = `CAREER COMPASS — ${document.getElementById('dream-role').value}\n${'='.repeat(60)}\n\n`;
+  out += `ASSESSMENT\n${pathData.assessment?.honest_summary}\n\n`;
+  out += `YOUR PATH\n${pathData.path?.summary}\n\n`;
+  (pathData.path?.stages || []).forEach(s => {
+    out += `[${s.stage_type.toUpperCase()}] ${s.role_title}\n${s.why}\nTimeframe: ${s.timeframe}\n\n`;
+  });
+  out += `HIDDEN ACCELERATORS\n`;
+  (pathData.hidden_roles || []).forEach(h => {
+    out += `${h.role_title}\nWhy powerful: ${h.why_powerful}\n\n`;
+  });
+  navigator.clipboard.writeText(out).then(() => {
+    const btn = document.querySelector('.btn-secondary');
+    if (btn) { const o = btn.textContent; btn.textContent = '✓ Copied!'; setTimeout(()=>btn.textContent=o, 2000); }
+  });
+}
+
+function reset() {
+  pathData = null;
+  document.getElementById('dream-role').value = '';
+  document.getElementById('results').style.display = 'none';
+  document.getElementById('results').classList.remove('show');
+  document.getElementById('progress-fill').style.width = '0%';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ── Config completeness guard ─────────────────────────────────────────────
+function checkConfigCompleteness(cfg) {
+  if (!cfg || Object.keys(cfg).length === 0) {
+    showConfigWarning('No profile found. Please complete setup before using this tool.');
+    return false;
+  }
+  const issues = [];
+  const p = cfg.personal || {};
+  if (!p.first_name || !p.last_name) issues.push('personal details incomplete');
+  if (!cfg.experience || cfg.experience.length === 0) issues.push('no work experience entries');
+  if (!(cfg.skills?.technical) && !(cfg.skills?.differentiator)) issues.push('skills section empty');
+  if (!cfg.targets?.summary) issues.push('professional summary missing');
+  if (issues.length > 0) {
+    showConfigWarning(
+      'Profile incomplete (' + issues.join(' · ') + ') — AI outputs may be generic. ' +
+      '<a href="/setup.html" style="color:var(--teal);text-decoration:underline;">Complete setup \u2192</a>'
+    );
+    return false;
+  }
+  return true;
+}
+
+function showConfigWarning(msg) {
+  const existing = document.getElementById('config-warning');
+  if (existing) return;
+  const div = document.createElement('div');
+  div.id = 'config-warning';
+  div.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:rgba(245,166,35,0.12);border:1px solid rgba(245,166,35,0.4);border-radius:6px;padding:12px 20px;font-size:12px;color:var(--amber);font-family:var(--mono);z-index:9999;max-width:600px;text-align:center;box-shadow:0 4px 24px rgba(0,0,0,0.4);line-height:1.6;';
+  div.innerHTML = '\u26a0 ' + msg + ' <span onclick="this.parentElement.remove()" style="cursor:pointer;margin-left:14px;opacity:0.6;font-size:14px;">\u2715</span>';
+  document.body.appendChild(div);
+  setTimeout(() => div.remove(), 12000);
+}
+
+// ── Token budget note (shown once per session) ────────────────────────────
+function showTokenNote() {
+  if (sessionStorage.getItem('token_note_shown')) return;
+  sessionStorage.setItem('token_note_shown', '1');
+  const div = document.createElement('div');
+  div.style.cssText = 'position:fixed;bottom:20px;right:20px;background:rgba(14,155,138,0.1);border:1px solid rgba(14,155,138,0.25);border-radius:6px;padding:10px 16px;font-size:11px;color:var(--muted);font-family:var(--mono);z-index:9999;max-width:280px;line-height:1.6;';
+  div.innerHTML = '\ud83d\udca1 Groq free tier: ~100k tokens/day (~15\u201320 analyses). If you hit a rate limit, wait a few minutes. <span onclick="this.parentElement.remove()" style="cursor:pointer;margin-left:8px;opacity:0.5;">\u2715</span>';
+  document.body.appendChild(div);
+  setTimeout(() => div.remove(), 8000);
+}
+
+// ── Safe JSON parser — state machine, handles any literal control chars in AI strings ──
+function safeParseJSON(raw) {
+  // Strip markdown fences
+  let text = raw.replace(/```json|```/g, '').trim();
+  // Remove true control chars (not newline/tab/CR — handled below per-character)
+  text = text.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '');
+
+  // Walk character by character, tracking whether we are inside a JSON string.
+  // Any literal newline, carriage return, or tab found inside a string gets
+  // replaced with its escape sequence — which is what JSON.parse requires.
+  // Proper escape sequences already in the text (\n etc) are passed through intact.
+  const out = [];
+  let inString = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (inString) {
+      if (c === '\\') {
+        // Backslash escape — consume both chars unchanged
+        out.push(c);
+        if (i + 1 < text.length) out.push(text[++i]);
+      } else if (c === '"') {
+        inString = false;
+        out.push(c);
+      } else if (c === '\n') {
+        out.push('\\n');   // literal newline → escaped
+      } else if (c === '\r') {
+        out.push('\\r');   // literal CR → escaped
+      } else if (c === '\t') {
+        out.push('\\t');   // literal tab → escaped
+      } else {
+        out.push(c);
+      }
+    } else {
+      if (c === '"') inString = true;
+      out.push(c);
+    }
+  }
+  return JSON.parse(out.join(''));
+}
+
+</script>
+
+<!-- ── Attribution footer ───────────────────────── -->
+<footer style="text-align:center;padding:28px 20px;border-top:1px solid var(--border);font-size:11px;color:var(--muted);font-family:var(--mono);line-height:1.9;position:relative;z-index:1;">
+  <strong style="color:var(--text);">Career Ops</strong> &nbsp;&middot;&nbsp; Built by <strong style="color:var(--text);">Johan Lopez</strong> &nbsp;&middot;&nbsp; Australia &nbsp;&middot;&nbsp; v1.0
+  &nbsp;&middot;&nbsp; <a href="/about.html" style="color:var(--teal);text-decoration:none;">About &amp; Disclaimer</a>
+</footer>
+</body>
+</html>

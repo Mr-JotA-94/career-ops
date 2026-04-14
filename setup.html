@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Setup — Career Ops</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:      #F7F4EF;
+  --surface: #FFFFFF;
+  --card:    #F0EDE8;
+  --border:  #DDD9D2;
+  --muted:   #9B9488;
+  --text:    #2C2820;
+  --bright:  #1A1510;
+  --teal:    #1A6B5E;
+  --teal2:   #228070;
+  --amber:   #C4711A;
+  --red:     #B94040;
+  --green:   #1E7A4E;
+  --serif:   'Instrument Serif', Georgia, serif;
+  --mono:    'DM Mono', monospace;
+  --sans:    'Syne', sans-serif;
+}
+
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--mono);
+  min-height: 100vh;
+}
+
+/* Texture overlay */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none; z-index: 0; opacity: 0.6;
+}
+
+.app { position: relative; z-index: 1; max-width: 680px; margin: 0 auto; padding: 60px 24px 100px; }
+
+/* Header */
+.brand {
+  display: flex; align-items: baseline; gap: 10px;
+  margin-bottom: 48px;
+}
+.brand-name { font-family: var(--sans); font-size: 13px; font-weight: 800; color: var(--bright); letter-spacing: 0.05em; }
+.brand-tag { font-size: 10px; font-family: var(--mono); color: var(--muted); letter-spacing: 0.1em; }
+
+.hero-title {
+  font-family: var(--serif);
+  font-size: clamp(36px, 6vw, 54px);
+  color: var(--bright);
+  line-height: 1.15;
+  margin-bottom: 16px;
+  font-style: italic;
+}
+.hero-title span { font-style: normal; color: var(--teal); }
+.hero-sub { font-size: 13px; color: var(--muted); line-height: 1.7; max-width: 480px; margin-bottom: 48px; }
+
+/* Progress */
+.progress-track {
+  display: flex; gap: 0;
+  margin-bottom: 40px;
+  border: 1px solid var(--border);
+  border-radius: 6px; overflow: hidden;
+  background: var(--card);
+}
+.progress-step {
+  flex: 1; padding: 10px 6px;
+  text-align: center;
+  font-size: 9px; font-family: var(--sans); font-weight: 700;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--muted); border-right: 1px solid var(--border);
+  transition: all 0.3s;
+}
+.progress-step:last-child { border-right: none; }
+.progress-step.active { background: var(--teal); color: white; }
+.progress-step.done { background: rgba(26,107,94,0.08); color: var(--teal); }
+.step-num { display: block; font-size: 14px; font-weight: 800; margin-bottom: 2px; }
+
+/* Step panels */
+.step-panel { display: none; animation: fadeIn 0.3s ease; }
+.step-panel.active { display: block; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+
+.step-heading {
+  font-family: var(--serif);
+  font-size: 28px; font-style: italic;
+  color: var(--bright); margin-bottom: 6px;
+}
+.step-sub { font-size: 12px; color: var(--muted); margin-bottom: 28px; line-height: 1.6; }
+
+/* Form elements */
+.field { margin-bottom: 18px; }
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 18px; }
+label {
+  display: block; font-size: 10px; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--muted);
+  font-family: var(--sans); font-weight: 700; margin-bottom: 6px;
+}
+input[type="text"], input[type="email"], input[type="password"], textarea, select {
+  width: 100%; background: var(--surface);
+  border: 1px solid var(--border); border-radius: 4px;
+  color: var(--text); font-family: var(--mono);
+  font-size: 13px; padding: 10px 14px;
+  outline: none; transition: border-color 0.2s;
+}
+input:focus, textarea:focus, select:focus { border-color: var(--teal); }
+input::placeholder, textarea::placeholder { color: var(--muted); }
+textarea { resize: vertical; min-height: 80px; line-height: 1.6; }
+select { cursor: pointer; }
+select option { background: white; }
+
+/* Toggle chips */
+.chip-group { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+.chip-toggle {
+  font-family: var(--mono); font-size: 11px;
+  padding: 6px 14px; border-radius: 3px;
+  border: 1px solid var(--border); background: var(--surface);
+  color: var(--muted); cursor: pointer; transition: all 0.15s;
+}
+.chip-toggle:hover { border-color: var(--teal); color: var(--teal); }
+.chip-toggle.selected { background: var(--teal); border-color: var(--teal); color: white; }
+
+/* Job blocks */
+.job-block {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 6px; padding: 20px; margin-bottom: 14px;
+}
+.job-block-head {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 14px;
+}
+.job-block-title { font-family: var(--sans); font-size: 12px; font-weight: 700; color: var(--bright); }
+.btn-remove {
+  font-size: 11px; color: var(--muted); background: none;
+  border: none; cursor: pointer; font-family: var(--mono);
+  transition: color 0.15s;
+}
+.btn-remove:hover { color: var(--red); }
+
+.btn-add-block {
+  width: 100%; padding: 10px;
+  border: 1px dashed var(--border); border-radius: 4px;
+  background: transparent; color: var(--muted);
+  font-family: var(--mono); font-size: 12px;
+  cursor: pointer; transition: all 0.15s; margin-top: 4px;
+}
+.btn-add-block:hover { border-color: var(--teal); color: var(--teal); }
+
+/* API key test */
+.key-row { display: flex; gap: 8px; }
+.key-row input { flex: 1; }
+.btn-test {
+  padding: 10px 16px; border-radius: 4px;
+  border: 1px solid var(--border); background: var(--surface);
+  color: var(--muted); font-family: var(--mono); font-size: 11px;
+  cursor: pointer; transition: all 0.15s; white-space: nowrap;
+}
+.btn-test:hover { border-color: var(--teal); color: var(--teal); }
+.btn-test.success { border-color: var(--green); color: var(--green); background: rgba(30,122,78,0.06); }
+.btn-test.fail { border-color: var(--red); color: var(--red); background: rgba(185,64,64,0.06); }
+.key-hint { font-size: 11px; color: var(--muted); margin-top: 8px; line-height: 1.6; }
+
+/* Role recommender */
+.recommend-box {
+  background: rgba(26,107,94,0.04); border: 1px solid rgba(26,107,94,0.2);
+  border-radius: 6px; padding: 20px; margin-top: 20px; display: none;
+}
+.recommend-box.show { display: block; }
+.recommend-title { font-family: var(--sans); font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--teal); margin-bottom: 12px; }
+.role-suggestion {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 10px 0; border-bottom: 1px solid var(--border);
+}
+.role-suggestion:last-child { border-bottom: none; }
+.role-rank { font-family: var(--sans); font-weight: 800; font-size: 12px; color: var(--teal); min-width: 20px; }
+.role-info { flex: 1; }
+.role-name { font-size: 13px; color: var(--bright); margin-bottom: 3px; }
+.role-why { font-size: 11px; color: var(--muted); line-height: 1.5; }
+.btn-get-roles {
+  margin-top: 16px; padding: 10px 20px;
+  background: var(--teal); color: white;
+  border: none; border-radius: 4px;
+  font-family: var(--sans); font-size: 12px; font-weight: 700;
+  cursor: pointer; transition: all 0.2s; letter-spacing: 0.05em;
+}
+.btn-get-roles:hover { background: var(--teal2); }
+.btn-get-roles:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* Review */
+.review-section { margin-bottom: 20px; }
+.review-label { font-family: var(--sans); font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--teal); margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+.review-row { display: flex; gap: 8px; font-size: 12px; color: var(--text); margin-bottom: 5px; }
+.review-key { color: var(--muted); min-width: 120px; }
+
+/* Nav buttons */
+.step-nav { display: flex; gap: 10px; margin-top: 32px; justify-content: space-between; align-items: center; }
+.btn-next {
+  font-family: var(--sans); font-size: 13px; font-weight: 700;
+  padding: 12px 32px; border-radius: 4px;
+  background: var(--teal); color: white;
+  border: none; cursor: pointer; transition: all 0.2s;
+  letter-spacing: 0.05em;
+}
+.btn-next:hover { background: var(--teal2); transform: translateY(-1px); }
+.btn-back {
+  font-family: var(--mono); font-size: 12px;
+  padding: 12px 20px; border-radius: 4px;
+  background: transparent; color: var(--muted);
+  border: 1px solid var(--border); cursor: pointer; transition: all 0.15s;
+}
+.btn-back:hover { color: var(--text); border-color: var(--muted); }
+
+/* Error */
+.error-msg { font-size: 11px; color: var(--red); margin-top: 6px; display: none; }
+.error-msg.show { display: block; }
+.form-error { border-color: var(--red) !important; }
+
+/* Complete screen */
+.complete { text-align: center; padding: 40px 0; display: none; }
+.complete.show { display: block; animation: fadeIn 0.5s ease; }
+.complete-icon { font-size: 48px; margin-bottom: 20px; }
+.complete-title { font-family: var(--serif); font-size: 36px; font-style: italic; color: var(--bright); margin-bottom: 12px; }
+.complete-sub { font-size: 13px; color: var(--muted); line-height: 1.7; margin-bottom: 32px; }
+.tool-links { display: flex; flex-direction: column; gap: 10px; max-width: 320px; margin: 0 auto; }
+.tool-link {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 20px; background: var(--surface);
+  border: 1px solid var(--border); border-radius: 6px;
+  text-decoration: none; color: var(--text);
+  font-size: 13px; transition: all 0.15s;
+}
+.tool-link:hover { border-color: var(--teal); color: var(--teal); transform: translateX(4px); }
+.tool-link span { font-size: 11px; color: var(--muted); }
+
+@media(max-width:600px) {
+  .field-row { grid-template-columns: 1fr; }
+  .app { padding: 40px 16px 80px; }
+}
+
+  /* ── Global nav ──────────────────────────────────────────────────── */
+  .topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 28px; border-bottom: 1px solid var(--border);
+    background: rgba(7,17,30,0.92); backdrop-filter: blur(10px);
+    position: sticky; top: 0; z-index: 100;
+  }
+  .topbar-left  { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+  .topbar-right { display: flex; align-items: center; gap: 8px; }
+  .logo { font-family: var(--sans); font-size: 15px; font-weight: 800; color: var(--bright); letter-spacing: -0.02em; text-decoration: none; }
+  .logo span { color: var(--teal); }
+  .tool-tag {
+    font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--teal); border: 1px solid var(--teal);
+    padding: 2px 8px; border-radius: 2px; font-family: var(--mono);
+  }
+  .nav-links { display: flex; gap: 4px; flex-wrap: wrap; }
+  .nav-link {
+    font-size: 11px; font-family: var(--mono); color: var(--muted);
+    text-decoration: none; padding: 5px 11px;
+    border: 1px solid var(--border); border-radius: 3px;
+    transition: color 0.15s, border-color 0.15s; white-space: nowrap;
+  }
+  .nav-link:hover { color: var(--teal); border-color: var(--teal); }
+  .nav-link.active { color: var(--teal); border-color: var(--teal); background: rgba(14,155,138,0.08); }
+
+</style>
+</head>
+<body>
+<div class="topbar">
+    <div class="topbar-left">
+      <a href="/pipeline.html" class="logo">Career<span>Ops</span></a>
+      <span class="tool-tag">setup</span>
+      <nav class="nav-links">
+        <a class="nav-link" href="/jd-analyser.html">JD Analyser</a>
+        <a class="nav-link" href="/cv-tailor.html">CV Tailor</a>
+        <a class="nav-link" href="/search-kit.html">Search Kit</a>
+        <a class="nav-link" href="/compass.html">Compass</a>
+        <a class="nav-link" href="/pipeline.html">Pipeline</a>
+      </nav>
+    </div>
+  </div>
+
+<div class="app">
+
+  <div class="brand">
+    <div class="brand-name">CareerOps</div>
+    <div class="brand-tag">/ setup</div>
+  </div>
+
+  <!-- Hero (step 1 only) -->
+  <div id="hero">
+    <h1 class="hero-title">Let's build your<br><span>job search engine.</span></h1>
+    <p class="hero-sub">Eight minutes. One setup. Every tool in the system becomes tailored to you — your background, your targets, your voice.</p>
+  </div>
+
+  <!-- Progress -->
+  <div class="progress-track" id="progress-track">
+    <div class="progress-step active" id="ps1"><span class="step-num">1</span>API Key</div>
+    <div class="progress-step" id="ps2"><span class="step-num">2</span>You</div>
+    <div class="progress-step" id="ps3"><span class="step-num">3</span>Targets</div>
+    <div class="progress-step" id="ps4"><span class="step-num">4</span>Experience</div>
+    <div class="progress-step" id="ps5"><span class="step-num">5</span>Education</div>
+    <div class="progress-step" id="ps6"><span class="step-num">6</span>Skills</div>
+    <div class="progress-step" id="ps7"><span class="step-num">7</span>Review</div>
+  </div>
+
+  <!-- ── STEP 1: Personal ─────────────────────────────────────────────── -->
+  <div class="step-panel" id="step2">
+    <h2 class="step-heading">About you</h2>
+    <p class="step-sub">Basic contact details — these appear on every generated CV and email.</p>
+
+    <div class="field-row">
+      <div><label>First Name *</label><input type="text" id="s1-fname" placeholder="Johan"></div>
+      <div><label>Last Name *</label><input type="text" id="s1-lname" placeholder="Lopez"></div>
+    </div>
+    <div class="field-row">
+      <div><label>Email *</label><input type="email" id="s1-email" placeholder="you@email.com"></div>
+      <div><label>Phone *</label><input type="text" id="s1-phone" placeholder="04xx xxx xxx"></div>
+    </div>
+    <div class="field-row">
+      <div><label>City / State *</label><input type="text" id="s1-location" placeholder="Brisbane, QLD"></div>
+      <div><label>LinkedIn URL</label><input type="text" id="s1-linkedin" placeholder="linkedin.com/in/yourname"></div>
+    </div>
+    <div class="field">
+      <label>Availability</label>
+      <div class="chip-group" id="s1-availability">
+        <button class="chip-toggle selected" data-val="open_to_relocation">Open to relocation</button>
+        <button class="chip-toggle selected" data-val="fifo">FIFO</button>
+        <button class="chip-toggle" data-val="remote_only">Remote only</button>
+        <button class="chip-toggle" data-val="local_only">Local only</button>
+      </div>
+    </div>
+    <div class="field">
+      <label>One-line professional tagline</label>
+      <input type="text" id="s1-tagline" placeholder="e.g. Petroleum Engineer · Data Analytics & AI">
+    </div>
+
+    <!-- CV Upload -->
+    <div class="field" style="margin-top:28px;">
+      <label>Import from CV (optional)</label>
+      <div id="upload-zone" style="
+        border: 1px dashed var(--border); border-radius: 6px;
+        padding: 20px 16px; text-align: center; cursor: pointer;
+        background: var(--card); transition: border-color 0.2s;
+      " onclick="document.getElementById('cv-file-input').click()"
+         ondragover="event.preventDefault(); this.style.borderColor='var(--teal)'"
+         ondragleave="this.style.borderColor='var(--border)'"
+         ondrop="handleCVDrop(event)">
+        <div style="font-size:22px; margin-bottom:6px;">📄</div>
+        <div style="font-size:12px; color:var(--muted);">Drop your CV here or click to browse</div>
+        <div style="font-size:10px; color:var(--muted); margin-top:4px;">.docx only · Fills all steps automatically</div>
+        <input type="file" id="cv-file-input" accept=".docx" style="display:none" onchange="handleCVUpload(this.files[0])">
+      </div>
+      <div id="upload-status" style="font-size:11px; color:var(--muted); margin-top:8px; display:none;"></div>
+    </div>
+
+    <div class="step-nav">
+      <button class="btn-back" onclick="goStep(1)">← Back</button>
+      <button class="btn-next" onclick="goStep(3)">Next →</button>
+    </div>
+  </div>
+
+  <!-- ── STEP 2: API Key ─────────────────────────────────────────────── -->
+  <div class="step-panel active" id="step1">
+    <h2 class="step-heading">Connect your AI</h2>
+    <p class="step-sub">CareerOps uses Groq's free AI API. Get your key at <strong>console.groq.com</strong> → API Keys. It stays on your machine — never sent anywhere else.</p>
+
+    <div class="field">
+      <label>Groq API Key *</label>
+      <div class="key-row">
+        <input type="password" id="s2-apikey" placeholder="gsk_...">
+        <button class="btn-test" id="test-btn" onclick="testApiKey()">Test Key</button>
+      </div>
+      <p class="key-hint">Free tier: 100,000 tokens/day · ~50 CV tailoring sessions · No credit card needed</p>
+      <p class="error-msg" id="key-error">Key invalid or unreachable. Check it and try again.</p>
+    </div>
+
+    <div class="step-nav">
+      <div></div>
+      <button class="btn-next" onclick="goStep(2)">Next →</button>
+    </div>
+  </div>
+
+  <!-- ── STEP 3: Target Roles ────────────────────────────────────────── -->
+  <div class="step-panel" id="step3">
+    <h2 class="step-heading">What you're going for</h2>
+    <p class="step-sub">Tell the system what kinds of roles you're targeting. It will tailor every output around this.</p>
+
+    <div class="field">
+      <label>Role Categories *</label>
+      <div class="chip-group" id="s3-categories">
+        <button class="chip-toggle" data-val="petroleum_engineering">⛽ Petroleum Engineering</button>
+        <button class="chip-toggle" data-val="data_analytics">📊 Data Analytics</button>
+        <button class="chip-toggle" data-val="data_science">🤖 Data Science</button>
+        <button class="chip-toggle" data-val="business_intelligence">📈 Business Intelligence</button>
+        <button class="chip-toggle" data-val="operations_analytics">⚙ Operations & Analytics</button>
+        <button class="chip-toggle" data-val="ai_ml">🧠 AI / Machine Learning</button>
+        <button class="chip-toggle" data-val="software_engineering">💻 Software Engineering</button>
+        <button class="chip-toggle" data-val="civil_engineering">🏗 Civil Engineering</button>
+        <button class="chip-toggle" data-val="mechanical_engineering">🔧 Mechanical Engineering</button>
+        <button class="chip-toggle" data-val="electrical_engineering">⚡ Electrical Engineering</button>
+        <button class="chip-toggle" data-val="chemical_engineering">🧪 Chemical Engineering</button>
+        <button class="chip-toggle" data-val="environmental_engineering">🌿 Environmental / Sustainability</button>
+        <button class="chip-toggle" data-val="accounting_finance">💰 Accounting & Finance</button>
+        <button class="chip-toggle" data-val="hr_people">👥 HR & People Operations</button>
+        <button class="chip-toggle" data-val="marketing">📣 Marketing & Communications</button>
+        <button class="chip-toggle" data-val="sales">🤝 Sales & Business Development</button>
+        <button class="chip-toggle" data-val="supply_chain">📦 Supply Chain & Logistics</button>
+        <button class="chip-toggle" data-val="healthcare">🏥 Healthcare & Allied Health</button>
+        <button class="chip-toggle" data-val="education">🎓 Education & Training</button>
+        <button class="chip-toggle" data-val="consulting">🎯 Consulting & Advisory</button>
+        <button class="chip-toggle" data-val="project_management">📋 Project Management</button>
+        <button class="chip-toggle" data-val="operations_management">⚙ Operations Management</button>
+        <button class="chip-toggle" data-val="architecture">🏛 Architecture & Urban Planning</button>
+        <button class="chip-toggle" data-val="legal">⚖ Legal & Compliance</button>
+        <button class="chip-toggle" data-val="hospitality">🍽 Hospitality & Tourism</button>
+        <button class="chip-toggle" data-val="construction">🏚 Construction & Trades</button>
+        <button class="chip-toggle" data-val="administration">📁 Administration & Office Support</button>
+        <button class="chip-toggle" data-val="customer_service">💬 Customer Service</button>
+        <button class="chip-toggle" data-val="other" onclick="toggleOtherInput('categories-other', this)">✦ Other</button>
+      </div>
+      <input type="text" id="categories-other" placeholder="e.g. Geoscience, Renewable Energy, Urban Planning…"
+        style="display:none;margin-top:8px;width:100%;box-sizing:border-box;"
+        oninput="syncOtherChip(this,'s3-categories','other')">
+    </div>
+
+    <div class="field">
+      <label>Seniority Level</label>
+      <div class="chip-group" id="s3-seniority">
+        <button class="chip-toggle selected" data-val="graduate">Graduate / Entry</button>
+        <button class="chip-toggle selected" data-val="junior">Junior</button>
+        <button class="chip-toggle" data-val="mid">Mid-level</button>
+        <button class="chip-toggle" data-val="senior">Senior</button>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Industries of interest</label>
+      <div class="chip-group" id="s3-industries">
+        <button class="chip-toggle" data-val="oil_gas">⛽ Oil & Gas</button>
+        <button class="chip-toggle" data-val="energy">⚡ Energy & Utilities</button>
+        <button class="chip-toggle" data-val="mining">⛏ Mining & Resources</button>
+        <button class="chip-toggle" data-val="construction">🏗 Construction & Infrastructure</button>
+        <button class="chip-toggle" data-val="manufacturing">🏭 Manufacturing</button>
+        <button class="chip-toggle" data-val="tech">💻 Technology & Software</button>
+        <button class="chip-toggle" data-val="fintech">💳 Fintech & Financial Services</button>
+        <button class="chip-toggle" data-val="banking">🏦 Banking</button>
+        <button class="chip-toggle" data-val="consulting_industry">🎯 Consulting & Professional Services</button>
+        <button class="chip-toggle" data-val="government">🏛 Government & Public Sector</button>
+        <button class="chip-toggle" data-val="defence">🛡 Defence</button>
+        <button class="chip-toggle" data-val="healthcare">🏥 Healthcare & Pharmaceuticals</button>
+        <button class="chip-toggle" data-val="education">🎓 Education</button>
+        <button class="chip-toggle" data-val="agriculture">🌾 Agriculture & Food</button>
+        <button class="chip-toggle" data-val="transport">🚢 Transport & Logistics</button>
+        <button class="chip-toggle" data-val="retail">🛒 Retail & FMCG</button>
+        <button class="chip-toggle" data-val="media">📺 Media & Communications</button>
+        <button class="chip-toggle" data-val="real_estate">🏠 Real Estate & Property</button>
+        <button class="chip-toggle" data-val="environmental">🌿 Environment & Sustainability</button>
+        <button class="chip-toggle" data-val="nonprofit">❤ Non-profit & NGO</button>
+        <button class="chip-toggle" data-val="hospitality">🍽 Hospitality & Tourism</button>
+        <button class="chip-toggle" data-val="any">✦ Open to any industry</button>
+        <button class="chip-toggle" data-val="other_industry" onclick="toggleOtherInput('industries-other', this)">✦ Other</button>
+      </div>
+      <input type="text" id="industries-other" placeholder="e.g. Space, Quantum computing, AgriTech…"
+        style="display:none;margin-top:8px;width:100%;box-sizing:border-box;"
+        oninput="syncOtherChip(this,'s3-industries','other_industry')">
+    </div>
+
+    <div class="field">
+      <label>Brief background summary *</label>
+      <textarea id="s3-summary" rows="4" placeholder="Describe your professional background in 3-5 sentences — your qualifications, years of experience, what you've done, and what you're looking for in Australia."></textarea>
+    </div>
+
+    <!-- Role Recommender -->
+    <button class="btn-get-roles" id="recommend-btn" onclick="getRoleRecommendations()">
+      ✦ Suggest roles based on my profile
+    </button>
+    <div class="recommend-box" id="recommend-box">
+      <div class="recommend-title">Recommended Roles</div>
+      <div id="recommend-list"></div>
+    </div>
+
+    <div class="step-nav">
+      <button class="btn-back" onclick="goStep(2)">← Back</button>
+      <button class="btn-next" onclick="goStep(4)">Next →</button>
+    </div>
+  </div>
+
+  <!-- ── STEP 4: Experience ──────────────────────────────────────────── -->
+  <div class="step-panel" id="step4">
+    <h2 class="step-heading">Your experience</h2>
+    <p class="step-sub">Add your roles, most recent first. 3–4 bullet points per role. Write them as achievements, not duties.</p>
+
+    <div id="jobs-container"></div>
+    <button class="btn-add-block" onclick="addJob()">+ Add another role</button>
+
+    <div class="step-nav">
+      <button class="btn-back" onclick="goStep(3)">← Back</button>
+      <button class="btn-next" onclick="goStep(5)">Next →</button>
+    </div>
+  </div>
+
+  <!-- ── STEP 5: Education ───────────────────────────────────────────── -->
+  <div class="step-panel" id="step5">
+    <h2 class="step-heading">Education</h2>
+    <p class="step-sub">Add your degrees, most recent first. Include key focus areas — these matter for technical roles.</p>
+
+    <div id="edu-container"></div>
+    <button class="btn-add-block" onclick="addEdu()">+ Add another qualification</button>
+
+    <div class="step-nav">
+      <button class="btn-back" onclick="goStep(4)">← Back</button>
+      <button class="btn-next" onclick="goStep(6)">Next →</button>
+    </div>
+  </div>
+
+  <!-- ── STEP 6: Skills ─────────────────────────────────────────────── -->
+  <div class="step-panel" id="step6">
+    <h2 class="step-heading">Skills & credentials</h2>
+    <p class="step-sub">Be specific — tools, technologies, methodologies. These feed directly into your CV and keyword matching.</p>
+
+    <div class="field">
+      <label>Technical Skills</label>
+      <textarea id="s6-technical" rows="3" placeholder="Python, SQL, Power BI, Reservoir simulation, Drilling hydraulics, CFD, TensorFlow, Scikit-learn..."></textarea>
+    </div>
+    <div class="field">
+      <label>Tools & Software</label>
+      <textarea id="s6-tools" rows="2" placeholder="Business Central, Looker, Tableau, MATLAB, ANSYS..."></textarea>
+    </div>
+    <div class="field">
+      <label>Languages</label>
+      <input type="text" id="s6-languages" placeholder="English (fluent), Spanish (native)...">
+    </div>
+    <div class="field">
+      <label>Certifications & Awards</label>
+      <textarea id="s6-certs" rows="3" placeholder="IBM Data Science Methodology, Study QLD Innovation Challenge 2025, Company Innovation Award FY24..."></textarea>
+    </div>
+    <div class="field">
+      <label>Key differentiator — what makes you unusual?</label>
+      <textarea id="s6-differentiator" rows="2" placeholder="e.g. Rare combination of petroleum engineering fundamentals and applied data analytics — can bridge operational O&G knowledge with digital tooling."></textarea>
+    </div>
+
+    <div class="step-nav">
+      <button class="btn-back" onclick="goStep(5)">← Back</button>
+      <button class="btn-next" onclick="goStep(7)">Next →</button>
+    </div>
+  </div>
+
+  <!-- ── STEP 7: Review ─────────────────────────────────────────────── -->
+  <div class="step-panel" id="step7">
+    <h2 class="step-heading">Looks good?</h2>
+    <p class="step-sub">Review your profile before we lock it in. You can always update it later by re-running setup.</p>
+
+    <div id="review-content"></div>
+
+    <div class="step-nav">
+      <button class="btn-back" onclick="goStep(6)">← Back</button>
+      <button class="btn-next" onclick="saveConfig()" id="save-btn">Save & Launch →</button>
+    </div>
+  </div>
+
+  <!-- Complete -->
+  <div class="complete" id="complete">
+    <div class="complete-icon">✦</div>
+    <h2 class="complete-title">You're all set.</h2>
+    <p class="complete-sub">Your profile is saved. Every tool is now tailored to you.<br>Pick where you want to start.</p>
+    <div class="tool-links">
+      <a class="tool-link" href="/compass.html" target="_blank">🧭 Career Compass <span>Map your path first →</span></a>
+      <a class="tool-link" href="/search-kit.html" target="_blank">🎯 Search Kit <span>Find roles to target →</span></a>
+      <a class="tool-link" href="/jd-analyser.html" target="_blank">🔍 JD Analyser <span>Check fit before applying →</span></a>
+      <a class="tool-link" href="/cv-tailor.html" target="_blank">📄 CV Tailor <span>Generate tailored CV →</span></a>
+      <a class="tool-link" href="/pipeline.html" target="_blank">📋 Pipeline <span>Track applications →</span></a>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ── State ──────────────────────────────────────────────────────────────────
+let currentStep = 1;
+let jobCount = 0;
+let eduCount = 0;
+let apiKey = '';
+let recommendations = [];
+
+// ── Chip toggles ───────────────────────────────────────────────────────────
+document.querySelectorAll('.chip-group').forEach(group => {
+  group.addEventListener('click', e => {
+    if (!e.target.classList.contains('chip-toggle')) return;
+    e.target.classList.toggle('selected');
+  });
+});
+
+function getChips(groupId) {
+  return [...document.querySelectorAll(`#${groupId} .chip-toggle.selected`)].map(b => {
+    // For "other" chips, substitute the typed text if present
+    if (b.dataset.val === 'other') {
+      const txt = document.getElementById('categories-other')?.value.trim();
+      return txt || 'other';
+    }
+    if (b.dataset.val === 'other_industry') {
+      const txt = document.getElementById('industries-other')?.value.trim();
+      return txt || 'other';
+    }
+    return b.dataset.val;
+  });
+}
+
+// Show/hide the custom text input when an Other chip is toggled
+function toggleOtherInput(inputId, btn) {
+  const input = document.getElementById(inputId);
+  if (!input) return;
+  const isSelected = btn.classList.contains('selected');
+  // The chip-toggle click handler fires AFTER this, so state isn't flipped yet
+  // We mirror what the final state will be
+  input.style.display = isSelected ? 'none' : 'block';
+  if (!isSelected) setTimeout(() => input.focus(), 50);
+}
+
+// Keep the chip's data-val in sync when the user types a custom label
+function syncOtherChip(input, groupId, chipVal) {
+  const chip = document.querySelector(`#${groupId} [data-val="${chipVal}"]`);
+  if (!chip) return;
+  if (input.value.trim()) {
+    chip.classList.add('selected');
+    chip.textContent = `✦ ${input.value.trim()}`;
+  } else {
+    chip.textContent = '✦ Other';
+  }
+}
+
+// ── Step navigation ────────────────────────────────────────────────────────
+function goStep(n) {
+  if (n > currentStep && !validateStep(currentStep)) return;
+
+  document.getElementById(`step${currentStep}`).classList.remove('active');
+  document.getElementById(`ps${currentStep}`).classList.remove('active');
+  document.getElementById(`ps${currentStep}`).classList.add('done');
+
+  currentStep = n;
+  document.getElementById(`step${currentStep}`).classList.add('active');
+
+  // Update progress
+  document.querySelectorAll('.progress-step').forEach((el, i) => {
+    el.classList.remove('active');
+    if (i + 1 < n) el.classList.add('done');
+    if (i + 1 === n) { el.classList.add('active'); el.classList.remove('done'); }
+  });
+
+  // Hide hero after step 1
+  document.getElementById('hero').style.display = n === 1 ? 'block' : 'none';
+
+  // Init dynamic sections
+  if (n === 4 && jobCount === 0) { addJob(); addJob(); }
+  if (n === 5 && eduCount === 0) { addEdu(); addEdu(); }
+  if (n === 7) buildReview();
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ── Validation ─────────────────────────────────────────────────────────────
+function validateStep(step) {
+  if (step === 1) {
+    const key = document.getElementById('s2-apikey').value.trim();
+    if (!key || !key.startsWith('gsk_')) {
+      document.getElementById('key-error').classList.add('show');
+      document.getElementById('s2-apikey').classList.add('form-error');
+      return false;
+    }
+    apiKey = key;
+  }
+  if (step === 2) {
+    const required = ['s1-fname','s1-lname','s1-email','s1-phone','s1-location'];
+    let ok = true;
+    required.forEach(id => {
+      const el = document.getElementById(id);
+      if (!el.value.trim()) { el.classList.add('form-error'); ok = false; }
+      else el.classList.remove('form-error');
+    });
+    if (!ok) return false;
+  }
+  if (step === 3) {
+    if (!getChips('s3-categories').length) { alert('Please select at least one role category.'); return false; }
+    if (!document.getElementById('s3-summary').value.trim()) {
+      document.getElementById('s3-summary').classList.add('form-error'); return false;
+    }
+  }
+  return true;
+}
+
+// ── API Key test ───────────────────────────────────────────────────────────
+async function testApiKey() {
+  const key = document.getElementById('s2-apikey').value.trim();
+  const btn = document.getElementById('test-btn');
+  const err = document.getElementById('key-error');
+  if (!key) return;
+
+  btn.textContent = 'Testing...'; btn.disabled = true;
+  err.classList.remove('show');
+
+  try {
+    const res = await fetch('/api/test-key', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key })
+    });
+    const data = await res.json();
+    if (data.ok) {
+      btn.textContent = '✓ Valid';
+      btn.classList.add('success');
+      apiKey = key;
+      document.getElementById('s2-apikey').classList.remove('form-error');
+      err.classList.remove('show');
+    } else {
+      throw new Error('invalid');
+    }
+  } catch {
+    btn.textContent = 'Failed';
+    btn.classList.add('fail');
+    err.classList.add('show');
+  }
+  btn.disabled = false;
+  setTimeout(() => { btn.textContent = 'Test Key'; btn.classList.remove('success','fail'); }, 3000);
+}
+
+// ── Role recommender ───────────────────────────────────────────────────────
+async function getRoleRecommendations() {
+  const btn = document.getElementById('recommend-btn');
+  const box = document.getElementById('recommend-box');
+  const list = document.getElementById('recommend-list');
+
+  btn.textContent = 'Analysing your profile...';
+  btn.disabled = true;
+
+  const summary  = document.getElementById('s3-summary').value.trim();
+  const cats     = getChips('s3-categories');
+  const seniority = getChips('s3-seniority');
+  const industries = getChips('s3-industries');
+
+  const prompt = `Based on this candidate profile, suggest the 6 most suitable job roles to target. Return ONLY valid JSON, no markdown.
+
+Profile summary: ${summary}
+Interests: ${cats.join(', ')}
+Seniority: ${seniority.join(', ')}
+Industries: ${industries.join(', ')}
+
+Return:
+{
+  "roles": [
+    { "title": "Job Title", "why": "One sentence — specific reason this fits their profile" }
+  ]
+}`;
+
+  try {
+    const setupKey = document.getElementById('s2-apikey')?.value?.trim() || '';
+    const res = await fetch('/api/claude', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 800, setup_key: setupKey, messages: [{ role: 'user', content: prompt }] })
+    });
+    const raw = await res.json();
+    if (!res.ok) throw new Error(raw.error?.message || 'API error');
+    const text = raw.content[0].text.replace(/```json|```/g,'').trim();
+    const data = JSON.parse(text);
+    recommendations = data.roles || [];
+
+    list.innerHTML = recommendations.map((r, i) => `
+      <div class="role-suggestion">
+        <span class="role-rank">${i+1}</span>
+        <div class="role-info">
+          <div class="role-name">${r.title}</div>
+          <div class="role-why">${r.why}</div>
+        </div>
+      </div>`).join('');
+
+    box.classList.add('show');
+  } catch(e) {
+    list.innerHTML = `<div style="font-size:12px;color:var(--red);line-height:1.6;">Could not load recommendations.<br>${e.message || 'Check your API key is entered on Step 1 and tested successfully.'}</div>`;
+    box.classList.add('show');
+  }
+
+  btn.textContent = '✦ Refresh suggestions';
+  btn.disabled = false;
+}
+
+// ── Dynamic job blocks ─────────────────────────────────────────────────────
+function addJob() {
+  jobCount++;
+  const n = jobCount;
+  const div = document.createElement('div');
+  div.className = 'job-block'; div.id = `job-${n}`;
+  div.innerHTML = `
+    <div class="job-block-head">
+      <div class="job-block-title">Role ${n}</div>
+      ${n > 1 ? `<button class="btn-remove" onclick="removeBlock('job-${n}')">Remove</button>` : ''}
+    </div>
+    <div class="field-row">
+      <div><label>Job Title</label><input type="text" id="job-${n}-title" placeholder="Operations Analyst"></div>
+      <div><label>Company</label><input type="text" id="job-${n}-company" placeholder="Microair Avionics"></div>
+    </div>
+    <div class="field-row">
+      <div><label>Start Date</label><input type="text" id="job-${n}-start" placeholder="Oct 2025"></div>
+      <div><label>End Date</label><input type="text" id="job-${n}-end" placeholder="Present"></div>
+    </div>
+    <div class="field">
+      <label>Location</label>
+      <input type="text" id="job-${n}-location" placeholder="Brisbane, AU">
+    </div>
+    <div class="field">
+      <label>Bullet points (one per line)</label>
+      <textarea id="job-${n}-bullets" rows="5" placeholder="Built Power BI dashboards consuming Business Central data, delivering real-time visibility across two markets.
+Mapped cross-department workflows, identifying bottlenecks and reducing manual adjustments."></textarea>
+    </div>`;
+  document.getElementById('jobs-container').appendChild(div);
+}
+
+function addEdu() {
+  eduCount++;
+  const n = eduCount;
+  const div = document.createElement('div');
+  div.className = 'job-block'; div.id = `edu-${n}`;
+  div.innerHTML = `
+    <div class="job-block-head">
+      <div class="job-block-title">Qualification ${n}</div>
+      ${n > 1 ? `<button class="btn-remove" onclick="removeBlock('edu-${n}')">Remove</button>` : ''}
+    </div>
+    <div class="field">
+      <label>Degree / Qualification</label>
+      <input type="text" id="edu-${n}-degree" placeholder="Master of Information Technology — Data Analytics">
+    </div>
+    <div class="field-row">
+      <div><label>Institution</label><input type="text" id="edu-${n}-institution" placeholder="Kaplan Business School"></div>
+      <div><label>Location</label><input type="text" id="edu-${n}-location" placeholder="Brisbane, Australia"></div>
+    </div>
+    <div class="field-row">
+      <div><label>Start Year</label><input type="text" id="edu-${n}-start" placeholder="2024"></div>
+      <div><label>End Year</label><input type="text" id="edu-${n}-end" placeholder="2026 (expected)"></div>
+    </div>
+    <div class="field">
+      <label>Key focus areas</label>
+      <input type="text" id="edu-${n}-focus" placeholder="Machine learning, data analytics, AI ethics, information systems">
+    </div>`;
+  document.getElementById('edu-container').appendChild(div);
+}
+
+function removeBlock(id) {
+  const el = document.getElementById(id);
+  if (el) el.remove();
+}
+
+// ── Collect all data ───────────────────────────────────────────────────────
+function collectData() {
+  // Jobs
+  const jobs = [];
+  document.querySelectorAll('#jobs-container .job-block').forEach(block => {
+    const n = block.id.split('-')[1];
+    const title = document.getElementById(`job-${n}-title`)?.value.trim();
+    if (!title) return;
+    jobs.push({
+      title,
+      company:   document.getElementById(`job-${n}-company`)?.value.trim(),
+      start:     document.getElementById(`job-${n}-start`)?.value.trim(),
+      end:       document.getElementById(`job-${n}-end`)?.value.trim(),
+      location:  document.getElementById(`job-${n}-location`)?.value.trim(),
+      bullets:   document.getElementById(`job-${n}-bullets`)?.value.trim().split('\n').filter(Boolean),
+    });
+  });
+
+  // Education
+  const education = [];
+  document.querySelectorAll('#edu-container .job-block').forEach(block => {
+    const n = block.id.split('-')[1];
+    const degree = document.getElementById(`edu-${n}-degree`)?.value.trim();
+    if (!degree) return;
+    education.push({
+      degree,
+      institution: document.getElementById(`edu-${n}-institution`)?.value.trim(),
+      location:    document.getElementById(`edu-${n}-location`)?.value.trim(),
+      start:       document.getElementById(`edu-${n}-start`)?.value.trim(),
+      end:         document.getElementById(`edu-${n}-end`)?.value.trim(),
+      focus:       document.getElementById(`edu-${n}-focus`)?.value.trim(),
+    });
+  });
+
+  return {
+    personal: {
+      first_name:   document.getElementById('s1-fname').value.trim(),
+      last_name:    document.getElementById('s1-lname').value.trim(),
+      email:        document.getElementById('s1-email').value.trim(),
+      phone:        document.getElementById('s1-phone').value.trim(),
+      location:     document.getElementById('s1-location').value.trim(),
+      linkedin:     document.getElementById('s1-linkedin').value.trim(),
+      tagline:      document.getElementById('s1-tagline').value.trim(),
+      availability: getChips('s1-availability'),
+    },
+    targets: {
+      categories:   getChips('s3-categories'),
+      seniority:    getChips('s3-seniority'),
+      industries:   getChips('s3-industries'),
+      summary:      document.getElementById('s3-summary').value.trim(),
+      recommended_roles: recommendations,
+    },
+    experience: jobs,
+    education,
+    skills: {
+      technical:     document.getElementById('s6-technical').value.trim(),
+      tools:         document.getElementById('s6-tools').value.trim(),
+      languages:     document.getElementById('s6-languages').value.trim(),
+      certifications: document.getElementById('s6-certs').value.trim(),
+      differentiator: document.getElementById('s6-differentiator').value.trim(),
+    },
+    groq_api_key: apiKey || document.getElementById('s2-apikey').value.trim(),
+    setup_complete: true,
+    setup_date: new Date().toISOString(),
+  };
+}
+
+// ── Review ─────────────────────────────────────────────────────────────────
+function buildReview() {
+  const d = collectData();
+  const p = d.personal;
+  const html = `
+    <div class="review-section">
+      <div class="review-label">Personal</div>
+      <div class="review-row"><span class="review-key">Name</span>${p.first_name} ${p.last_name}</div>
+      <div class="review-row"><span class="review-key">Contact</span>${p.email} · ${p.phone}</div>
+      <div class="review-row"><span class="review-key">Location</span>${p.location}</div>
+      <div class="review-row"><span class="review-key">Tagline</span>${p.tagline || '—'}</div>
+      <div class="review-row"><span class="review-key">Availability</span>${p.availability.join(', ')}</div>
+    </div>
+    <div class="review-section">
+      <div class="review-label">Target Roles</div>
+      <div class="review-row"><span class="review-key">Categories</span>${d.targets.categories.join(', ')}</div>
+      <div class="review-row"><span class="review-key">Seniority</span>${d.targets.seniority.join(', ')}</div>
+      <div class="review-row"><span class="review-key">Industries</span>${d.targets.industries.join(', ')}</div>
+    </div>
+    <div class="review-section">
+      <div class="review-label">Experience (${d.experience.length} roles)</div>
+      ${d.experience.map(j => `<div class="review-row"><span class="review-key">${j.start}–${j.end}</span>${j.title} @ ${j.company}</div>`).join('')}
+    </div>
+    <div class="review-section">
+      <div class="review-label">Education (${d.education.length} entries)</div>
+      ${d.education.map(e => `<div class="review-row"><span class="review-key">${e.start}–${e.end}</span>${e.degree}</div>`).join('')}
+    </div>
+    <div class="review-section">
+      <div class="review-label">API Key</div>
+      <div class="review-row"><span class="review-key">Groq</span>${(d.groq_api_key||'').slice(0,12)}•••</div>
+    </div>`;
+  document.getElementById('review-content').innerHTML = html;
+}
+
+// ── CV Upload & Prefill ────────────────────────────────────────────────────
+function handleCVDrop(e) {
+  e.preventDefault();
+  document.getElementById('upload-zone').style.borderColor = 'var(--border)';
+  const file = e.dataTransfer.files[0];
+  if (file) handleCVUpload(file);
+}
+
+async function handleCVUpload(file) {
+  if (!file || !file.name.endsWith('.docx')) {
+    setUploadStatus('error', 'Please select a .docx file.');
+    return;
+  }
+
+  setUploadStatus('loading', `Reading ${file.name}…`);
+
+  const formData = new FormData();
+  formData.append('resume', file);
+
+  // Pass API key in header so server can use it before config is saved
+  const keyEl = document.getElementById('s2-apikey');
+  const key = keyEl?.value?.trim() || '';
+
+  try {
+    const res = await fetch('/api/parse-resume', {
+      method: 'POST',
+      headers: key ? { 'x-setup-key': key } : {},
+      body: formData,
+    });
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.error || 'Parse failed');
+    prefillFromProfile(data.profile);
+    setUploadStatus('success', `✓ CV imported — review each step before saving.`);
+  } catch (err) {
+    setUploadStatus('error', `Import failed: ${err.message}`);
+  }
+}
+
+function setUploadStatus(type, msg) {
+  const el = document.getElementById('upload-status');
+  el.style.display = 'block';
+  el.style.color = type === 'error' ? 'var(--red)' : type === 'success' ? 'var(--green)' : 'var(--muted)';
+  el.textContent = msg;
+}
+
+function prefillFromProfile(p) {
+  if (!p) return;
+
+  // ── Step 1: Personal ──────────────────────────────────────────────────
+  const personal = p.personal || {};
+  setVal('s1-fname',     personal.first_name);
+  setVal('s1-lname',     personal.last_name);
+  setVal('s1-email',     personal.email);
+  setVal('s1-phone',     personal.phone);
+  setVal('s1-location',  personal.location);
+  setVal('s1-linkedin',  personal.linkedin);
+  setVal('s1-tagline',   personal.tagline);
+
+  // ── Step 3: Summary ───────────────────────────────────────────────────
+  setVal('s3-summary', p.summary);
+
+  // ── Step 4: Experience ────────────────────────────────────────────────
+  const jobs = p.experience || [];
+  if (jobs.length > 0) {
+    // Clear existing default blocks
+    document.getElementById('jobs-container').innerHTML = '';
+    jobCount = 0;
+
+    jobs.forEach(job => {
+      addJob();
+      const n = jobCount;
+      setVal(`job-${n}-title`,    job.title);
+      setVal(`job-${n}-company`,  job.company);
+      setVal(`job-${n}-start`,    job.start);
+      setVal(`job-${n}-end`,      job.end);
+      setVal(`job-${n}-location`, job.location);
+      const bullets = Array.isArray(job.bullets) ? job.bullets.join('\n') : (job.bullets || '');
+      setVal(`job-${n}-bullets`,  bullets);
+    });
+  }
+
+  // ── Step 5: Education ─────────────────────────────────────────────────
+  const edus = p.education || [];
+  if (edus.length > 0) {
+    document.getElementById('edu-container').innerHTML = '';
+    eduCount = 0;
+
+    edus.forEach(edu => {
+      addEdu();
+      const n = eduCount;
+      setVal(`edu-${n}-degree`,      edu.degree);
+      setVal(`edu-${n}-institution`, edu.institution);
+      setVal(`edu-${n}-location`,    edu.location);
+      setVal(`edu-${n}-start`,       edu.start);
+      setVal(`edu-${n}-end`,         edu.end);
+      setVal(`edu-${n}-focus`,       edu.focus);
+    });
+  }
+
+  // ── Step 6: Skills ────────────────────────────────────────────────────
+  const skills = p.skills || {};
+  setVal('s6-technical', skills.technical);
+  setVal('s6-tools',     skills.tools);
+  setVal('s6-languages', skills.languages);
+  setVal('s6-certs',     skills.certifications);
+  // differentiator is not in the parsed schema — leave it for the user
+}
+
+function setVal(id, val) {
+  if (!val && val !== 0) return;
+  const el = document.getElementById(id);
+  if (el) el.value = val;
+}
+
+// ── Save config ────────────────────────────────────────────────────────────
+async function saveConfig() {
+  const btn = document.getElementById('save-btn');
+  btn.textContent = 'Saving...'; btn.disabled = true;
+
+  const data = collectData();
+
+  try {
+    const res = await fetch('/api/save-config', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    if (!res.ok) throw new Error('Save failed');
+
+    // Hide wizard, show complete
+    document.getElementById('progress-track').style.display = 'none';
+    document.getElementById(`step${currentStep}`).classList.remove('active');
+    document.getElementById('complete').classList.add('show');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  } catch(err) {
+    alert('Could not save: ' + err.message);
+    btn.textContent = 'Save & Launch →'; btn.disabled = false;
+  }
+}
+</script>
+
+<!-- ── Attribution footer ───────────────────────── -->
+<footer style="text-align:center;padding:28px 20px;border-top:1px solid var(--border);font-size:11px;color:var(--muted);font-family:var(--mono);line-height:1.9;position:relative;z-index:1;">
+  <strong style="color:var(--text);">Career Ops</strong> &nbsp;&middot;&nbsp; Built by <strong style="color:var(--text);">Johan Lopez</strong> &nbsp;&middot;&nbsp; Australia &nbsp;&middot;&nbsp; v1.0
+  &nbsp;&middot;&nbsp; <a href="/about.html" style="color:var(--teal);text-decoration:none;">About &amp; Disclaimer</a>
+</footer>
+</body>
+</html>

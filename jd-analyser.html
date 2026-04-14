@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JD Analyser — Career Ops</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy:   #0D1F35;
+    --teal:   #0E9B8A;
+    --teal2:  #07C5B0;
+    --amber:  #F5A623;
+    --red:    #E8504A;
+    --green:  #2ECC8F;
+    --bg:     #07111E;
+    --surface:#0F1E30;
+    --card:   #142030;
+    --border: #1E3248;
+    --muted:  #4A6580;
+    --text:   #C8DDF0;
+    --bright: #EAF4FF;
+    --mono:   'DM Mono', monospace;
+    --sans:   'Syne', sans-serif;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--mono);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Grid background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(14,155,138,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(14,155,138,0.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wrap {
+    position: relative;
+    z-index: 1;
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 48px 24px 80px;
+  }
+
+  /* Header */
+  header {
+    margin-bottom: 48px;
+  }
+  .tag {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    color: var(--teal);
+    border: 1px solid var(--teal);
+    padding: 3px 10px;
+    border-radius: 2px;
+    margin-bottom: 16px;
+    text-transform: uppercase;
+  }
+  h1 {
+    font-family: var(--sans);
+    font-size: clamp(28px, 5vw, 42px);
+    font-weight: 800;
+    color: var(--bright);
+    line-height: 1.1;
+    margin-bottom: 12px;
+  }
+  h1 span { color: var(--teal); }
+  .subtitle {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.6;
+    max-width: 540px;
+  }
+
+  /* Input panel */
+  .panel {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .panel-label {
+    font-family: var(--sans);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--teal);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .panel-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  textarea {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 1.7;
+    padding: 16px;
+    resize: vertical;
+    min-height: 200px;
+    transition: border-color 0.2s;
+    outline: none;
+  }
+  textarea:focus { border-color: var(--teal); }
+  textarea::placeholder { color: var(--muted); }
+
+  .target-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 14px;
+    flex-wrap: wrap;
+  }
+  .target-btn {
+    font-family: var(--mono);
+    font-size: 11px;
+    padding: 6px 14px;
+    border-radius: 3px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.15s;
+    letter-spacing: 0.06em;
+  }
+  .target-btn:hover { border-color: var(--teal); color: var(--teal); }
+  .target-btn.active {
+    background: var(--teal);
+    border-color: var(--teal);
+    color: var(--navy);
+    font-weight: 500;
+  }
+
+  /* Run button */
+  .run-btn {
+    width: 100%;
+    padding: 16px;
+    background: var(--teal);
+    color: var(--navy);
+    font-family: var(--sans);
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+    margin-top: 4px;
+    position: relative;
+    overflow: hidden;
+  }
+  .run-btn:hover:not(:disabled) {
+    background: var(--teal2);
+    transform: translateY(-1px);
+  }
+  .run-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  /* Loading */
+  .loading {
+    display: none;
+    text-align: center;
+    padding: 48px 0;
+    color: var(--muted);
+    font-size: 13px;
+  }
+  .loading.show { display: block; }
+  .spinner {
+    width: 32px;
+    height: 32px;
+    border: 2px solid var(--border);
+    border-top-color: var(--teal);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 16px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-steps { display: flex; flex-direction: column; gap: 6px; align-items: center; margin-top: 12px; }
+  .step { font-size: 11px; opacity: 0; transition: opacity 0.4s; }
+  .step.visible { opacity: 1; }
+
+  /* Results */
+  #results { display: none; }
+  #results.show { display: block; }
+
+  /* Score bar */
+  .score-block {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 28px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 28px;
+  }
+  .score-circle {
+    flex-shrink: 0;
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--sans);
+    font-weight: 800;
+    font-size: 28px;
+    border: 3px solid;
+  }
+  .score-label { font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; margin-top: 2px; }
+  .score-A { color: var(--green); border-color: var(--green); background: rgba(46,204,143,0.08); }
+  .score-B { color: #6BE08A; border-color: #6BE08A; background: rgba(107,224,138,0.08); }
+  .score-C { color: var(--amber); border-color: var(--amber); background: rgba(245,166,35,0.08); }
+  .score-D { color: #F07B3F; border-color: #F07B3F; background: rgba(240,123,63,0.08); }
+  .score-F { color: var(--red); border-color: var(--red); background: rgba(232,80,74,0.08); }
+
+  .score-meta { flex: 1; }
+  .score-title { font-family: var(--sans); font-size: 18px; font-weight: 700; color: var(--bright); margin-bottom: 6px; }
+  .score-desc { font-size: 12px; color: var(--muted); line-height: 1.6; }
+
+  /* Section cards */
+  .result-section {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 24px;
+    margin-bottom: 16px;
+    animation: fadeUp 0.4s ease both;
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .section-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .section-icon { font-size: 16px; }
+  .section-title {
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--bright);
+  }
+
+  /* Keyword chips */
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip {
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 3px;
+    font-family: var(--mono);
+    letter-spacing: 0.04em;
+  }
+  .chip-match  { background: rgba(46,204,143,0.12);  color: var(--green);  border: 1px solid rgba(46,204,143,0.3); }
+  .chip-gap    { background: rgba(232,80,74,0.12);   color: var(--red);    border: 1px solid rgba(232,80,74,0.3); }
+  .chip-neutral{ background: rgba(74,101,128,0.2);   color: var(--muted);  border: 1px solid var(--border); }
+  .chip-industry{ background: rgba(245,166,35,0.12); color: var(--amber);  border: 1px solid rgba(245,166,35,0.3); }
+
+  /* Text content */
+  .result-text { font-size: 13px; line-height: 1.8; color: var(--text); }
+  .result-text p { margin-bottom: 10px; }
+  .result-text p:last-child { margin-bottom: 0; }
+
+  /* Bullets */
+  .result-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+  .result-list li {
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.6;
+    padding-left: 20px;
+    position: relative;
+  }
+  .result-list li::before {
+    content: '▸';
+    position: absolute;
+    left: 0;
+    color: var(--teal);
+    font-size: 11px;
+    top: 2px;
+  }
+  .result-list li strong { color: var(--bright); font-weight: 500; }
+
+  /* Divider */
+  .divider { height: 1px; background: var(--border); margin: 8px 0 16px; }
+
+  /* Action row */
+  .action-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 24px;
+    flex-wrap: wrap;
+  }
+  .action-btn {
+    font-family: var(--mono);
+    font-size: 12px;
+    padding: 10px 20px;
+    border-radius: 4px;
+    border: 1px solid var(--teal);
+    background: transparent;
+    color: var(--teal);
+    cursor: pointer;
+    transition: all 0.15s;
+    letter-spacing: 0.06em;
+  }
+  .action-btn:hover { background: var(--teal); color: var(--navy); }
+  .action-btn.secondary { border-color: var(--border); color: var(--muted); }
+  .action-btn.secondary:hover { border-color: var(--muted); color: var(--text); background: transparent; }
+
+  /* Error */
+  .error-box {
+    background: rgba(232,80,74,0.08);
+    border: 1px solid rgba(232,80,74,0.3);
+    border-radius: 6px;
+    padding: 16px;
+    font-size: 13px;
+    color: var(--red);
+    display: none;
+    margin-bottom: 16px;
+  }
+  .error-box.show { display: block; }
+
+  /* Responsive */
+  @media(max-width: 600px) {
+    .score-block { flex-direction: column; text-align: center; }
+    .wrap { padding: 32px 16px 60px; }
+  }
+
+  /* ── Global nav ──────────────────────────────────────────────────── */
+  .topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 28px; border-bottom: 1px solid var(--border);
+    background: rgba(7,17,30,0.92); backdrop-filter: blur(10px);
+    position: sticky; top: 0; z-index: 100;
+  }
+  .topbar-left  { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+  .topbar-right { display: flex; align-items: center; gap: 8px; }
+  .logo { font-family: var(--sans); font-size: 15px; font-weight: 800; color: var(--bright); letter-spacing: -0.02em; text-decoration: none; }
+  .logo span { color: var(--teal); }
+  .tool-tag {
+    font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--teal); border: 1px solid var(--teal);
+    padding: 2px 8px; border-radius: 2px; font-family: var(--mono);
+  }
+  .nav-links { display: flex; gap: 4px; flex-wrap: wrap; }
+  .nav-link {
+    font-size: 11px; font-family: var(--mono); color: var(--muted);
+    text-decoration: none; padding: 5px 11px;
+    border: 1px solid var(--border); border-radius: 3px;
+    transition: color 0.15s, border-color 0.15s; white-space: nowrap;
+  }
+  .nav-link:hover { color: var(--teal); border-color: var(--teal); }
+  .nav-link.active { color: var(--teal); border-color: var(--teal); background: rgba(14,155,138,0.08); }
+
+</style>
+</head>
+<body>
+<div class="topbar">
+    <div class="topbar-left">
+      <a href="/pipeline.html" class="logo">Career<span>Ops</span></a>
+      <span class="tool-tag">jd-analyser</span>
+      <nav class="nav-links">
+        <a class="nav-link active" href="/jd-analyser.html">JD Analyser</a>
+        <a class="nav-link" href="/cv-tailor.html">CV Tailor</a>
+        <a class="nav-link" href="/search-kit.html">Search Kit</a>
+        <a class="nav-link" href="/compass.html">Compass</a>
+        <a class="nav-link" href="/pipeline.html">Pipeline</a>
+      </nav>
+    </div>
+  </div>
+
+<div class="wrap">
+
+  <header>
+    <div class="tag">career-ops / jd-analyser</div>
+    <h1>Know Before<br>You <span>Apply</span></h1>
+    <p class="subtitle">Paste any job description. Get a fit score, keyword gaps, industry terminology to inject into your CV, and exactly what to emphasise — before you write a word.</p>
+  </header>
+
+  <div class="panel">
+    <div class="panel-label">Job Description</div>
+    <textarea id="jd-input" placeholder="Paste the full job description here — title, requirements, responsibilities, everything..."></textarea>
+
+    <div style="margin-top:16px;">
+      <div class="panel-label">Target Role Type</div>
+      <div class="target-row" id="role-toggle-row">
+        <!-- Populated from config on load -->
+      </div>
+    </div>
+  </div>
+
+  <button class="run-btn" id="run-btn" onclick="runAnalysis()">
+    Analyse Job Description
+  </button>
+
+  <div class="error-box" id="error-box"></div>
+
+  <div class="loading" id="loading">
+    <div class="spinner"></div>
+    <div style="font-family: var(--sans); font-size:14px; color: var(--teal); font-weight:600;">Analysing JD...</div>
+    <div class="loading-steps">
+      <div class="step" id="s1">Extracting requirements & keywords</div>
+      <div class="step" id="s2">Mapping to your profile</div>
+      <div class="step" id="s3">Identifying industry terminology gaps</div>
+      <div class="step" id="s4">Generating tailoring recommendations</div>
+    </div>
+  </div>
+
+  <div id="results"></div>
+
+</div>
+
+<script>
+
+// ── Load profile from server config ───────────────────────────────────────
+let CFG = null;
+
+async function loadConfig() {
+  if (CFG) return CFG;
+  try {
+    const res = await fetch('/api/config');
+    CFG = await res.json();
+  } catch { CFG = {}; }
+  return CFG;
+}
+
+function buildMasterCV(cfg) {
+  const p = cfg.personal || {};
+  const fullName = `${p.first_name || ''} ${p.last_name || ''}`.trim();
+  const availability = (p.availability || []).map(a => a.replace(/_/g, ' ')).join(', ');
+  const edu = (cfg.education || []).map(e =>
+    `- ${e.degree} | ${e.institution}, ${e.location} | ${e.start} – ${e.end}` +
+    (e.focus ? `\n  Key focus: ${e.focus}` : '')
+  ).join('\n');
+  const exp = (cfg.experience || []).map(e => {
+    const bullets = (e.bullets || []).map(b => `- ${b}`).join('\n');
+    return `${e.title} | ${e.company} | ${e.location} | ${e.start} – ${e.end}\n${bullets}`;
+  }).join('\n\n');
+  const s = cfg.skills || {};
+  return [
+    `CANDIDATE: ${fullName}`,
+    `CONTACT: ${p.location} | ${p.phone} | ${p.email}${p.linkedin ? ' | ' + p.linkedin : ''}`,
+    availability ? `Availability: ${availability}` : '',
+    '', 'SUMMARY:', cfg.targets?.summary || '',
+    '', 'EDUCATION:', edu,
+    '', 'EXPERIENCE:', exp,
+    '', 'SKILLS:',
+    `Technical: ${s.technical || ''}`,
+    `Tools: ${s.tools || ''}`,
+    `Languages: ${s.languages || ''}`,
+    `Certifications: ${s.certifications || ''}`,
+    '', 'KEY DIFFERENTIATOR:', s.differentiator || '',
+  ].filter(l => l !== null).join('\n').trim();
+}
+
+function buildProfileString(cfg) {
+  const p = cfg.personal || {};
+  const fullName = `${p.first_name || ''} ${p.last_name || ''}`.trim();
+  const t = cfg.targets || {};
+  const s = cfg.skills || {};
+  const exp = (cfg.experience || []).map(e => `${e.title} at ${e.company} (${e.start}–${e.end})`).join('; ');
+  const edu = (cfg.education || []).map(e => `${e.degree} from ${e.institution} (${e.start}–${e.end})`).join('; ');
+  return [
+    `CANDIDATE: ${fullName}`,
+    `Location: ${p.location}. ${(p.availability||[]).map(a=>a.replace(/_/g,' ')).join(', ')}.`,
+    `Target roles: ${(t.categories||[]).join(', ')} — ${(t.seniority||[]).join('/')} level`,
+    `Industries: ${(t.industries||[]).join(', ')}`,
+    `Summary: ${t.summary || ''}`,
+    `Experience: ${exp}`,
+    `Education: ${edu}`,
+    `Technical skills: ${s.technical || ''}`,
+    `Key differentiator: ${s.differentiator || ''}`,
+  ].join('\n').trim();
+}
+
+
+let selectedRole = '';
+
+
+function showStep(n) {
+  const el = document.getElementById('s' + n);
+  if (el) el.classList.add('visible');
+}
+
+function getScoreClass(score) {
+  if (!score) return 'score-C';
+  const s = score.toString().toUpperCase();
+  if (s.startsWith('A')) return 'score-A';
+  if (s.startsWith('B')) return 'score-B';
+  if (s.startsWith('C')) return 'score-C';
+  if (s.startsWith('D')) return 'score-D';
+  return 'score-F';
+}
+
+function renderChips(items, type) {
+  if (!items || !items.length) return '<span style="color:var(--muted);font-size:12px">None identified</span>';
+  return items.map(k => `<span class="chip chip-${type}">${k}</span>`).join('');
+}
+
+function renderList(items) {
+  if (!items || !items.length) return '';
+  return '<ul class="result-list">' + items.map(i => {
+    const parts = i.split(':');
+    if (parts.length > 1) {
+      return `<li><strong>${parts[0]}:</strong>${parts.slice(1).join(':')}</li>`;
+    }
+    return `<li>${i}</li>`;
+  }).join('') + '</ul>';
+}
+
+function renderResults(data) {
+  const scoreClass = getScoreClass(data.fit_score);
+  const scoreVal = data.fit_score || 'C';
+
+  let html = `
+    <div class="score-block" style="animation: fadeUp 0.3s ease both;">
+      <div class="score-circle ${scoreClass}">
+        ${scoreVal}
+        <span class="score-label">Fit</span>
+      </div>
+      <div class="score-meta">
+        <div class="score-title">${data.role_summary || 'Role Analysis'}</div>
+        <div class="score-desc">${data.fit_rationale || ''}</div>
+      </div>
+    </div>
+  `;
+
+  // Keywords: matches
+  if (data.keyword_matches?.length || data.keyword_gaps?.length) {
+    html += `<div class="result-section" style="animation-delay:0.05s">
+      <div class="section-head"><span class="section-icon">🔍</span><span class="section-title">Keyword Analysis</span></div>
+      ${data.keyword_matches?.length ? `<div style="margin-bottom:14px"><div style="font-size:11px;color:var(--teal);margin-bottom:8px;letter-spacing:0.08em;">✓ ALREADY IN YOUR CV</div><div class="chips">${renderChips(data.keyword_matches, 'match')}</div></div>` : ''}
+      ${data.keyword_gaps?.length ? `<div><div style="font-size:11px;color:var(--red);margin-bottom:8px;letter-spacing:0.08em;">✗ GAPS — ADD THESE</div><div class="chips">${renderChips(data.keyword_gaps, 'gap')}</div></div>` : ''}
+    </div>`;
+  }
+
+  // Industry terminology — dynamic label based on selected role/industry
+  if (data.industry_terms?.length) {
+    const { icon: termIcon, label: termLabel } = getTermLabel();
+    html += `<div class="result-section" style="animation-delay:0.1s">
+      <div class="section-head"><span class="section-icon">${termIcon}</span><span class="section-title">${termLabel}</span></div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:12px;">These industry-specific terms appear in the JD. Use them verbatim in your CV and cover letter.</div>
+      <div class="chips">${renderChips(data.industry_terms, 'industry')}</div>
+    </div>`;
+  }
+
+  // What to emphasise
+  if (data.emphasise?.length) {
+    html += `<div class="result-section" style="animation-delay:0.15s">
+      <div class="section-head"><span class="section-icon">🎯</span><span class="section-title">What to Emphasise</span></div>
+      ${renderList(data.emphasise)}
+    </div>`;
+  }
+
+  // Gaps & how to address
+  if (data.gap_strategy?.length) {
+    html += `<div class="result-section" style="animation-delay:0.2s">
+      <div class="section-head"><span class="section-icon">⚠️</span><span class="section-title">Gaps & How to Address Them</span></div>
+      ${renderList(data.gap_strategy)}
+    </div>`;
+  }
+
+  // Cover letter angle
+  if (data.cover_letter_angle) {
+    html += `<div class="result-section" style="animation-delay:0.25s">
+      <div class="section-head"><span class="section-icon">✉️</span><span class="section-title">Cover Letter Angle</span></div>
+      <div class="result-text"><p>${data.cover_letter_angle}</p></div>
+    </div>`;
+  }
+
+  // Red flags
+  if (data.red_flags?.length) {
+    html += `<div class="result-section" style="animation-delay:0.3s; border-color: rgba(232,80,74,0.3);">
+      <div class="section-head"><span class="section-icon">🚩</span><span class="section-title">Red Flags</span></div>
+      ${renderList(data.red_flags)}
+    </div>`;
+  }
+
+  // Action row
+  html += `<div class="action-row">
+    <button class="action-btn" onclick="copyTailoring()">Copy Tailoring Notes</button>
+    <button class="action-btn" onclick="openInCVTailor()" style="background:var(--teal);color:var(--navy);border-color:var(--teal);">→ Tailor my CV</button>
+    <button class="action-btn secondary" onclick="resetForm()">Analyse Another JD</button>
+  </div>`;
+
+  return html;
+}
+
+window._lastData = null;
+
+function copyTailoring() {
+  if (!window._lastData) return;
+  const d = window._lastData;
+  let text = `JD ANALYSIS — ${d.role_summary || 'Role'}\n`;
+  text += `Fit Score: ${d.fit_score}\n\n`;
+  if (d.keyword_gaps?.length) text += `KEYWORDS TO ADD:\n${d.keyword_gaps.join(', ')}\n\n`;
+  if (d.industry_terms?.length) text += `${getTermLabel().label.toUpperCase()}:\n${d.industry_terms.join(', ')}\n\n`;
+  if (d.emphasise?.length) text += `EMPHASISE:\n${d.emphasise.map(i=>'- '+i).join('\n')}\n\n`;
+  if (d.gap_strategy?.length) text += `GAPS & STRATEGY:\n${d.gap_strategy.map(i=>'- '+i).join('\n')}\n\n`;
+  if (d.cover_letter_angle) text += `COVER LETTER ANGLE:\n${d.cover_letter_angle}\n`;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.querySelector('.action-btn');
+    const orig = btn.textContent;
+    btn.textContent = '✓ Copied!';
+    setTimeout(() => btn.textContent = orig, 2000);
+  });
+}
+
+function resetForm() {
+  document.getElementById('results').style.display = 'none';
+  document.getElementById('results').classList.remove('show');
+  document.getElementById('jd-input').value = '';
+  document.getElementById('jd-input').focus();
+  window._lastData = null;
+}
+
+function openInCVTailor() {
+  const jd = document.getElementById('jd-input').value.trim();
+  const d  = window._lastData;
+  if (!jd || !d) return;
+  // Extract company name hint from role_summary (best effort)
+  const summary = d.role_summary || '';
+  // Pass JD via sessionStorage (URL params can't hold full JD text safely)
+  sessionStorage.setItem('jda_jd',        jd);
+  sessionStorage.setItem('jda_role',       selectedRole);
+  sessionStorage.setItem('jda_summary',    summary);
+  sessionStorage.setItem('jda_fit_score',  d.fit_score  || '');
+  sessionStorage.setItem('jda_fit_rationale', d.fit_rationale || '');
+  window.open('/cv-tailor.html?from=jda', '_blank');
+}
+
+
+function getCoachFraming() {
+  const r = selectedRole;
+  const petroRoles = ['petroleum_engineering','chemical_engineering','environmental_engineering'];
+  const dataRoles  = ['data_analytics','data_science','business_intelligence','operations_analytics','ai_ml'];
+  const engRoles   = ['civil_engineering','mechanical_engineering','electrical_engineering','software_engineering'];
+  const finRoles   = ['accounting_finance','banking','fintech'];
+  const healthRoles= ['healthcare'];
+  const legalRoles = ['legal'];
+  if (petroRoles.includes(r)) return 'You are a specialist career coach for oil & gas, energy, and resources sector roles.';
+  if (dataRoles.includes(r))  return 'You are a specialist career coach for data analytics, data science, and technology roles.';
+  if (engRoles.includes(r))   return 'You are a specialist career coach for engineering and technical roles.';
+  if (finRoles.includes(r))   return 'You are a specialist career coach for finance, accounting, and banking roles.';
+  if (healthRoles.includes(r))return 'You are a specialist career coach for healthcare and allied health roles.';
+  if (legalRoles.includes(r)) return 'You are a specialist career coach for legal and compliance roles.';
+  return 'You are an expert career coach specialising in professional job applications across all industries.';
+}
+
+function getTermLabel() {
+  const r = selectedRole;
+  const ind = (CFG?.targets?.industries || []);
+  // Determine dominant industry context from role + industries
+  const isPetro  = r === 'petroleum_engineering' || ind.some(i => ['oil_gas','mining','energy'].includes(i));
+  const isData   = ['data_analytics','data_science','business_intelligence','operations_analytics','ai_ml'].includes(r);
+  const isFin    = ['accounting_finance','banking'].includes(r) || ind.some(i => ['fintech','banking'].includes(i));
+  const isHealth = r === 'healthcare' || ind.includes('healthcare');
+  const isLegal  = r === 'legal';
+  const isEng    = ['civil_engineering','mechanical_engineering','electrical_engineering','chemical_engineering'].includes(r);
+  const isTech   = r === 'software_engineering' || ind.includes('tech');
+
+  if (isPetro)  return { icon:'⛽', label:'Energy & Resources Terminology to Inject', promptLabel:'O&G / energy sector specific terminology from JD to use verbatim — max 8' };
+  if (isData)   return { icon:'📊', label:'Data & Tech Terminology to Inject',        promptLabel:'Data, analytics, and technology specific terminology from JD to use verbatim — max 8' };
+  if (isFin)    return { icon:'💰', label:'Finance Terminology to Inject',             promptLabel:'Finance, accounting, and banking specific terminology from JD to use verbatim — max 8' };
+  if (isHealth) return { icon:'🏥', label:'Healthcare Terminology to Inject',          promptLabel:'Healthcare and clinical specific terminology from JD to use verbatim — max 8' };
+  if (isLegal)  return { icon:'⚖',  label:'Legal Terminology to Inject',              promptLabel:'Legal and compliance specific terminology from JD to use verbatim — max 8' };
+  if (isEng)    return { icon:'🔧', label:'Engineering Terminology to Inject',         promptLabel:'Engineering and technical specific terminology from JD to use verbatim — max 8' };
+  if (isTech)   return { icon:'💻', label:'Tech Terminology to Inject',               promptLabel:'Software and technology specific terminology from JD to use verbatim — max 8' };
+  return         { icon:'🏷',  label:'Industry Terminology to Inject',                 promptLabel:'Industry-specific terminology and domain keywords from the JD to use verbatim — max 8' };
+}
+
+// ── Build role buttons from config ────────────────────────────────────────
+function buildTargetButtons(cfg) {
+  const container = document.getElementById('role-toggle-row');
+  if (!container || container.children.length > 0) return;
+
+  const cats = cfg?.targets?.categories || [];
+  const catLabels = {
+    petroleum_engineering:'⛽ Petroleum Engineering', data_analytics:'📊 Data Analytics',
+    data_science:'🤖 Data Science', business_intelligence:'📈 Business Intelligence',
+    operations_analytics:'⚙ Operations & Analytics', ai_ml:'🧠 AI / ML',
+    software_engineering:'💻 Software Engineering', civil_engineering:'🏗 Civil Engineering',
+    mechanical_engineering:'🔧 Mechanical Engineering', electrical_engineering:'⚡ Electrical Engineering',
+    chemical_engineering:'🧪 Chemical Engineering', accounting_finance:'💰 Finance',
+    consulting:'🎯 Consulting', project_management:'📋 Project Mgmt',
+    hr_people:'👥 HR', marketing:'📣 Marketing', sales:'🤝 Sales',
+    supply_chain:'📦 Supply Chain', healthcare:'🏥 Healthcare',
+    education:'🎓 Education', operations_management:'⚙ Operations', other:'✦ Other',
+  };
+
+  const options = cats.length
+    ? cats.map(v => ({ val: v, label: catLabels[v] || v.replace(/_/g,' ') }))
+    : [{ val: 'professional', label: '💼 Professional Role' }];
+
+  options.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'target-btn' + (i === 0 ? ' active' : '');
+    btn.dataset.role = opt.val;
+    btn.textContent = opt.label;
+    btn.addEventListener('click', () => {
+      container.querySelectorAll('.target-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      selectedRole = opt.val;
+    });
+    container.appendChild(btn);
+  });
+
+  if (options.length && !selectedRole) selectedRole = options[0].val;
+}
+
+// ── Init on page load ──────────────────────────────────────────────────────
+(async () => {
+  await loadConfig();
+  buildTargetButtons(CFG);
+  checkConfigCompleteness(CFG);
+})();
+
+async function runAnalysis() {
+  await loadConfig();
+  buildTargetButtons(CFG);
+  const jd = document.getElementById('jd-input').value.trim();
+  if (!jd) {
+    showError('Please paste a job description first.');
+    return;
+  }
+  if (jd.length < 100) {
+    showError('That looks too short. Paste the full job description for a useful analysis.');
+    return;
+  }
+
+  hideError();
+  setLoading(true);
+
+  // Animate steps
+  const steps = [1,2,3,4];
+  steps.forEach((s,i) => setTimeout(() => showStep(s), i * 1200));
+
+  const seniority = (CFG?.targets?.seniority || ['junior']).join(' or ');
+  const industries = (CFG?.targets?.industries || []).slice(0,2).map(i=>i.replace(/_/g,' ')).join(', ') || 'any industry';
+  const roleContext = `${seniority} ${selectedRole.replace(/_/g,' ')} roles${industries ? ' in ' + industries : ''}`;
+
+  const industryTermsLabel = getTermLabel().promptLabel;
+
+  const prompt = `${getCoachFraming()} Analyse this job description against the candidate profile below and return a JSON object only — no markdown, no explanation, just raw JSON. Only reference experience, skills, and qualifications explicitly stated in the candidate profile — do not infer, invent, or embellish.
+
+CANDIDATE PROFILE:
+${buildMasterCV(CFG)}
+
+TARGET: ${roleContext}
+
+JOB DESCRIPTION:
+${jd}
+
+Return this exact JSON structure:
+{
+  "fit_score": "A/B/C/D/F grade",
+  "role_summary": "Job title and company type in ~8 words",
+  "fit_rationale": "2-sentence honest assessment of why this score. Be direct.",
+  "keyword_matches": ["skills/keywords already in candidate CV that match JD — max 10"],
+  "keyword_gaps": ["important keywords in JD missing from CV — max 10, be specific"],
+  "industry_terms": ["${industryTermsLabel}"],
+  "emphasise": ["What to highlight from CV for this specific role — 4-6 items, format: 'Area: specific instruction'"],
+  "gap_strategy": ["For each real gap, how to address it honestly — 3-4 items, format: 'Gap: strategy'"],
+  "cover_letter_angle": "The single strongest narrative angle for a cover letter. 2-3 sentences. Specific, not generic.",
+  "red_flags": ["Any genuine concerns about this role or application — 0-3 items, omit if none"]
+}
+
+Be honest and specific. Do not invent skills the candidate does not have. Flag real gaps. The candidate's unique value is their specific combination of qualifications and experience as described in the profile.`;
+
+  try {
+    const res = await fetch('/api/claude', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1500,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+
+    const raw = await res.json();
+    if (!res.ok) throw new Error(raw.error?.message || 'API error');
+
+
+    const text = raw.content.map(b => b.text || '').join('');
+    const cleaned = text.replace(/```json|```/g, '').trim();
+    const data = JSON.parse(cleaned);
+
+    window._lastData = data;
+    setLoading(false);
+    showTokenNote();
+
+    const resultsEl = document.getElementById('results');
+    resultsEl.innerHTML = renderResults(data);
+    resultsEl.style.display = 'block';
+    resultsEl.classList.add('show');
+    resultsEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+  } catch(err) {
+    setLoading(false);
+    showError('Analysis failed: ' + err.message + '. Check your API key is configured.');
+  }
+}
+
+function setLoading(on) {
+  document.getElementById('loading').classList.toggle('show', on);
+  document.getElementById('run-btn').disabled = on;
+  if (!on) {
+    document.querySelectorAll('.step').forEach(s => s.classList.remove('visible'));
+  }
+}
+
+function showError(msg) {
+  const el = document.getElementById('error-box');
+  el.textContent = msg;
+  el.classList.add('show');
+}
+function hideError() {
+  document.getElementById('error-box').classList.remove('show');
+}
+
+// ── Config completeness guard ─────────────────────────────────────────────
+function checkConfigCompleteness(cfg) {
+  if (!cfg || Object.keys(cfg).length === 0) {
+    showConfigWarning('No profile found. Please complete setup before using this tool.');
+    return false;
+  }
+  const issues = [];
+  const p = cfg.personal || {};
+  if (!p.first_name || !p.last_name) issues.push('personal details incomplete');
+  if (!cfg.experience || cfg.experience.length === 0) issues.push('no work experience entries');
+  if (!(cfg.skills?.technical) && !(cfg.skills?.differentiator)) issues.push('skills section empty');
+  if (!cfg.targets?.summary) issues.push('professional summary missing');
+  if (issues.length > 0) {
+    showConfigWarning(
+      'Profile incomplete (' + issues.join(' · ') + ') — AI outputs may be generic. ' +
+      '<a href="/setup.html" style="color:var(--teal);text-decoration:underline;">Complete setup \u2192</a>'
+    );
+    return false;
+  }
+  return true;
+}
+
+function showConfigWarning(msg) {
+  const existing = document.getElementById('config-warning');
+  if (existing) return;
+  const div = document.createElement('div');
+  div.id = 'config-warning';
+  div.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:rgba(245,166,35,0.12);border:1px solid rgba(245,166,35,0.4);border-radius:6px;padding:12px 20px;font-size:12px;color:var(--amber);font-family:var(--mono);z-index:9999;max-width:600px;text-align:center;box-shadow:0 4px 24px rgba(0,0,0,0.4);line-height:1.6;';
+  div.innerHTML = '\u26a0 ' + msg + ' <span onclick="this.parentElement.remove()" style="cursor:pointer;margin-left:14px;opacity:0.6;font-size:14px;">\u2715</span>';
+  document.body.appendChild(div);
+  setTimeout(() => div.remove(), 12000);
+}
+
+// ── Token budget note (shown once per session) ────────────────────────────
+function showTokenNote() {
+  if (sessionStorage.getItem('token_note_shown')) return;
+  sessionStorage.setItem('token_note_shown', '1');
+  const div = document.createElement('div');
+  div.style.cssText = 'position:fixed;bottom:20px;right:20px;background:rgba(14,155,138,0.1);border:1px solid rgba(14,155,138,0.25);border-radius:6px;padding:10px 16px;font-size:11px;color:var(--muted);font-family:var(--mono);z-index:9999;max-width:280px;line-height:1.6;';
+  div.innerHTML = '\ud83d\udca1 Groq free tier: ~100k tokens/day (~15\u201320 analyses). If you hit a rate limit, wait a few minutes. <span onclick="this.parentElement.remove()" style="cursor:pointer;margin-left:8px;opacity:0.5;">\u2715</span>';
+  document.body.appendChild(div);
+  setTimeout(() => div.remove(), 8000);
+}
+
+</script>
+
+<!-- ── Attribution footer ───────────────────────── -->
+<footer style="text-align:center;padding:28px 20px;border-top:1px solid var(--border);font-size:11px;color:var(--muted);font-family:var(--mono);line-height:1.9;position:relative;z-index:1;">
+  <strong style="color:var(--text);">Career Ops</strong> &nbsp;&middot;&nbsp; Built by <strong style="color:var(--text);">Johan Lopez</strong> &nbsp;&middot;&nbsp; Australia &nbsp;&middot;&nbsp; v1.0
+  &nbsp;&middot;&nbsp; <a href="/about.html" style="color:var(--teal);text-decoration:none;">About &amp; Disclaimer</a>
+</footer>
+</body>
+</html>

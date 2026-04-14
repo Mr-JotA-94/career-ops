@@ -1,0 +1,1206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CV Tailor — Career Ops</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy:   #0D1F35;
+    --teal:   #0E9B8A;
+    --teal2:  #07C5B0;
+    --amber:  #F5A623;
+    --red:    #E8504A;
+    --green:  #2ECC8F;
+    --bg:     #07111E;
+    --surface:#0F1E30;
+    --card:   #142030;
+    --border: #1E3248;
+    --muted:  #4A6580;
+    --text:   #C8DDF0;
+    --bright: #EAF4FF;
+    --mono:   'DM Mono', monospace;
+    --sans:   'Syne', sans-serif;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--mono);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(14,155,138,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(14,155,138,0.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wrap {
+    position: relative;
+    z-index: 1;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 48px 24px 80px;
+  }
+
+  header { margin-bottom: 48px; }
+  .tag {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    color: var(--teal);
+    border: 1px solid var(--teal);
+    padding: 3px 10px;
+    border-radius: 2px;
+    margin-bottom: 16px;
+    text-transform: uppercase;
+  }
+  h1 {
+    font-family: var(--sans);
+    font-size: clamp(28px, 5vw, 42px);
+    font-weight: 800;
+    color: var(--bright);
+    line-height: 1.1;
+    margin-bottom: 12px;
+  }
+  h1 span { color: var(--teal); }
+  .subtitle { font-size: 13px; color: var(--muted); line-height: 1.6; max-width: 580px; }
+
+  /* Steps nav */
+  .steps-nav {
+    display: flex;
+    gap: 0;
+    margin-bottom: 32px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .step-nav-item {
+    flex: 1;
+    padding: 12px 8px;
+    text-align: center;
+    font-size: 11px;
+    font-family: var(--mono);
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    border-right: 1px solid var(--border);
+    background: var(--surface);
+    transition: all 0.2s;
+  }
+  .step-nav-item:last-child { border-right: none; }
+  .step-nav-item.active { background: var(--card); color: var(--teal); }
+  .step-nav-item.done { color: var(--green); background: rgba(46,204,143,0.05); }
+  .step-num { display: block; font-size: 16px; font-family: var(--sans); font-weight: 700; margin-bottom: 2px; }
+
+  .panel {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 28px;
+    margin-bottom: 20px;
+  }
+  .panel-label {
+    font-family: var(--sans);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--teal);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .panel-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  textarea {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 12.5px;
+    line-height: 1.7;
+    padding: 16px;
+    resize: vertical;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  textarea:focus { border-color: var(--teal); }
+  textarea::placeholder { color: var(--muted); }
+
+  input[type="text"] {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 13px;
+    padding: 10px 14px;
+    outline: none;
+    transition: border-color 0.2s;
+    margin-bottom: 10px;
+  }
+  input[type="text"]:focus { border-color: var(--teal); }
+  input[type="text"]::placeholder { color: var(--muted); }
+
+  .btn-primary {
+    width: 100%;
+    padding: 15px;
+    background: var(--teal);
+    color: var(--navy);
+    font-family: var(--sans);
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+  }
+  .btn-primary:hover:not(:disabled) { background: var(--teal2); transform: translateY(-1px); }
+  .btn-primary:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+
+  .btn-secondary {
+    padding: 10px 20px;
+    background: transparent;
+    color: var(--teal);
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    border: 1px solid var(--teal);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-secondary:hover { background: var(--teal); color: var(--navy); }
+
+  .btn-muted {
+    padding: 10px 20px;
+    background: transparent;
+    color: var(--muted);
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-muted:hover { color: var(--text); border-color: var(--muted); }
+
+  /* Loading */
+  .loading { display: none; text-align: center; padding: 56px 0; }
+  .loading.show { display: block; }
+  .spinner {
+    width: 36px; height: 36px;
+    border: 2px solid var(--border);
+    border-top-color: var(--teal);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 20px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-label { font-family: var(--sans); font-size: 15px; font-weight: 600; color: var(--teal); margin-bottom: 8px; }
+  .loading-sub { font-size: 12px; color: var(--muted); }
+  .progress-bar {
+    width: 280px; height: 2px;
+    background: var(--border);
+    border-radius: 2px;
+    margin: 20px auto 0;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--teal);
+    width: 0%;
+    transition: width 0.6s ease;
+    border-radius: 2px;
+  }
+
+  /* Preview panel */
+  .preview-panel {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 20px;
+    display: none;
+    animation: fadeUp 0.4s ease;
+  }
+  .preview-panel.show { display: block; }
+  @keyframes fadeUp { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:translateY(0); } }
+
+  .preview-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+  }
+  .preview-tab {
+    padding: 12px 20px;
+    font-size: 11px;
+    font-family: var(--mono);
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.15s;
+    text-transform: uppercase;
+  }
+  .preview-tab.active { color: var(--teal); border-bottom-color: var(--teal); }
+
+  .preview-content { padding: 28px; }
+
+  .cv-section { margin-bottom: 28px; }
+  .cv-section:last-child { margin-bottom: 0; }
+  .cv-section-title {
+    font-family: var(--sans);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--teal);
+    margin-bottom: 10px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border);
+  }
+  .cv-text { font-size: 13px; line-height: 1.8; color: var(--text); }
+  .cv-bullet { font-size: 13px; color: var(--text); line-height: 1.7; padding-left: 18px; position: relative; margin-bottom: 6px; }
+  .cv-bullet::before { content: '▸'; position: absolute; left: 0; color: var(--teal); font-size: 11px; top: 2px; }
+  .cv-bullet strong { color: var(--bright); }
+
+  .chip-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .chip {
+    font-size: 11px; padding: 3px 9px;
+    border-radius: 3px; font-family: var(--mono);
+  }
+  .chip-add { background: rgba(46,204,143,0.12); color: var(--green); border: 1px solid rgba(46,204,143,0.3); }
+  .chip-keep { background: rgba(14,155,138,0.1); color: var(--teal); border: 1px solid rgba(14,155,138,0.3); }
+
+  .cover-text {
+    font-size: 13px;
+    line-height: 1.9;
+    color: var(--text);
+    white-space: pre-wrap;
+    font-family: var(--mono);
+  }
+
+  .action-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
+
+  .error-box {
+    background: rgba(232,80,74,0.08);
+    border: 1px solid rgba(232,80,74,0.3);
+    border-radius: 6px;
+    padding: 14px 16px;
+    font-size: 13px;
+    color: var(--red);
+    display: none;
+    margin-bottom: 16px;
+  }
+  .error-box.show { display: block; }
+
+  .hint {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 8px;
+    line-height: 1.6;
+  }
+
+  .role-toggle { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+  .role-btn {
+    font-family: var(--mono);
+    font-size: 11px;
+    padding: 6px 14px;
+    border-radius: 3px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .role-btn:hover { border-color: var(--teal); color: var(--teal); }
+  .role-btn.active { background: var(--teal); border-color: var(--teal); color: var(--navy); font-weight: 500; }
+
+  @media(max-width:600px) { .wrap { padding: 32px 16px 60px; } }
+
+  /* ── Global nav ──────────────────────────────────────────────────── */
+  .topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 28px; border-bottom: 1px solid var(--border);
+    background: rgba(7,17,30,0.92); backdrop-filter: blur(10px);
+    position: sticky; top: 0; z-index: 100;
+  }
+  .topbar-left  { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+  .topbar-right { display: flex; align-items: center; gap: 8px; }
+  .logo { font-family: var(--sans); font-size: 15px; font-weight: 800; color: var(--bright); letter-spacing: -0.02em; text-decoration: none; }
+  .logo span { color: var(--teal); }
+  .tool-tag {
+    font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--teal); border: 1px solid var(--teal);
+    padding: 2px 8px; border-radius: 2px; font-family: var(--mono);
+  }
+  .nav-links { display: flex; gap: 4px; flex-wrap: wrap; }
+  .nav-link {
+    font-size: 11px; font-family: var(--mono); color: var(--muted);
+    text-decoration: none; padding: 5px 11px;
+    border: 1px solid var(--border); border-radius: 3px;
+    transition: color 0.15s, border-color 0.15s; white-space: nowrap;
+  }
+  .nav-link:hover { color: var(--teal); border-color: var(--teal); }
+  .nav-link.active { color: var(--teal); border-color: var(--teal); background: rgba(14,155,138,0.08); }
+
+  /* Fit score circle — matches JD Analyser style */
+  .score-block { background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:24px 28px; margin-top:20px; display:flex; align-items:center; gap:24px; }
+  .score-circle { flex-shrink:0; width:86px; height:86px; border-radius:50%; display:flex; flex-direction:column; align-items:center; justify-content:center; font-family:var(--sans); font-weight:800; font-size:28px; border:3px solid; }
+  .score-label  { font-size:10px; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; margin-top:2px; }
+  .score-A { color:var(--green);  border-color:var(--green);  background:rgba(46,204,143,0.08); }
+  .score-B { color:#6BE08A;       border-color:#6BE08A;       background:rgba(107,224,138,0.08); }
+  .score-C { color:var(--amber);  border-color:var(--amber);  background:rgba(245,166,35,0.08); }
+  .score-D { color:#F07B3F;       border-color:#F07B3F;       background:rgba(240,123,63,0.08); }
+  .score-F { color:var(--red);    border-color:var(--red);    background:rgba(232,80,74,0.08); }
+  .score-meta { flex:1; }
+  .score-title { font-family:var(--sans); font-size:16px; font-weight:700; color:var(--bright); margin-bottom:4px; }
+  .score-desc  { font-size:12px; color:var(--muted); line-height:1.6; }
+</style>
+</head>
+<body>
+<div class="topbar">
+    <div class="topbar-left">
+      <a href="/pipeline.html" class="logo">Career<span>Ops</span></a>
+      <span class="tool-tag">cv-tailor</span>
+      <nav class="nav-links">
+        <a class="nav-link" href="/jd-analyser.html">JD Analyser</a>
+        <a class="nav-link active" href="/cv-tailor.html">CV Tailor</a>
+        <a class="nav-link" href="/search-kit.html">Search Kit</a>
+        <a class="nav-link" href="/compass.html">Compass</a>
+        <a class="nav-link" href="/pipeline.html">Pipeline</a>
+      </nav>
+    </div>
+  </div>
+
+<div class="wrap">
+
+  <header>
+    <div class="tag">career-ops / cv-tailor</div>
+    <h1>CV <span>Tailored</span><br>to the Role</h1>
+    <p class="subtitle">Paste a job description. Get a tailored profile, reordered bullets, a keyword-injected CV, and a cover letter opener — ready to copy or download.</p>
+  </header>
+
+  <div class="steps-nav">
+    <div class="step-nav-item active" id="nav1"><span class="step-num">01</span>Job Details</div>
+    <div class="step-nav-item" id="nav2"><span class="step-num">02</span>Generating</div>
+    <div class="step-nav-item" id="nav3"><span class="step-num">03</span>Review & Export</div>
+  </div>
+
+  <!-- Step 1: Input -->
+  <div id="step1">
+    <div class="panel">
+      <div class="panel-label">Job Description</div>
+      <textarea id="jd-input" rows="10" placeholder="Paste the full job description here — title, company, requirements, responsibilities..."></textarea>
+    </div>
+
+    <div class="panel">
+      <div class="panel-label">Role Details</div>
+      <input type="text" id="company-input" placeholder="Company name (e.g. Santos, Woodside, BHP)">
+      <input type="text" id="title-input" placeholder="Job title (e.g. Graduate Petroleum Engineer)">
+      <div class="panel-label" style="margin-top:14px;">Applying as</div>
+      <div class="role-toggle">
+        <!-- Populated dynamically from config -->
+      </div>
+    </div>
+
+    <div class="error-box" id="error-box"></div>
+    <button class="btn-primary" onclick="generate()">Generate Tailored CV + Cover Letter</button>
+    <p class="hint" style="margin-top:12px;text-align:center;">Takes ~15 seconds · Output includes tailored profile, rewritten bullets, keyword analysis, and cover letter opener</p>
+  </div>
+
+  <!-- Step 2: Loading -->
+  <div id="step2" style="display:none;">
+    <div class="loading show">
+      <div class="spinner"></div>
+      <div class="loading-label" id="loading-label">Analysing job description...</div>
+      <div class="loading-sub" id="loading-sub">Mapping requirements to your profile</div>
+      <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+    </div>
+  </div>
+
+  <!-- Step 3: Results -->
+  <div id="step3" style="display:none;">
+
+    <div class="preview-panel show" id="preview-panel">
+      <div class="preview-tabs">
+        <div class="preview-tab active" onclick="switchTab('profile')">Profile</div>
+        <div class="preview-tab" onclick="switchTab('bullets')">Experience Bullets</div>
+        <div class="preview-tab" onclick="switchTab('keywords')">Keywords</div>
+        <div class="preview-tab" onclick="switchTab('cover')">Cover Letter</div>
+        <div class="preview-tab" onclick="switchTab('email')">✉ Email / EOI</div>
+      </div>
+      <div class="preview-content" id="preview-content"></div>
+    </div>
+
+    <div class="action-row">
+      <button class="btn-secondary" onclick="downloadDocx()" id="dl-btn">⬇ Download CV (.docx)</button>
+      <button class="btn-secondary" onclick="copyAll()">📋 Copy All Tailoring</button>
+      <button class="btn-muted" onclick="restart()">← New JD</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+
+// ── Load profile from server config ───────────────────────────────────────
+let CFG = null;
+
+async function loadConfig() {
+  if (CFG) return CFG;
+  try {
+    const res = await fetch('/api/config');
+    CFG = await res.json();
+  } catch { CFG = {}; }
+  return CFG;
+}
+
+function buildMasterCV(cfg) {
+  const p = cfg.personal || {};
+  const fullName = `${p.first_name || ''} ${p.last_name || ''}`.trim();
+  const availability = (p.availability || []).map(a => a.replace(/_/g, ' ')).join(', ');
+  const edu = (cfg.education || []).map(e =>
+    `- ${e.degree} | ${e.institution}, ${e.location} | ${e.start} – ${e.end}` +
+    (e.focus ? `\n  Key focus: ${e.focus}` : '')
+  ).join('\n');
+  const exp = (cfg.experience || []).map(e => {
+    const bullets = (e.bullets || []).map(b => `- ${b}`).join('\n');
+    return `${e.title} | ${e.company} | ${e.location} | ${e.start} – ${e.end}\n${bullets}`;
+  }).join('\n\n');
+  const s = cfg.skills || {};
+  return [
+    `CANDIDATE: ${fullName}`,
+    `CONTACT: ${p.location} | ${p.phone} | ${p.email}${p.linkedin ? ' | ' + p.linkedin : ''}`,
+    availability ? `Availability: ${availability}` : '',
+    '', 'SUMMARY:', cfg.targets?.summary || '',
+    '', 'EDUCATION:', edu,
+    '', 'EXPERIENCE:', exp,
+    '', 'SKILLS:',
+    `Technical: ${s.technical || ''}`,
+    `Tools: ${s.tools || ''}`,
+    `Languages: ${s.languages || ''}`,
+    `Certifications: ${s.certifications || ''}`,
+    '', 'KEY DIFFERENTIATOR:', s.differentiator || '',
+  ].filter(l => l !== null).join('\n').trim();
+}
+
+
+let selectedRole = '';
+let outputData = null;
+let activeTab = 'profile';
+
+// ── Build role buttons from config categories ──────────────────────────────
+function buildRoleButtons(cfg) {
+  const cats = cfg?.targets?.categories || [];
+  const container = document.querySelector('.role-toggle');
+  if (!container || container.children.length > 1) return; // already built
+  container.innerHTML = '';
+
+  const catLabels = {
+    petroleum_engineering:'⛽ Petroleum Engineering', data_analytics:'📊 Data Analytics',
+    data_science:'🤖 Data Science', business_intelligence:'📈 Business Intelligence',
+    operations_analytics:'⚙ Operations & Analytics', ai_ml:'🧠 AI / ML',
+    software_engineering:'💻 Software Engineering', civil_engineering:'🏗 Civil Engineering',
+    mechanical_engineering:'🔧 Mechanical Engineering', electrical_engineering:'⚡ Electrical Engineering',
+    chemical_engineering:'🧪 Chemical Engineering', environmental_engineering:'🌿 Environmental',
+    accounting_finance:'💰 Finance', hr_people:'👥 HR', marketing:'📣 Marketing',
+    sales:'🤝 Sales', supply_chain:'📦 Supply Chain', healthcare:'🏥 Healthcare',
+    education:'🎓 Education', consulting:'🎯 Consulting', project_management:'📋 Project Mgmt',
+    operations_management:'⚙ Operations', other:'✦ Other',
+  };
+
+  const options = cats.length
+    ? cats.map(v => ({ val: v, label: catLabels[v] || v.replace(/_/g,' ') }))
+    : [{ val: 'professional', label: '💼 Professional Role' }];
+
+  options.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'role-btn' + (i === 0 ? ' active' : '');
+    btn.dataset.role = opt.val;
+    btn.textContent = opt.label;
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      selectedRole = opt.val;
+    });
+    container.appendChild(btn);
+  });
+
+  if (options.length && !selectedRole) selectedRole = options[0].val;
+}
+
+function setNav(step) {
+  ['nav1','nav2','nav3'].forEach((id, i) => {
+    const el = document.getElementById(id);
+    el.className = 'step-nav-item';
+    if (i + 1 < step) el.classList.add('done');
+    else if (i + 1 === step) el.classList.add('active');
+  });
+}
+
+function showStep(n) {
+  ['step1','step2','step3'].forEach((id, i) => {
+    document.getElementById(id).style.display = (i + 1 === n) ? 'block' : 'none';
+  });
+  setNav(n);
+}
+
+function animateProgress(stages) {
+  let i = 0;
+  const labels = document.getElementById('loading-label');
+  const subs = document.getElementById('loading-sub');
+  const fill = document.getElementById('progress-fill');
+
+  function next() {
+    if (i >= stages.length) return;
+    const s = stages[i];
+    labels.textContent = s.label;
+    subs.textContent = s.sub;
+    fill.style.width = s.pct + '%';
+    i++;
+    if (i < stages.length) setTimeout(next, s.dur || 2500);
+  }
+  next();
+}
+
+async function generate() {
+  await loadConfig();
+  buildRoleButtons(CFG);
+  const jd = document.getElementById('jd-input').value.trim();
+  const company = document.getElementById('company-input').value.trim();
+  const title = document.getElementById('title-input').value.trim();
+
+  if (!jd || jd.length < 80) {
+    showError('Please paste a full job description (at least a few paragraphs).');
+    return;
+  }
+
+  hideError();
+  showStep(2);
+  animateProgress([
+    { label: 'Analysing job description...', sub: 'Extracting requirements & seniority signals', pct: 15, dur: 2000 },
+    { label: 'Mapping to your profile...', sub: 'Identifying matches and gaps', pct: 35, dur: 2500 },
+    { label: 'Rewriting profile statement...', sub: 'Tailoring narrative for this specific role', pct: 55, dur: 2500 },
+    { label: 'Optimising experience bullets...', sub: 'Surfacing most relevant achievements', pct: 75, dur: 2500 },
+    { label: 'Calculating fit & risks...', sub: 'Scoring application strength', pct: 90, dur: 1500 },
+  ]);
+
+  // Build roleContext dynamically — use config seniority + selected category
+  const seniority = (CFG?.targets?.seniority || ['junior']).join(' or ');
+  const industries = (CFG?.targets?.industries || []).slice(0,3).map(i=>i.replace(/_/g,' ')).join(', ') || 'any industry';
+  const roleContext = `a ${seniority} ${selectedRole.replace(/_/g,' ')} role${industries ? ' in ' + industries : ''}`;
+
+  const prompt = `You are a career mentor with 30+ years as a senior HR leader and hiring manager across ${selectedRole.replace(/_/g,' ')} and adjacent fields. You have read tens of thousands of CVs and made thousands of hiring decisions. You know — without thinking — what makes a hiring manager stop and read, and what makes them move on. You are now using that lifetime of expertise to craft the best version of this candidate's CV for one specific role. Your output will feel like it was written by the candidate themselves, on their best day, with your guidance.
+
+Return ONLY valid JSON — no markdown, no explanation.
+
+CANDIDATE MASTER CV:
+${buildMasterCV(CFG)}
+
+TARGET ROLE: ${roleContext}
+Company: ${company || 'Not specified'}
+Job Title: ${title || 'Not specified'}
+
+JOB DESCRIPTION:
+${jd}
+
+---
+
+YOUR CRAFT PRINCIPLES — these are not a checklist, they are how you think:
+
+Every bullet tells a story in one sentence: what you did, at what scale, with what result. It opens with a verb that carries the weight of the action — not "Responsible for managing" but "Led", not "Was involved in" but "Delivered". The opening word sets the tone for everything that follows.
+
+Bullets are written in implicit first person — the subject is the candidate, but the pronoun is never written. "Managed a team of six" not "I managed" and not "Johan managed". This is standard CV convention and it reads with quiet confidence.
+
+Keywords from the JD are woven into bullets only where the master CV contains clear, substantial evidence of that skill — not a passing mention, not a tangentially related concept, not something that could be inferred. If the evidence is thin or absent, that keyword belongs on the keywords_to_add list, not embedded in a bullet as though it were a demonstrated competency. ATS systems reward exact phrase matches, but a recruiter who asks about a keyword in interview will expect a real answer. Use the JD's own terminology where the candidate's actual experience supports it — and only then.
+
+Metrics and scope make bullets credible. If a number or scope indicator exists in the master CV for that role, keep it and carry it forward. If it is not stated in the master CV, do not add it — not even a plausible-sounding one. A metric that cannot be traced back to the candidate's own data is a fabrication, and a fabrication discovered at interview ends the process. The rewrite earns its credibility through precision of language, not invented numbers.
+
+A bullet that has been genuinely rewritten looks and sounds different from the original — but the underlying facts are identical. The rewrite changes the expression: the structure, the opening verb, the integration of JD language. It does not add experience, context, or claims that are not in the source material. The test is: if you showed both versions to the candidate, the improved one should make them think "that's exactly what I did, and now it reads the way it deserved to." Not "I don't remember doing that."
+
+The tailored profile is the candidate's own voice — the most compelling accurate version of who they already are, not who they could become. Every claim in the profile must be traceable to something in the master CV above. No third person, no "results-driven" or "passionate about", no opening with "I". Start with what they actually bring: a real qualification, a real capability, a real track record. The third sentence should say something specific about why this candidate's combination of background is genuinely valuable for this role — not an aspiration, a fact.
+
+Do not reference ${company || 'the target company'} anywhere in the experience bullets. Those bullets describe what the candidate did at previous employers. Naming the company being applied to in a past-experience bullet is an error that any experienced recruiter will notice.
+
+---
+
+Return this exact JSON:
+{
+  "tailored_profile": "3 sentences in implicit first person (no 'I', no third person — subject is implied). Opens with the candidate's strongest concrete credential or experience for this role. Connects a real achievement to a key JD requirement using the JD's own language. Closes with the genuine differentiator — what is specifically unusual about this candidate's background for this company. Example register: 'Petroleum engineering graduate with reservoir simulation experience across conventional and unconventional plays, complemented by applied data analytics and Python-based production modelling. Delivered [X] during [role], directly relevant to the [JD requirement] outlined for this position. The combination of subsurface technical grounding and hands-on data tooling is uncommon at this career stage and directly addresses the dual requirements of this role.'",
+
+  "profile_changes": ["2-3 specific changes made vs the original profile, and the strategic reason each one improves fit for this role"],
+
+  "experience_bullets": {
+    "job_0": {
+      "keep": ["bullet that is already strong, ATS-aligned, and needs no change"],
+      "rewrite": [{"original": "exact original bullet text", "improved": "rewritten bullet — opens with a strong verb, JD keyword woven in naturally, scope or metric included, substantively different in wording from the original, target company not mentioned"}],
+      "deprioritise": ["bullet that is less relevant to this role — keep in CV but move to end of this role's list"]
+    },
+    "job_1": { "keep": [], "rewrite": [], "deprioritise": [] },
+    "job_2": { "keep": [], "rewrite": [], "deprioritise": [] }
+  },
+
+  "keywords_to_add": ["exact JD phrases missing from CV, max 8"],
+  "keywords_present": ["skills in CV that directly match JD, max 6"],
+
+  "academic_projects_to_mention": "If the candidate lacks direct work experience for this field, name 1-2 specific academic projects or topics and explain precisely how to frame each to bridge the gap. If not applicable: N/A.",
+
+  "fit_score": "A/B/C/D/F — grade honestly. A=strong match, B=good with addressable gaps, C=partial, D=stretch, F=significant mismatch.",
+  "role_summary": "Job title and company type in ~8 words — e.g. 'Graduate Data Analyst — ASX-listed mining services firm'",
+  "fit_rationale": "2-sentence honest assessment of why this score. First sentence: the strongest genuine match. Second sentence: the most significant real gap. Direct, specific, no padding.",
+  "fit_note": "One plain sentence summarising the fit for the candidate's reference.",
+  "risk_level": "none/low/medium/high",
+  "risk_items": [
+    {
+      "severity": "high/medium/low",
+      "flag": "Plain, specific statement of the risk — missing experience, no local credentials, qualification recognition, seniority gap, work rights if detectable. No softening."
+    }
+  ]
+}`;
+
+  try {
+    const res = await fetch('/api/claude', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 7000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+
+    const raw = await res.json();
+    if (!res.ok) throw new Error(raw.error?.message || 'API error ' + res.status);
+
+    const text = raw.content.map(b => b.text || '').join('');
+    outputData = safeParseJSON(text);
+
+    document.getElementById('progress-fill').style.width = '100%';
+    showTokenNote();
+    setTimeout(() => {
+      showStep(3);
+      renderTab('profile');
+    }, 600);
+
+  } catch(err) {
+    showStep(1);
+    showError('Generation failed: ' + err.message);
+  }
+}
+
+function switchTab(tab) {
+  activeTab = tab;
+  document.querySelectorAll('.preview-tab').forEach((t, i) => {
+    t.classList.toggle('active', ['profile','bullets','keywords','cover','email'][i] === tab);
+  });
+  renderTab(tab);
+}
+
+function renderTab(tab) {
+  const el = document.getElementById('preview-content');
+  const d = outputData;
+  if (!d) return;
+
+  if (tab === 'profile') {
+    let html = `<div class="cv-section">
+      <div class="cv-section-title">Tailored Professional Summary</div>
+      <div class="cv-text">${d.tailored_profile || ''}</div>
+    </div>`;
+    if (d.profile_changes?.length) {
+      html += `<div class="cv-section">
+        <div class="cv-section-title">What Changed & Why</div>
+        ${d.profile_changes.map(c => `<div class="cv-bullet">${c}</div>`).join('')}
+      </div>`;
+    }
+    if (d.fit_score) {
+      const scoreCls = ({'A':'score-A','B':'score-B','C':'score-C','D':'score-D','F':'score-F'})[d.fit_score.toString().toUpperCase().charAt(0)] || 'score-C';
+      const sevColor  = { high:'var(--red)', medium:'var(--amber)', low:'#6BE08A' };
+      const sevBg     = { high:'rgba(232,80,74,0.08)', medium:'rgba(245,166,35,0.08)', low:'rgba(107,224,138,0.08)' };
+      const sevBorder = { high:'rgba(232,80,74,0.3)',  medium:'rgba(245,166,35,0.3)',  low:'rgba(107,224,138,0.3)' };
+
+      // Risk items block
+      let riskHtml = '';
+      const risks = d.risk_items || [];
+      const noRisk = !risks.length || d.risk_level === 'none';
+      if (noRisk) {
+        riskHtml = `<div style="margin-top:10px;padding:10px 14px;background:rgba(46,204,143,0.06);border:1px solid rgba(46,204,143,0.2);border-radius:4px;display:flex;align-items:center;gap:8px;">
+          <span style="font-size:13px;">✓</span>
+          <span style="font-size:11px;color:var(--green);font-family:var(--mono);">No significant flags identified for this application.</span>
+        </div>`;
+      } else {
+        riskHtml = risks.map(r => {
+          const sev = (r.severity || 'medium').toLowerCase();
+          return `<div style="margin-top:8px;padding:10px 14px;background:${sevBg[sev]||sevBg.medium};border:1px solid ${sevBorder[sev]||sevBorder.medium};border-radius:4px;display:flex;align-items:flex-start;gap:10px;">
+            <span style="font-size:10px;font-family:var(--sans);font-weight:700;color:${sevColor[sev]||sevColor.medium};min-width:48px;padding-top:1px;">${sev.toUpperCase()}</span>
+            <span style="font-size:12px;color:var(--text);font-family:var(--mono);line-height:1.5;">${r.flag}</span>
+          </div>`;
+        }).join('');
+      }
+
+      html += `<div class="score-block">
+        <div class="score-circle ${scoreCls}">
+          ${d.fit_score}
+          <span class="score-label">Fit</span>
+        </div>
+        <div class="score-meta">
+          <div class="score-title">${d.role_summary || 'Role Fit Assessment'}</div>
+          <div class="score-desc">${d.fit_rationale || d.fit_note || ''}</div>
+        </div>
+      </div>
+      <div style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);font-family:var(--sans);font-weight:700;margin-bottom:4px;margin-top:16px;">Application Risk</div>
+      ${riskHtml}`;
+    }
+    if (d.academic_projects_to_mention && d.academic_projects_to_mention !== 'N/A') {
+      html += `<div class="cv-section" style="margin-top:20px;">
+        <div class="cv-section-title">💡 Add Academic Projects (bridges experience gap)</div>
+        <div class="cv-text" style="color:var(--amber);">${d.academic_projects_to_mention}</div>
+      </div>`;
+    }
+    el.innerHTML = html;
+  }
+
+  else if (tab === 'bullets') {
+    // Build job list dynamically from config
+    const expJobs = (CFG?.experience || []);
+    const jobs = expJobs.map((e, i) => ({
+      key: Object.keys(d.experience_bullets || {})[i] || `job_${i}`,
+      label: `${e.company}${e.end === 'Present' ? ' (Current)' : ''}`,
+    }));
+    let html = '';
+    jobs.forEach(job => {
+      const b = d.experience_bullets?.[job.key];
+      if (!b) return;
+      html += `<div class="cv-section"><div class="cv-section-title">${job.label}</div>`;
+      b.keep?.forEach(item => {
+        html += `<div class="cv-bullet" style="margin-bottom:8px;"><span style="font-size:10px;color:var(--teal);margin-right:6px;">KEEP</span>${item}</div>`;
+      });
+      b.rewrite?.forEach(item => {
+        html += `<div style="margin-bottom:12px;padding:10px;background:var(--surface);border-radius:4px;border-left:2px solid var(--amber);">
+          <div style="font-size:10px;color:var(--muted);margin-bottom:4px;">ORIGINAL</div>
+          <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">${item.original}</div>
+          <div style="font-size:10px;color:var(--teal);margin-bottom:4px;">IMPROVED</div>
+          <div style="font-size:13px;color:var(--bright);">${item.improved}</div>
+        </div>`;
+      });
+      b.deprioritise?.forEach(item => {
+        html += `<div class="cv-bullet" style="opacity:0.5;margin-bottom:8px;"><span style="font-size:10px;color:var(--muted);margin-right:6px;">MOVE LAST</span>${item}</div>`;
+      });
+      html += '</div>';
+    });
+    el.innerHTML = html || '<div style="color:var(--muted);font-size:13px;">No bullet data available.</div>';
+  }
+
+  else if (tab === 'keywords') {
+    let html = '';
+    if (d.keywords_to_add?.length) {
+      html += `<div class="cv-section">
+        <div class="cv-section-title">✗ Add These to Your CV</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:10px;">Missing from your current CV — inject into bullets or profile naturally.</div>
+        <div class="chip-row">${d.keywords_to_add.map(k=>`<span class="chip chip-add">${k}</span>`).join('')}</div>
+      </div>`;
+    }
+    if (d.keywords_present?.length) {
+      html += `<div class="cv-section">
+        <div class="cv-section-title">✓ Already in Your CV</div>
+        <div class="chip-row">${d.keywords_present.map(k=>`<span class="chip chip-keep">${k}</span>`).join('')}</div>
+      </div>`;
+    }
+    el.innerHTML = html || '<div style="color:var(--muted);font-size:13px;">No keyword data.</div>';
+  }
+
+  else if (tab === 'cover') {
+    const text = d.cover_letter_opener || '';
+    if (!text) {
+      el.innerHTML = `<div style="text-align:center;padding:48px 20px;color:var(--muted);">
+        <div style="font-size:28px;margin-bottom:12px;">✉</div>
+        <div style="font-family:var(--sans);font-size:15px;font-weight:700;color:var(--text);margin-bottom:8px;">Not generated yet</div>
+        <div style="font-size:12px;margin-bottom:20px;">Click the button below when you're ready to apply.</div>
+        <button class="btn-secondary" onclick="generateCoverEmail()">Generate Cover Letter & Email</button>
+      </div>`;
+    } else {
+      el.innerHTML = `<div class="cv-section">
+        <div class="cv-section-title">Cover Letter Opening</div>
+        <div class="cover-text">${text.replace(/\n/g, '\n\n')}</div>
+        <div style="margin-top:20px;">
+          <button class="btn-secondary" id="copy-cover-btn" onclick="copyById('copy-cover-btn','cover_letter_opener')">Copy to Clipboard</button>
+        </div>
+      </div>`;
+    }
+  }
+
+  else if (tab === 'email') {
+    const subject = d.email_subject || '';
+    const body = d.email_body || '';
+    if (!subject && !body) {
+      el.innerHTML = `<div style="text-align:center;padding:48px 20px;color:var(--muted);">
+        <div style="font-size:28px;margin-bottom:12px;">📨</div>
+        <div style="font-family:var(--sans);font-size:15px;font-weight:700;color:var(--text);margin-bottom:8px;">Not generated yet</div>
+        <div style="font-size:12px;margin-bottom:20px;">Click the button below when you're ready to apply.</div>
+        <button class="btn-secondary" onclick="generateCoverEmail()">Generate Cover Letter & Email</button>
+      </div>`;
+    } else {
+      el.innerHTML = `<div class="cv-section">
+        <div class="cv-section-title">Email Subject</div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:12px 16px;font-size:13px;color:var(--bright);margin-bottom:20px;font-family:var(--mono);">${subject}</div>
+        <div class="cv-section-title">Email Body</div>
+        <div class="cover-text" style="background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:16px;white-space:pre-wrap;">${body}</div>
+        <div style="margin-top:20px;display:flex;gap:10px;flex-wrap:wrap;">
+          <button class="btn-secondary" id="copy-email-btn" onclick="copyById('copy-email-btn','email_full')">📋 Copy Full Email</button>
+          <button class="btn-muted" id="copy-subject-btn" onclick="copyById('copy-subject-btn','email_subject')">Copy Subject Only</button>
+        </div>
+      </div>`;
+    }
+  }
+}
+
+function copyById(btnId, field) {
+  if (!outputData) return;
+  let text = '';
+  if (field === 'email_full') {
+    text = `Subject: ${outputData.email_subject || ''}\n\n${outputData.email_body || ''}`;
+  } else {
+    text = outputData[field] || '';
+  }
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById(btnId);
+    if (btn) { const o = btn.textContent; btn.textContent = '✓ Copied!'; setTimeout(()=>{ btn.textContent=o; },2000); }
+  }).catch(err => console.error('Copy failed:', err));
+}
+
+function copyAll() {
+  if (!outputData) return;
+  const d = outputData;
+  let out = `CV TAILORING PACKAGE\n${'='.repeat(50)}\n\n`;
+  out += `FIT SCORE: ${d.fit_score}\n${d.fit_note}\n`;
+  if (d.risk_items?.length) out += `RISKS:\n${d.risk_items.map(r=>`[${r.severity.toUpperCase()}] ${r.flag}`).join("\n")}\n`;
+  out += `\n${'─'.repeat(40)}\nTAILORED PROFILE\n${'─'.repeat(40)}\n${d.tailored_profile}\n`;
+  if (d.keywords_to_add?.length) out += `\n${'─'.repeat(40)}\nKEYWORDS TO ADD\n${'─'.repeat(40)}\n${d.keywords_to_add.join(' | ')}\n`;
+  if (d.experience_bullets) {
+    out += `\n${'─'.repeat(40)}\nREWRITTEN BULLETS\n${'─'.repeat(40)}\n`;
+    Object.entries(d.experience_bullets).forEach(([job, b]) => {
+      out += `\n[${job.toUpperCase()}]\n`;
+      b.rewrite?.forEach(r => out += `IMPROVED: ${r.improved}\n`);
+      b.keep?.forEach(k => out += `KEEP: ${k}\n`);
+    });
+  }
+  if (d.cover_letter_opener) out += `\n${'─'.repeat(40)}\nCOVER LETTER OPENER\n${'─'.repeat(40)}\n${d.cover_letter_opener}\n`;
+
+  navigator.clipboard.writeText(out).then(() => {
+    const btn = document.querySelector('.btn-secondary');
+    if (btn) { const o = btn.textContent; btn.textContent = '✓ Copied!'; setTimeout(()=>btn.textContent=o,2000); }
+  });
+}
+
+async function downloadDocx() {
+  if (!outputData) return;
+  const btn = document.getElementById('dl-btn');
+  const orig = btn.textContent;
+  btn.textContent = 'Generating...';
+  btn.disabled = true;
+  try {
+    const company = document.getElementById('company-input').value.trim() || 'Company';
+    const title   = document.getElementById('title-input').value.trim() || '';
+    const res = await fetch('/api/generate-cv', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ data: outputData, company, title }),
+    });
+    if (!res.ok) throw new Error('Server error ' + res.status);
+
+    // Get the filename the server saved
+    const lastName = CFG?.personal?.last_name || 'User';
+    const firstName = CFG?.personal?.first_name || '';
+    const filename = res.headers.get('X-Saved-Filename') || (() => {
+      const mm = String(new Date().getMonth()+1).padStart(2,'0');
+      const yy = String(new Date().getFullYear()).slice(-2);
+      const co = company.replace(/[^a-zA-Z0-9]/g,'').slice(0,20);
+      return `${firstName}${lastName}_CV_${co}_${mm}${yy}.docx`;
+    })();
+
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = filename; a.click();
+    URL.revokeObjectURL(url);
+
+    btn.textContent = '✓ Downloaded!';
+
+    // Show "Log in Pipeline" button with prefill data
+    showPipelinePrompt(company, title, filename);
+
+    setTimeout(() => { btn.textContent = orig; btn.disabled = false; }, 2500);
+  } catch(err) {
+    btn.textContent = orig; btn.disabled = false;
+    alert('Download failed: ' + err.message);
+  }
+}
+
+function showPipelinePrompt(company, title, filename) {
+  // Remove existing prompt if any
+  const existing = document.getElementById('pipeline-prompt');
+  if (existing) existing.remove();
+
+  const params = new URLSearchParams({
+    company,
+    role: title,
+    status: 'applied',
+    fit: outputData?.fit_score || '',
+    resume: filename,
+  });
+
+  const div = document.createElement('div');
+  div.id = 'pipeline-prompt';
+  div.style.cssText = 'margin-top:14px;padding:14px 18px;background:rgba(14,155,138,0.08);border:1px solid rgba(14,155,138,0.3);border-radius:6px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;';
+  div.innerHTML = `
+    <span style="font-size:12px;color:var(--teal);font-family:var(--mono);">CV saved to resumes/ — log this application?</span>
+    <a href="/pipeline.html?${params.toString()}" target="_blank"
+       style="font-family:var(--sans);font-size:12px;font-weight:700;padding:7px 16px;background:var(--teal);color:var(--navy);border-radius:4px;text-decoration:none;white-space:nowrap;">
+      → Log in Pipeline
+    </a>
+  `;
+  document.getElementById('dl-btn').parentElement.after(div);
+}
+
+
+
+async function generateCoverEmail() {
+  await loadConfig();
+  if (!outputData) return;
+
+  // Show generating state on the active tab button (no ghost button needed)
+  const activeTabEl = document.querySelector('.preview-tab.active');
+  const origTabText = activeTabEl?.textContent;
+  if (activeTabEl) activeTabEl.textContent = 'Generating...';
+
+  const company    = document.getElementById('company-input').value.trim() || 'Not specified';
+  const title      = document.getElementById('title-input').value.trim()   || 'Not specified';
+  const jd         = document.getElementById('jd-input').value.trim();
+  const candidateName = `${CFG?.personal?.first_name || ''} ${CFG?.personal?.last_name || ''}`.trim();
+
+  // Fix #10 — Build roleContext dynamically from config, same as generate()
+  const seniorityCE = (CFG?.targets?.seniority || ['junior']).join(' or ');
+  const industriesCE = (CFG?.targets?.industries || []).slice(0,2).map(i=>i.replace(/_/g,' ')).join(', ') || 'the relevant industry';
+  const roleContextCE = `a ${seniorityCE} ${selectedRole.replace(/_/g,' ')} role in ${industriesCE}`;
+
+  // Dual-profile framing adapts to role type
+  const isPetroCE = selectedRole === 'petroleum_engineering';
+  const differentiatorLine = isPetroCE
+    ? 'one sentence on the petroleum engineering + data analytics differentiator'
+    : `one sentence on the candidate's strongest unique value for this specific role`;
+
+  const prompt = `You are a career mentor with 30+ years as a senior HR leader and hiring manager. You have read more cover letters than you can count and you know within the first two sentences whether one will get a call or go in the bin. You write with the authority of someone who has made thousands of hiring decisions. Now you are writing on behalf of this candidate — in their voice, with your judgment.
+
+Candidate: ${candidateName}
+Role: ${title} at ${company}
+Target: ${roleContextCE}
+Fit assessment: ${outputData.fit_score} — ${(outputData.fit_note || outputData.fit_rationale || '').replace(/[\n\r"]/g, ' ')}
+
+JOB DESCRIPTION:
+${jd}
+
+---
+
+Write the cover letter and email as the candidate's own words — first person, "I", "my", "I have". The tone is confident and direct, not deferential. The candidate knows their value; they are not asking for a favour, they are making a case.
+
+The cover letter is addressed to the hiring manager at ${company}. Write it as if speaking directly to that person — "your team", "your organisation", "what you're looking for", not "the company's team" or "${company}'s needs". This is a conversation, not a report.
+
+A strong opening does not begin with "I am writing to apply" or "I am excited/passionate/thrilled". It begins with something real — a credential, an achievement, a direct connection to what you are looking for. The reader should feel, after the first sentence, that this candidate has already thought about the role rather than just sending a template.
+
+The cover letter has two paragraphs. The first establishes who the candidate is and why they are relevant to what you need specifically — using a detail from the JD or something concrete about the role, not generic praise. The second connects one or two specific experiences to what the role requires, using the JD's own language. It closes with a single forward-looking sentence — what the candidate brings to your team.
+
+The email is a professional covering note, not a condensed version of the letter. Shorter, crisper, assumes the CV will speak for itself. It mentions the role, gives two or three direct sentences grounded in the JD, and closes cleanly. Under 200 words. Same direct "you/your" register — written to the person reading it.
+
+Use ${company}'s name. Use the JD's terminology. Write the way someone writes when they are good at their job and they know it.
+
+Return ONLY valid JSON:
+{
+  "cover_letter_opener": "Two paragraphs in first person as the candidate, addressed to the hiring manager. Paragraph 1: opens with a concrete statement — a real credential or achievement — directly connected to what you are looking for in this role. Not 'I am writing to apply'. Not 'passionate' or 'excited'. References something specific from the JD. Paragraph 2: 2-3 sentences connecting specific experience to a stated JD requirement using the JD's own language. Closes with one forward-looking sentence about what the candidate brings to your team. Example register: 'Five years working at the intersection of reservoir engineering and production data analysis has given me an unusual vantage point on the kind of problem you are describing in this role. At [previous company], I [specific achievement directly relevant to JD requirement]. I would bring that same combination of subsurface rigour and data-driven approach to your [specific team or project mentioned in JD].'",
+  "email_subject": "Application — ${title} | ${candidateName}",
+  "email_body": "Professional covering email in first person, under 200 words. Written directly to the hiring manager — 'your team', 'your organisation'. Opens by stating the role applied for. Two to three sentences of specific, direct reason — why this role at ${company}, why this candidate, grounded in the JD. Closes with CV attached and availability. Sign-off: Best regards / ${candidateName} / ${CFG?.personal?.phone || ''} / ${CFG?.personal?.email || ''}. No 'I am excited'. No 'I am passionate'. No filler."
+}`;
+
+  try {
+    const res = await fetch('/api/claude', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 2000, messages: [{ role: 'user', content: prompt }] })
+    });
+    const raw = await res.json();
+    if (!res.ok) throw new Error(raw.error?.message || 'API error');
+    const text = raw.content.map(b => b.text || '').join('');
+    const parsed = safeParseJSON(text);
+    outputData.cover_letter_opener = parsed.cover_letter_opener;
+    outputData.email_subject       = parsed.email_subject;
+    outputData.email_body          = parsed.email_body;
+
+    if (activeTabEl) activeTabEl.textContent = origTabText;
+    // Auto-switch to cover tab
+    switchTab('cover');
+  } catch(err) {
+    if (activeTabEl) activeTabEl.textContent = origTabText;
+    alert('Failed to generate cover letter: ' + err.message);
+  }
+}
+
+function restart() {
+  outputData = null;
+  activeTab = 'profile';
+  document.getElementById('jd-input').value = '';
+  document.getElementById('company-input').value = '';
+  document.getElementById('title-input').value = '';
+  document.getElementById('progress-fill').style.width = '0%';
+  showStep(1);
+}
+
+function showError(msg) { const e = document.getElementById('error-box'); e.textContent = msg; e.classList.add('show'); }
+function hideError() { document.getElementById('error-box').classList.remove('show'); }
+
+// ── Init role buttons on page load ─────────────────────────────────────────
+(async () => {
+  await loadConfig();
+  buildRoleButtons(CFG);
+  checkConfigCompleteness(CFG);
+  // Pre-fill from JD Analyser handoff (sessionStorage set by openInCVTailor)
+  if (new URLSearchParams(window.location.search).get('from') === 'jda') {
+    const jd   = sessionStorage.getItem('jda_jd');
+    const role = sessionStorage.getItem('jda_role');
+    const sum  = sessionStorage.getItem('jda_summary') || '';
+    if (jd) {
+      document.getElementById('jd-input').value = jd;
+      // Auto-select matching role button if present
+      if (role) {
+        document.querySelectorAll('.role-btn').forEach(b => {
+          b.classList.toggle('active', b.dataset.role === role);
+          if (b.dataset.role === role) selectedRole = role;
+        });
+      }
+      // Subtle banner so user knows where the JD came from
+      const note = document.createElement('div');
+      note.style.cssText = 'margin-top:8px;padding:8px 14px;background:rgba(14,155,138,0.08);border:1px solid rgba(14,155,138,0.25);border-radius:4px;font-size:11px;color:var(--teal);font-family:var(--mono);';
+      note.textContent = `✓ JD pre-filled from JD Analyser${sum ? ' — ' + sum : ''}`;
+      document.getElementById('jd-input').after(note);
+      setTimeout(() => note.remove(), 6000);
+    }
+    // Clean up so a page refresh doesn't re-trigger
+    ['jda_jd','jda_role','jda_summary','jda_fit_score','jda_fit_rationale'].forEach(k => sessionStorage.removeItem(k));
+  }
+})();
+
+
+// ── Config completeness guard ─────────────────────────────────────────────
+function checkConfigCompleteness(cfg) {
+  if (!cfg || Object.keys(cfg).length === 0) {
+    showConfigWarning('No profile found. Please complete setup before using this tool.');
+    return false;
+  }
+  const issues = [];
+  const p = cfg.personal || {};
+  if (!p.first_name || !p.last_name) issues.push('personal details incomplete');
+  if (!cfg.experience || cfg.experience.length === 0) issues.push('no work experience entries');
+  if (!(cfg.skills?.technical) && !(cfg.skills?.differentiator)) issues.push('skills section empty');
+  if (!cfg.targets?.summary) issues.push('professional summary missing');
+  if (issues.length > 0) {
+    showConfigWarning(
+      'Profile incomplete (' + issues.join(' · ') + ') — AI outputs may be generic. ' +
+      '<a href="/setup.html" style="color:var(--teal);text-decoration:underline;">Complete setup \u2192</a>'
+    );
+    return false;
+  }
+  return true;
+}
+
+function showConfigWarning(msg) {
+  const existing = document.getElementById('config-warning');
+  if (existing) return;
+  const div = document.createElement('div');
+  div.id = 'config-warning';
+  div.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:rgba(245,166,35,0.12);border:1px solid rgba(245,166,35,0.4);border-radius:6px;padding:12px 20px;font-size:12px;color:var(--amber);font-family:var(--mono);z-index:9999;max-width:600px;text-align:center;box-shadow:0 4px 24px rgba(0,0,0,0.4);line-height:1.6;';
+  div.innerHTML = '\u26a0 ' + msg + ' <span onclick="this.parentElement.remove()" style="cursor:pointer;margin-left:14px;opacity:0.6;font-size:14px;">\u2715</span>';
+  document.body.appendChild(div);
+  setTimeout(() => div.remove(), 12000);
+}
+
+// ── Token budget note (shown once per session) ────────────────────────────
+function showTokenNote() {
+  if (sessionStorage.getItem('token_note_shown')) return;
+  sessionStorage.setItem('token_note_shown', '1');
+  const div = document.createElement('div');
+  div.style.cssText = 'position:fixed;bottom:20px;right:20px;background:rgba(14,155,138,0.1);border:1px solid rgba(14,155,138,0.25);border-radius:6px;padding:10px 16px;font-size:11px;color:var(--muted);font-family:var(--mono);z-index:9999;max-width:280px;line-height:1.6;';
+  div.innerHTML = '\ud83d\udca1 Groq free tier: ~100k tokens/day (~15\u201320 analyses). If you hit a rate limit, wait a few minutes. <span onclick="this.parentElement.remove()" style="cursor:pointer;margin-left:8px;opacity:0.5;">\u2715</span>';
+  document.body.appendChild(div);
+  setTimeout(() => div.remove(), 8000);
+}
+
+
+// ── Safe JSON parser — state machine, handles any literal control chars in AI strings ──
+function safeParseJSON(raw) {
+  // Strip markdown fences
+  let text = raw.replace(/```json|```/g, '').trim();
+  // Remove true control chars (not newline/tab/CR — handled below per-character)
+  text = text.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '');
+
+  // Walk character by character, tracking whether we are inside a JSON string.
+  // Any literal newline, carriage return, or tab found inside a string gets
+  // replaced with its escape sequence — which is what JSON.parse requires.
+  // Proper escape sequences already in the text (\n etc) are passed through intact.
+  const out = [];
+  let inString = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (inString) {
+      if (c === '\\') {
+        // Backslash escape — consume both chars unchanged
+        out.push(c);
+        if (i + 1 < text.length) out.push(text[++i]);
+      } else if (c === '"') {
+        inString = false;
+        out.push(c);
+      } else if (c === '\n') {
+        out.push('\\n');   // literal newline → escaped
+      } else if (c === '\r') {
+        out.push('\\r');   // literal CR → escaped
+      } else if (c === '\t') {
+        out.push('\\t');   // literal tab → escaped
+      } else {
+        out.push(c);
+      }
+    } else {
+      if (c === '"') inString = true;
+      out.push(c);
+    }
+  }
+  return JSON.parse(out.join(''));
+}
+
+</script>
+
+<!-- ── Attribution footer ───────────────────────── -->
+<footer style="text-align:center;padding:28px 20px;border-top:1px solid var(--border);font-size:11px;color:var(--muted);font-family:var(--mono);line-height:1.9;position:relative;z-index:1;">
+  <strong style="color:var(--text);">Career Ops</strong> &nbsp;&middot;&nbsp; Built by <strong style="color:var(--text);">Johan Lopez</strong> &nbsp;&middot;&nbsp; Australia &nbsp;&middot;&nbsp; v1.0
+  &nbsp;&middot;&nbsp; <a href="/about.html" style="color:var(--teal);text-decoration:none;">About &amp; Disclaimer</a>
+</footer>
+</body>
+</html>

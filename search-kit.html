@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Search Kit — Career Ops</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg:     #07111E;
+    --surface:#0F1E30;
+    --card:   #142030;
+    --border: #1E3248;
+    --muted:  #4A6580;
+    --text:   #C8DDF0;
+    --bright: #EAF4FF;
+    --teal:   #0E9B8A;
+    --teal2:  #07C5B0;
+    --amber:  #F5A623;
+    --green:  #2ECC8F;
+    --red:    #E8504A;
+    --mono:   'DM Mono', monospace;
+    --sans:   'Syne', sans-serif;
+  }
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--text); font-family: var(--mono); min-height: 100vh; }
+  body::before {
+    content: ''; position: fixed; inset: 0;
+    background-image: linear-gradient(rgba(14,155,138,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(14,155,138,0.03) 1px, transparent 1px);
+    background-size: 40px 40px; pointer-events: none; z-index: 0;
+  }
+
+  .wrap { position: relative; z-index: 1; max-width: 900px; margin: 0 auto; padding: 0 0 80px; }
+
+  .main { padding: 32px 28px; }
+
+  /* Header */
+  .page-title { font-family: var(--sans); font-size: clamp(24px, 4vw, 36px); font-weight: 800; color: var(--bright); margin-bottom: 8px; }
+  .page-title span { color: var(--teal); }
+  .page-sub { font-size: 12px; color: var(--muted); line-height: 1.7; margin-bottom: 32px; max-width: 540px; }
+
+  /* Role selector */
+  .role-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; margin-bottom: 24px; }
+  .role-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 6px; padding: 14px 16px;
+    cursor: pointer; transition: all 0.15s; text-align: left;
+  }
+  .role-card:hover { border-color: var(--teal); }
+  .role-card.selected { border-color: var(--teal); background: rgba(14,155,138,0.08); }
+  .role-card-title { font-family: var(--sans); font-size: 12px; font-weight: 700; color: var(--bright); margin-bottom: 4px; }
+  .role-card-sub { font-size: 10px; color: var(--muted); }
+
+  /* Generate button */
+  .btn-generate {
+    width: 100%; padding: 15px;
+    background: var(--teal); color: #07111E;
+    font-family: var(--sans); font-size: 14px; font-weight: 700;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    border: none; border-radius: 6px; cursor: pointer;
+    transition: all 0.2s; margin-bottom: 28px;
+  }
+  .btn-generate:hover:not(:disabled) { background: var(--teal2); transform: translateY(-1px); }
+  .btn-generate:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+
+  /* Loading */
+  .loading { display: none; text-align: center; padding: 48px 0; }
+  .loading.show { display: block; }
+  .spinner { width: 32px; height: 32px; border: 2px solid var(--border); border-top-color: var(--teal); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 16px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-label { font-family: var(--sans); font-size: 14px; font-weight: 600; color: var(--teal); }
+
+  /* Results */
+  #results { display: none; }
+  #results.show { display: block; }
+
+  /* Board tabs */
+  .board-tabs { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 24px; overflow-x: auto; }
+  .board-tab {
+    padding: 10px 20px; font-size: 11px; font-family: var(--mono);
+    letter-spacing: 0.08em; color: var(--muted); cursor: pointer;
+    border-bottom: 2px solid transparent; transition: all 0.15s;
+    text-transform: uppercase; white-space: nowrap;
+  }
+  .board-tab.active { color: var(--teal); border-bottom-color: var(--teal); }
+
+  /* Cards */
+  .result-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 8px; padding: 22px; margin-bottom: 14px;
+    animation: fadeUp 0.3s ease both;
+  }
+  @keyframes fadeUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+
+  .card-label {
+    font-family: var(--sans); font-size: 10px; font-weight: 700;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--teal); margin-bottom: 12px;
+    padding-bottom: 8px; border-bottom: 1px solid var(--border);
+  }
+
+  /* Search strings */
+  .search-string {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 4px; padding: 12px 16px;
+    font-family: var(--mono); font-size: 12px; color: var(--bright);
+    margin-bottom: 10px; line-height: 1.6;
+    display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
+  }
+  .search-string-text { flex: 1; word-break: break-all; }
+  .copy-btn {
+    font-size: 10px; color: var(--muted); background: none;
+    border: 1px solid var(--border); border-radius: 3px;
+    padding: 3px 8px; cursor: pointer; white-space: nowrap;
+    font-family: var(--mono); transition: all 0.15s; flex-shrink: 0;
+  }
+  .copy-btn:hover { color: var(--teal); border-color: var(--teal); }
+
+  /* Platform pills */
+  .platform-block { margin-bottom: 16px; }
+  .platform-name {
+    font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--amber); font-family: var(--sans); font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .filter-list { display: flex; flex-direction: column; gap: 6px; }
+  .filter-item {
+    display: flex; gap: 10px; align-items: flex-start;
+    font-size: 12px; line-height: 1.5;
+  }
+  .filter-key { color: var(--muted); min-width: 120px; font-size: 11px; flex-shrink: 0; }
+  .filter-val { color: var(--text); }
+
+  /* Company chips */
+  .company-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .company-chip {
+    font-size: 11px; padding: 4px 12px; border-radius: 3px;
+    font-family: var(--mono);
+    background: rgba(14,155,138,0.08);
+    color: var(--teal); border: 1px solid rgba(14,155,138,0.25);
+  }
+
+  /* Alert chips */
+  .alert-item {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 4px; padding: 10px 14px; margin-bottom: 8px;
+    font-size: 12px; color: var(--text); display: flex;
+    align-items: flex-start; gap: 10px;
+  }
+  .alert-icon { color: var(--teal); flex-shrink: 0; }
+
+  .action-row { display: flex; gap: 10px; margin-top: 8px; flex-wrap: wrap; }
+  .btn-secondary {
+    font-family: var(--mono); font-size: 12px; padding: 9px 18px;
+    border-radius: 4px; border: 1px solid var(--teal);
+    background: transparent; color: var(--teal); cursor: pointer; transition: all 0.15s;
+  }
+  .btn-secondary:hover { background: var(--teal); color: #07111E; }
+  .btn-muted {
+    font-family: var(--mono); font-size: 12px; padding: 9px 18px;
+    border-radius: 4px; border: 1px solid var(--border);
+    background: transparent; color: var(--muted); cursor: pointer; transition: all 0.15s;
+  }
+  .btn-muted:hover { color: var(--text); border-color: var(--muted); }
+
+  .empty-state { text-align: center; padding: 60px 20px; color: var(--muted); }
+  .empty-icon { font-size: 36px; margin-bottom: 12px; }
+  .empty-title { font-family: var(--sans); font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+
+  @media(max-width:600px) { .main { padding: 20px 16px; }  }
+
+  /* ── Global nav ──────────────────────────────────────────────────── */
+  .topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 28px; border-bottom: 1px solid var(--border);
+    background: rgba(7,17,30,0.92); backdrop-filter: blur(10px);
+    position: sticky; top: 0; z-index: 100;
+  }
+  .topbar-left  { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+  .topbar-right { display: flex; align-items: center; gap: 8px; }
+  .logo { font-family: var(--sans); font-size: 15px; font-weight: 800; color: var(--bright); letter-spacing: -0.02em; text-decoration: none; }
+  .logo span { color: var(--teal); }
+  .tool-tag {
+    font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--teal); border: 1px solid var(--teal);
+    padding: 2px 8px; border-radius: 2px; font-family: var(--mono);
+  }
+  .nav-links { display: flex; gap: 4px; flex-wrap: wrap; }
+  .nav-link {
+    font-size: 11px; font-family: var(--mono); color: var(--muted);
+    text-decoration: none; padding: 5px 11px;
+    border: 1px solid var(--border); border-radius: 3px;
+    transition: color 0.15s, border-color 0.15s; white-space: nowrap;
+  }
+  .nav-link:hover { color: var(--teal); border-color: var(--teal); }
+  .nav-link.active { color: var(--teal); border-color: var(--teal); background: rgba(14,155,138,0.08); }
+
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <div class="topbar-left">
+      <a href="/pipeline.html" class="logo">Career<span>Ops</span></a>
+      <span class="tool-tag">search-kit</span>
+      <nav class="nav-links">
+        <a class="nav-link" href="/jd-analyser.html">JD Analyser</a>
+        <a class="nav-link" href="/cv-tailor.html">CV Tailor</a>
+        <a class="nav-link active" href="/search-kit.html">Search Kit</a>
+        <a class="nav-link" href="/compass.html">Compass</a>
+        <a class="nav-link" href="/pipeline.html">Pipeline</a>
+      </nav>
+    </div>
+  </div>
+
+  <div class="main">
+    <h1 class="page-title">Search <span>Smarter</span></h1>
+    <p class="page-sub">Pick a target role and get exact search strings, platform filters, companies to watch, and alert setups — ready to paste into Seek, LinkedIn, and Indeed.</p>
+
+    <!-- Role selector — populated from config -->
+    <div class="card-label" style="margin-bottom:10px;">Select a target role</div>
+    <div class="role-grid" id="role-grid">
+      <div class="empty-state"><div class="spinner" style="margin:0 auto 8px;"></div></div>
+    </div>
+
+    <div id="custom-role-row" style="margin-bottom:20px;">
+      <input type="text" id="custom-role" placeholder="Or type a custom role title..."
+        style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:var(--mono);font-size:13px;padding:10px 14px;outline:none;transition:border-color 0.2s;"
+        onfocus="this.style.borderColor='var(--teal)'" onblur="this.style.borderColor='var(--border)'">
+    </div>
+
+    <button class="btn-generate" id="gen-btn" onclick="generate()">Generate Search Kit</button>
+
+    <div class="loading" id="loading">
+      <div class="spinner"></div>
+      <div class="loading-label">Building your search kit...</div>
+    </div>
+
+    <div id="results">
+      <div class="board-tabs">
+        <div class="board-tab active" onclick="showTab('strings')">Search Strings</div>
+        <div class="board-tab" onclick="showTab('filters')">Platform Filters</div>
+        <div class="board-tab" onclick="showTab('companies')">Companies</div>
+        <div class="board-tab" onclick="showTab('alerts')">Alerts to Set</div>
+      </div>
+      <div id="tab-content"></div>
+      <div class="action-row">
+        <button class="btn-secondary" onclick="copyAll()">📋 Copy All</button>
+        <button class="btn-muted" onclick="reset()">← New Role</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+let CFG = null;
+let KIT = null;
+let selectedRole = '';
+let activeTab = 'strings';
+
+// ── Load config ────────────────────────────────────────────────────────────
+async function init() {
+  try {
+    const res = await fetch('/api/config');
+    CFG = await res.json();
+  } catch { CFG = {}; }
+  checkConfigCompleteness(CFG);
+  renderRoleGrid();
+}
+
+function buildProfileString(cfg) {
+  const p = cfg.personal || {};
+  const t = cfg.targets || {};
+  const s = cfg.skills || {};
+  const exp = (cfg.experience || []).map(e => `${e.title} at ${e.company}`).join('; ');
+  const edu = (cfg.education || []).map(e => `${e.degree} (${e.institution})`).join('; ');
+  return [
+    `Name: ${p.first_name} ${p.last_name}`,
+    `Location: ${p.location}`,
+    `Availability: ${(p.availability||[]).map(a=>a.replace(/_/g,' ')).join(', ')}`,
+    `Target industries: ${(t.industries||[]).join(', ')}`,
+    `Seniority: ${(t.seniority||[]).join(', ')}`,
+    `Summary: ${t.summary || ''}`,
+    `Experience: ${exp}`,
+    `Education: ${edu}`,
+    `Technical skills: ${s.technical || ''}`,
+    `Tools: ${s.tools || ''}`,
+    `Key differentiator: ${s.differentiator || ''}`,
+  ].join('\n');
+}
+function buildMasterCV(cfg) {
+  const p = cfg.personal || {};
+  const fullName = `${p.first_name || ''} ${p.last_name || ''}`.trim();
+  const availability = (p.availability || []).map(a => a.replace(/_/g, ' ')).join(', ');
+  const edu = (cfg.education || []).map(e =>
+    `- ${e.degree} | ${e.institution}, ${e.location} | ${e.start} – ${e.end}` +
+    (e.focus ? `\n  Key focus: ${e.focus}` : '')
+  ).join('\n');
+  const exp = (cfg.experience || []).map(e => {
+    const bullets = (e.bullets || []).map(b => `- ${b}`).join('\n');
+    return `${e.title} | ${e.company} | ${e.location} | ${e.start} – ${e.end}\n${bullets}`;
+  }).join('\n\n');
+  const s = cfg.skills || {};
+  return [
+    `CANDIDATE: ${fullName}`,
+    `CONTACT: ${p.location} | ${p.phone} | ${p.email}${p.linkedin ? ' | ' + p.linkedin : ''}`,
+    availability ? `Availability: ${availability}` : '',
+    '', 'SUMMARY:', cfg.targets?.summary || '',
+    '', 'EDUCATION:', edu,
+    '', 'EXPERIENCE:', exp,
+    '', 'SKILLS:',
+    `Technical: ${s.technical || ''}`,
+    `Tools: ${s.tools || ''}`,
+    `Languages: ${s.languages || ''}`,
+    `Certifications: ${s.certifications || ''}`,
+    '', 'KEY DIFFERENTIATOR:', s.differentiator || '',
+  ].filter(l => l !== null).join('\n').trim();
+}
+
+
+// ── Build role buttons from config categories ──────────────────────────────
+
+// ── Role grid ──────────────────────────────────────────────────────────────
+function renderRoleGrid() {
+  const grid = document.getElementById('role-grid');
+  const recommended = CFG?.targets?.recommended_roles || [];
+  const categories = CFG?.targets?.categories || [];
+
+  // Build role list from recommendations + category defaults
+  const catDefaults = {
+    petroleum_engineering: ['Graduate Petroleum Engineer', 'Production Engineer', 'Reservoir Engineer'],
+    data_analytics: ['Junior Data Analyst', 'Data Analyst', 'Business Intelligence Analyst'],
+    data_science: ['Junior Data Scientist', 'ML Engineer'],
+    business_intelligence: ['BI Developer', 'BI Analyst'],
+    operations_analytics: ['Operations Analyst', 'Process Analyst'],
+    ai_ml: ['Junior ML Engineer', 'AI Analyst'],
+    consulting: ['Graduate Consultant', 'Analyst'],
+    project_management: ['Project Coordinator', 'Junior Project Manager'],
+  };
+
+  let roles = recommended.map(r => ({ title: r.title, sub: r.why }));
+
+  // Add category defaults not already covered
+  categories.forEach(cat => {
+    (catDefaults[cat] || []).forEach(title => {
+      if (!roles.find(r => r.title.toLowerCase() === title.toLowerCase())) {
+        roles.push({ title, sub: cat.replace(/_/g, ' ') });
+      }
+    });
+  });
+
+  roles = roles.slice(0, 9); // max 9 cards
+
+  if (!roles.length) {
+    grid.innerHTML = '<div style="color:var(--muted);font-size:12px;padding:12px 0;">No roles configured — type a custom role below.</div>';
+    return;
+  }
+
+  grid.innerHTML = roles.map(r => `
+    <button class="role-card" onclick="selectRole(this, '${r.title.replace(/'/g,"\\'")}')">
+      <div class="role-card-title">${r.title}</div>
+      <div class="role-card-sub">${r.sub || ''}</div>
+    </button>`).join('');
+}
+
+function selectRole(el, title) {
+  document.querySelectorAll('.role-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedRole = title;
+  document.getElementById('custom-role').value = '';
+}
+
+// ── Generate ───────────────────────────────────────────────────────────────
+async function generate() {
+  const customRole = document.getElementById('custom-role').value.trim();
+  const role = customRole || selectedRole;
+  if (!role) { alert('Select or type a role first.'); return; }
+
+  const btn = document.getElementById('gen-btn');
+  btn.disabled = true;
+  document.getElementById('loading').classList.add('show');
+  document.getElementById('results').style.display = 'none';
+
+  const prompt = `You are a career mentor and senior recruiter with 30+ years placing professionals across ${role} and related fields in the Australian market. You know the Australian job search landscape — which platforms work for which roles, how hiring managers actually source candidates, and what separates a candidate who gets interviews from one who applies into the void. Apply that expertise now.
+
+Return ONLY valid JSON — no markdown.
+
+CANDIDATE PROFILE:
+${buildMasterCV(CFG)}
+
+TARGET ROLE: ${role}
+LOCATION: ${CFG?.personal?.location || 'Australia'}
+
+---
+
+Your output is a practical, ready-to-use search kit. Every search string should be something the candidate can paste directly into a platform today. Every company listed must be a real, operating organisation with plausible relevance to this role and location — do not invent or pad the list. Salary ranges should reflect realistic Australian market rates for this role and seniority level; if you are uncertain, give a range rather than a precise figure and note it is indicative. Do not generate URLs or links — they will be wrong. For insider tips, draw on genuine knowledge of how this role type is hired in Australia — recruitment patterns, timing, channels that are actually used.
+
+Return this exact JSON:
+{
+  "role": "${role}",
+  "search_strings": [
+    {
+      "platform": "Seek",
+      "strings": ["exact search string to paste", "alternative with broader terms"],
+      "tip": "one genuine, practical tip specific to how Seek works for this role type"
+    },
+    {
+      "platform": "LinkedIn",
+      "strings": ["exact search string", "boolean search string using AND/OR/NOT"],
+      "tip": "one genuine tip specific to LinkedIn job search for this role"
+    },
+    {
+      "platform": "Indeed",
+      "strings": ["exact search string"],
+      "tip": "one genuine tip"
+    }
+  ],
+  "platform_filters": [
+    {
+      "platform": "Seek",
+      "filters": [
+        { "field": "Job Type", "value": "Full Time, Contract" },
+        { "field": "Classification", "value": "the most accurate Seek classification for this role" },
+        { "field": "Salary Range", "value": "indicative AUD range for this role and seniority — note this is approximate" },
+        { "field": "Location", "value": "cities or regions most likely to have roles of this type" },
+        { "field": "Date Posted", "value": "Last 7 days" }
+      ]
+    },
+    {
+      "platform": "LinkedIn",
+      "filters": [
+        { "field": "Experience Level", "value": "appropriate level for the candidate's seniority" },
+        { "field": "Job Type", "value": "Full-time, Contract" },
+        { "field": "Industry", "value": "most relevant LinkedIn industry categories for this role" },
+        { "field": "Location", "value": "city recommendations based on where this role is typically hired" }
+      ]
+    }
+  ],
+  "companies_to_watch": [
+    {
+      "name": "real company name — must be an actual operating organisation",
+      "why": "specific reason this company is relevant to this role and candidate — not generic",
+      "seek_url_hint": "search term to use on Seek to find this company's roles — not a URL"
+    }
+  ],
+  "alerts_to_set": [
+    {
+      "platform": "Seek or LinkedIn or Indeed",
+      "alert_name": "descriptive name for the alert",
+      "search_term": "exact term to use",
+      "frequency": "Daily or Weekly"
+    }
+  ],
+  "insider_tips": [
+    "specific, actionable tip grounded in how this role is actually hired in Australia — recruitment agency names, industry groups, timing patterns, or channels that are genuinely used for this role type. Not generic advice."
+  ]
+}`;
+
+  try {
+    const res = await fetch('/api/claude', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ max_tokens: 2500, messages: [{ role: 'user', content: prompt }] })
+    });
+    const raw = await res.json();
+    if (!res.ok) throw new Error(raw.error?.message || 'API error');
+    const text = raw.content[0].text;
+    KIT = safeParseJSON(text);
+
+    document.getElementById('loading').classList.remove('show');
+    document.getElementById('results').style.display = 'block';
+    showTab('strings');
+  } catch(err) {
+    document.getElementById('loading').classList.remove('show');
+    alert('Failed: ' + err.message);
+  }
+
+  btn.disabled = false;
+}
+
+// ── Tab rendering ──────────────────────────────────────────────────────────
+function showTab(tab) {
+  activeTab = tab;
+  document.querySelectorAll('.board-tab').forEach((t, i) => {
+    t.classList.toggle('active', ['strings','filters','companies','alerts'][i] === tab);
+  });
+
+  const el = document.getElementById('tab-content');
+  if (!KIT) return;
+
+  if (tab === 'strings') {
+    el.innerHTML = (KIT.search_strings || []).map(p => `
+      <div class="result-card">
+        <div class="card-label">${p.platform}</div>
+        ${(p.strings || []).map((s, i) => `
+          <div class="search-string">
+            <div class="search-string-text">${s}</div>
+            <button class="copy-btn" onclick="copyText('${s.replace(/'/g,"\\'")}', this)">Copy</button>
+          </div>`).join('')}
+        ${p.tip ? `<div style="margin-top:10px;font-size:11px;color:var(--muted);padding:8px 12px;background:var(--surface);border-radius:3px;border-left:2px solid var(--teal);">💡 ${p.tip}</div>` : ''}
+      </div>`).join('') +
+    (KIT.insider_tips?.length ? `
+      <div class="result-card">
+        <div class="card-label">Insider Tips</div>
+        ${KIT.insider_tips.map(t => `<div class="alert-item"><span class="alert-icon">→</span><span>${t}</span></div>`).join('')}
+      </div>` : '');
+  }
+
+  else if (tab === 'filters') {
+    el.innerHTML = (KIT.platform_filters || []).map(p => `
+      <div class="result-card">
+        <div class="card-label">${p.platform} Filters</div>
+        <div class="filter-list">
+          ${(p.filters || []).map(f => `
+            <div class="filter-item">
+              <span class="filter-key">${f.field}</span>
+              <span class="filter-val">${f.value}</span>
+            </div>`).join('')}
+        </div>
+      </div>`).join('');
+  }
+
+  else if (tab === 'companies') {
+    el.innerHTML = `<div class="result-card">
+      <div class="card-label">Companies to Watch & Follow</div>
+      ${(KIT.companies_to_watch || []).map(c => `
+        <div class="alert-item" style="flex-direction:column;gap:4px;">
+          <div style="font-family:var(--sans);font-weight:700;font-size:13px;color:var(--bright);">${c.name}</div>
+          <div style="font-size:11px;color:var(--muted);">${c.why}</div>
+          ${c.seek_url_hint ? `<div style="font-size:10px;color:var(--teal);margin-top:2px;">Seek: search "${c.seek_url_hint}"</div>` : ''}
+        </div>`).join('')}
+    </div>`;
+  }
+
+  else if (tab === 'alerts') {
+    el.innerHTML = `<div class="result-card">
+      <div class="card-label">Job Alerts to Set Up</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:14px;">Set these up once — new matching roles land in your inbox automatically.</div>
+      ${(KIT.alerts_to_set || []).map(a => `
+        <div class="alert-item">
+          <span class="alert-icon">🔔</span>
+          <div>
+            <div style="font-size:12px;color:var(--bright);margin-bottom:3px;">${a.alert_name} <span style="font-size:10px;color:var(--muted);">· ${a.platform} · ${a.frequency}</span></div>
+            <div class="search-string" style="margin-top:6px;padding:8px 12px;">
+              <span class="search-string-text" style="font-size:11px;">${a.search_term}</span>
+              <button class="copy-btn" onclick="copyText('${a.search_term.replace(/'/g,"\\'")}', this)">Copy</button>
+            </div>
+          </div>
+        </div>`).join('')}
+    </div>`;
+  }
+}
+
+// ── Utilities ──────────────────────────────────────────────────────────────
+function copyText(text, btn) {
+  navigator.clipboard.writeText(text).then(() => {
+    if (btn) { const o = btn.textContent; btn.textContent = '✓'; setTimeout(()=>btn.textContent=o, 1500); }
+  });
+}
+
+function copyAll() {
+  if (!KIT) return;
+  let out = `SEARCH KIT — ${KIT.role}\n${'='.repeat(50)}\n\n`;
+  (KIT.search_strings||[]).forEach(p => {
+    out += `${p.platform}:\n${p.strings.join('\n')}\n\n`;
+  });
+  if (KIT.companies_to_watch?.length) out += `COMPANIES:\n${KIT.companies_to_watch.map(c=>c.name).join('\n')}\n\n`;
+  if (KIT.alerts_to_set?.length) out += `ALERTS:\n${KIT.alerts_to_set.map(a=>`${a.platform}: ${a.search_term} (${a.frequency})`).join('\n')}\n`;
+  navigator.clipboard.writeText(out).then(() => {
+    const btn = document.querySelector('.btn-secondary');
+    if (btn) { const o = btn.textContent; btn.textContent = '✓ Copied!'; setTimeout(()=>btn.textContent=o, 2000); }
+  });
+}
+
+function reset() {
+  KIT = null; selectedRole = '';
+  document.getElementById('results').style.display = 'none';
+  document.getElementById('custom-role').value = '';
+  document.querySelectorAll('.role-card').forEach(c => c.classList.remove('selected'));
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ── Init ───────────────────────────────────────────────────────────────────
+init();
+
+// ── Config completeness guard ─────────────────────────────────────────────
+function checkConfigCompleteness(cfg) {
+  if (!cfg || Object.keys(cfg).length === 0) {
+    showConfigWarning('No profile found. Please complete setup before using this tool.');
+    return false;
+  }
+  const issues = [];
+  const p = cfg.personal || {};
+  if (!p.first_name || !p.last_name) issues.push('personal details incomplete');
+  if (!cfg.experience || cfg.experience.length === 0) issues.push('no work experience entries');
+  if (!(cfg.skills?.technical) && !(cfg.skills?.differentiator)) issues.push('skills section empty');
+  if (!cfg.targets?.summary) issues.push('professional summary missing');
+  if (issues.length > 0) {
+    showConfigWarning(
+      'Profile incomplete (' + issues.join(' · ') + ') — AI outputs may be generic. ' +
+      '<a href="/setup.html" style="color:var(--teal);text-decoration:underline;">Complete setup \u2192</a>'
+    );
+    return false;
+  }
+  return true;
+}
+
+function showConfigWarning(msg) {
+  const existing = document.getElementById('config-warning');
+  if (existing) return;
+  const div = document.createElement('div');
+  div.id = 'config-warning';
+  div.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:rgba(245,166,35,0.12);border:1px solid rgba(245,166,35,0.4);border-radius:6px;padding:12px 20px;font-size:12px;color:var(--amber);font-family:var(--mono);z-index:9999;max-width:600px;text-align:center;box-shadow:0 4px 24px rgba(0,0,0,0.4);line-height:1.6;';
+  div.innerHTML = '\u26a0 ' + msg + ' <span onclick="this.parentElement.remove()" style="cursor:pointer;margin-left:14px;opacity:0.6;font-size:14px;">\u2715</span>';
+  document.body.appendChild(div);
+  setTimeout(() => div.remove(), 12000);
+}
+
+// ── Token budget note (shown once per session) ────────────────────────────
+function showTokenNote() {
+  if (sessionStorage.getItem('token_note_shown')) return;
+  sessionStorage.setItem('token_note_shown', '1');
+  const div = document.createElement('div');
+  div.style.cssText = 'position:fixed;bottom:20px;right:20px;background:rgba(14,155,138,0.1);border:1px solid rgba(14,155,138,0.25);border-radius:6px;padding:10px 16px;font-size:11px;color:var(--muted);font-family:var(--mono);z-index:9999;max-width:280px;line-height:1.6;';
+  div.innerHTML = '\ud83d\udca1 Groq free tier: ~100k tokens/day (~15\u201320 analyses). If you hit a rate limit, wait a few minutes. <span onclick="this.parentElement.remove()" style="cursor:pointer;margin-left:8px;opacity:0.5;">\u2715</span>';
+  document.body.appendChild(div);
+  setTimeout(() => div.remove(), 8000);
+}
+
+// ── Safe JSON parser — state machine, handles any literal control chars in AI strings ──
+function safeParseJSON(raw) {
+  // Strip markdown fences
+  let text = raw.replace(/```json|```/g, '').trim();
+  // Remove true control chars (not newline/tab/CR — handled below per-character)
+  text = text.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '');
+
+  // Walk character by character, tracking whether we are inside a JSON string.
+  // Any literal newline, carriage return, or tab found inside a string gets
+  // replaced with its escape sequence — which is what JSON.parse requires.
+  // Proper escape sequences already in the text (\n etc) are passed through intact.
+  const out = [];
+  let inString = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (inString) {
+      if (c === '\\') {
+        // Backslash escape — consume both chars unchanged
+        out.push(c);
+        if (i + 1 < text.length) out.push(text[++i]);
+      } else if (c === '"') {
+        inString = false;
+        out.push(c);
+      } else if (c === '\n') {
+        out.push('\\n');   // literal newline → escaped
+      } else if (c === '\r') {
+        out.push('\\r');   // literal CR → escaped
+      } else if (c === '\t') {
+        out.push('\\t');   // literal tab → escaped
+      } else {
+        out.push(c);
+      }
+    } else {
+      if (c === '"') inString = true;
+      out.push(c);
+    }
+  }
+  return JSON.parse(out.join(''));
+}
+
+</script>
+
+<!-- ── Attribution footer ───────────────────────── -->
+<footer style="text-align:center;padding:28px 20px;border-top:1px solid var(--border);font-size:11px;color:var(--muted);font-family:var(--mono);line-height:1.9;position:relative;z-index:1;">
+  <strong style="color:var(--text);">Career Ops</strong> &nbsp;&middot;&nbsp; Built by <strong style="color:var(--text);">Johan Lopez</strong> &nbsp;&middot;&nbsp; Australia &nbsp;&middot;&nbsp; v1.0
+  &nbsp;&middot;&nbsp; <a href="/about.html" style="color:var(--teal);text-decoration:none;">About &amp; Disclaimer</a>
+</footer>
+</body>
+</html>
