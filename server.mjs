@@ -14,6 +14,42 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PORT = 3131;
 const CONFIG_FILE    = path.join(__dirname, 'config.json');
 const PIPELINE_FILE  = path.join(__dirname, 'pipeline.json');
+const LICENCES_FILE  = path.join(__dirname, 'licences.json');
+
+// ── Licence helpers ───────────────────────────────────────────────────────
+function loadLicences() {
+  try { return fs.existsSync(LICENCES_FILE) ? JSON.parse(fs.readFileSync(LICENCES_FILE, 'utf8')) : []; }
+  catch { return []; }
+}
+
+function getLicenceTier() {
+  const cfg = loadConfig();
+  return cfg?.licence?.tier || 'free';
+}
+
+function getJdUses() {
+  const cfg = loadConfig();
+  return cfg?.licence?.jd_uses || 0;
+}
+
+function saveLicenceToConfig(tier, key) {
+  const cfg = loadConfig() || {};
+  cfg.licence = {
+    key,
+    tier,
+    activated_at: new Date().toISOString(),
+    jd_uses: cfg.licence?.jd_uses || 0,
+  };
+  fs.writeFileSync(CONFIG_FILE, JSON.stringify(cfg, null, 2));
+}
+
+function incrementJdUses() {
+  const cfg = loadConfig() || {};
+  if (!cfg.licence) cfg.licence = { key: '', tier: 'free', jd_uses: 0 };
+  cfg.licence.jd_uses = (cfg.licence.jd_uses || 0) + 1;
+  fs.writeFileSync(CONFIG_FILE, JSON.stringify(cfg, null, 2));
+  return cfg.licence.jd_uses;
+}
 
 // ── Load config (null if not set up yet) ──────────────────────────────────
 function loadConfig() {
@@ -371,9 +407,6 @@ function makeFilename(company) {
 // ── MIME map ───────────────────────────────────────────────────────────────
 const MIME = { '.html': 'text/html', '.js': 'application/javascript', '.css': 'text/css', '.json': 'application/json', '.png': 'image/png', '.ico': 'image/x-icon' };
 
-// ── /about → serve about.html (no auth required) ──────────────────────────
-// Registered as an explicit route so it works even before setup is complete.
-
 // ── HTTP server ────────────────────────────────────────────────────────────
 const server = http.createServer((req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -518,6 +551,60 @@ const server = http.createServer((req, res) => {
     if (!cfg || !cfg.setup_complete) {
       res.writeHead(302, { Location: '/setup.html' }); res.end(); return;
     }
+  }
+
+  // GET /api/licence → return current tier and jd_uses (safe, no key exposed)
+  if (req.method === 'GET' && req.url === '/api/licence') {
+    const cfg = loadConfig();
+    const licence = cfg?.licence || { tier: 'free', jd_uses: 0 };
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ tier: licence.tier || 'free', jd_uses: licence.jd_uses || 0 }));
+    return;
+  }
+
+  // POST /api/activate → validate licence key and write tier to config
+  if (req.method === 'POST' && req.url === '/api/activate') {
+    let body = '';
+    req.on('data', c => body += c);
+    req.on('end', () => {
+      try {
+        const { key } = JSON.parse(body);
+        if (!key) throw new Error('No key provided');
+        const licences = loadLicences();
+        const match = licences.find(l => l.key === key.trim().toUpperCase());
+        if (!match) {
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ ok: false, error: 'Invalid licence key. Check the key and try again.' }));
+          return;
+        }
+        if (match.used_by && match.used_by !== (loadConfig()?.personal?.email || '')) {
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ ok: false, error: 'This key has already been activated on another profile.' }));
+          return;
+        }
+        saveLicenceToConfig(match.tier, key.trim().toUpperCase());
+        console.log(`  ✓ Licence activated: ${key.trim().toUpperCase()} (${match.tier})`);
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ ok: true, tier: match.tier }));
+      } catch (err) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ ok: false, error: err.message }));
+      }
+    });
+    return;
+  }
+
+  // POST /api/jd-use → increment JD analyser usage counter
+  if (req.method === 'POST' && req.url === '/api/jd-use') {
+    try {
+      const uses = incrementJdUses();
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ ok: true, jd_uses: uses }));
+    } catch (err) {
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ ok: false, error: err.message }));
+    }
+    return;
   }
 
   // POST /api/test-key → verify Groq key works
@@ -761,18 +848,6 @@ Extract only what is explicitly stated. For experience end date, use "Present" i
     return;
   }
 
-  // GET /about → always serve about.html (pre-setup accessible)
-  if (req.method === 'GET' && (req.url === '/about' || req.url === '/about.html')) {
-    const aboutPath = path.join(__dirname, 'about.html');
-    if (fs.existsSync(aboutPath)) {
-      res.writeHead(200, { 'Content-Type': 'text/html' });
-      fs.createReadStream(aboutPath).pipe(res);
-    } else {
-      res.writeHead(404); res.end('about.html not found');
-    }
-    return;
-  }
-
   // Static files — strip query string before resolving file path
   const urlPath = req.url.split('?')[0];
   let filePath = path.join(__dirname, urlPath === '/' ? '/index.html' : urlPath);
@@ -803,6 +878,10 @@ server.listen(PORT, '127.0.0.1', () => {
     const name = `${cfg.personal?.first_name || ''} ${cfg.personal?.last_name || ''}`.trim();
     console.log(`  ✓  Profile : ${name}`);
     console.log(`  ✓  API key : ${hasKey ? 'loaded' : '⚠ MISSING — re-run setup'}`);
+    const licences = loadLicences();
+    console.log(`  ✓  Licences: ${licences.length} key${licences.length !== 1 ? 's' : ''} in licences.json`);
+    const tier = getLicenceTier();
+    console.log(`  ✓  This install: ${tier.toUpperCase()} tier`);
     console.log('');
     console.log('  🔗 Open in browser:');
     console.log(`     Setup      →  ${base}/setup.html`);

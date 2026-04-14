@@ -505,6 +505,97 @@ footer {
   .hero-stats { gap: 24px; }
   .nav-tag { display: none; }
 }
+
+/* ── Pricing section ───────────────────────────────────────────────────── */
+.pricing-section {
+  padding: 100px 48px;
+  max-width: 1100px; margin: 0 auto;
+}
+.pricing-grid {
+  display: grid; grid-template-columns: 1fr 1fr 1fr;
+  gap: 2px; margin-top: 60px;
+}
+.pricing-card {
+  background: var(--card); border: 1px solid var(--border);
+  padding: 36px 28px; position: relative; transition: border-color 0.2s;
+}
+.pricing-card:hover { border-color: rgba(10,168,152,0.3); }
+.pricing-card.featured {
+  border-color: rgba(10,168,152,0.4);
+  background: linear-gradient(160deg, rgba(10,168,152,0.07), var(--card));
+}
+.pricing-badge {
+  display: inline-block; font-size: 9px; letter-spacing: 0.15em;
+  text-transform: uppercase; padding: 3px 10px; border-radius: 2px;
+  margin-bottom: 20px; font-family: var(--mono);
+}
+.badge-free { background: rgba(10,168,152,0.08); color: var(--teal); border: 1px solid rgba(10,168,152,0.2); }
+.badge-community { background: rgba(10,168,152,0.15); color: var(--teal2); border: 1px solid rgba(10,168,152,0.35); }
+.badge-external { background: rgba(232,146,26,0.08); color: var(--amber); border: 1px solid rgba(232,146,26,0.2); }
+.pricing-launch-tag {
+  position: absolute; top: -1px; right: 24px;
+  background: var(--teal); color: var(--bg);
+  font-family: var(--sans); font-size: 9px; font-weight: 700;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 4px 12px; border-radius: 0 0 4px 4px;
+}
+.pricing-tier-name {
+  font-family: var(--sans); font-size: 13px; font-weight: 700;
+  color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.pricing-price-block { margin-bottom: 8px; }
+.pricing-price-scratch {
+  font-family: var(--mono); font-size: 13px;
+  color: var(--border); text-decoration: line-through;
+  margin-bottom: 4px; display: block;
+}
+.pricing-price-main {
+  font-family: var(--sans); font-size: 40px; font-weight: 800;
+  color: var(--bright); line-height: 1; display: flex;
+  align-items: baseline; gap: 4px;
+}
+.pricing-price-main .currency { font-size: 20px; color: var(--teal); }
+.pricing-price-main .period { font-size: 13px; color: var(--muted); font-weight: 400; margin-left: 4px; }
+.pricing-price-note { font-size: 11px; color: var(--muted); margin-top: 6px; line-height: 1.6; }
+.pricing-divider { height: 1px; background: var(--border); margin: 24px 0; }
+.pricing-features { list-style: none; margin-bottom: 32px; }
+.pricing-features li {
+  font-size: 12px; color: var(--text); padding: 7px 0;
+  border-bottom: 1px solid rgba(30,50,72,0.5);
+  display: flex; align-items: center; gap: 10px;
+}
+.pricing-features li:last-child { border-bottom: none; }
+.pricing-features li .feat-icon { color: var(--teal); font-size: 11px; flex-shrink: 0; }
+.pricing-features li .feat-icon.locked { color: var(--border); }
+.pricing-features li.locked-feat { color: var(--muted); }
+.pricing-cta-btn {
+  display: block; width: 100%; padding: 14px 20px; text-align: center;
+  border-radius: 4px; font-family: var(--sans); font-size: 12px;
+  font-weight: 700; letter-spacing: 0.05em; text-decoration: none;
+  transition: all 0.2s; cursor: pointer; border: none;
+}
+.cta-free {
+  background: transparent; color: var(--muted);
+  border: 1px solid var(--border);
+}
+.cta-free:hover { border-color: var(--muted); color: var(--text); }
+.cta-paid {
+  background: var(--teal); color: var(--bg);
+}
+.cta-paid:hover { background: var(--teal2); transform: translateY(-1px); }
+.cta-external {
+  background: transparent; color: var(--amber);
+  border: 1px solid rgba(232,146,26,0.3);
+}
+.cta-external:hover { background: rgba(232,146,26,0.06); }
+.pricing-who {
+  font-size: 11px; color: var(--muted); margin-top: 12px;
+  text-align: center; line-height: 1.6;
+}
+@media(max-width: 900px) {
+  .pricing-grid { grid-template-columns: 1fr; max-width: 420px; margin: 60px auto 0; }
+}
 </style>
 </head>
 <body>
@@ -813,6 +904,99 @@ footer {
     </div>
   </div>
 </section>
+
+
+<!-- ── Pricing ───────────────────────────────────────────────────────────── -->
+<div style="border-top:1px solid var(--border); background: var(--surface);" class="z">
+<section class="pricing-section">
+  <div class="section-eyebrow reveal">Pricing</div>
+  <h2 class="section-title reveal">Simple, one-off.<br><em>No subscriptions.</em></h2>
+  <p class="section-body reveal">Pay once. Own it. Your data stays on your machine forever.</p>
+
+  <div class="pricing-grid">
+
+    <!-- Free -->
+    <div class="pricing-card reveal reveal-d1">
+      <span class="pricing-badge badge-free">Free</span>
+      <div class="pricing-tier-name">Try it first</div>
+      <div class="pricing-price-block">
+        <div class="pricing-price-main">
+          <span class="currency">$</span>0
+        </div>
+        <div class="pricing-price-note">Always free &mdash; no key required</div>
+      </div>
+      <div class="pricing-divider"></div>
+      <ul class="pricing-features">
+        <li><span class="feat-icon">&#x25B8;</span> Career Compass &mdash; unlimited</li>
+        <li><span class="feat-icon">&#x25B8;</span> Search Kit &mdash; unlimited</li>
+        <li><span class="feat-icon">&#x25B8;</span> JD Analyser &mdash; 3 uses</li>
+        <li class="locked-feat"><span class="feat-icon locked">&#x2715;</span> CV Tailor</li>
+        <li class="locked-feat"><span class="feat-icon locked">&#x2715;</span> Pipeline</li>
+        <li class="locked-feat"><span class="feat-icon locked">&#x2715;</span> Setup session</li>
+      </ul>
+      <a href="#get-started" class="pricing-cta-btn cta-free">Get started free</a>
+    </div>
+
+    <!-- Community -->
+    <div class="pricing-card featured reveal reveal-d2">
+      <div class="pricing-launch-tag">&#x2605; Launch Offer</div>
+      <span class="pricing-badge badge-community">Latinos Encorporate</span>
+      <div class="pricing-tier-name">Community Access</div>
+      <div class="pricing-price-block">
+        <span class="pricing-price-scratch">$375 AUD full price</span>
+        <div class="pricing-price-main">
+          <span class="currency">$</span>79
+          <span class="period">AUD &mdash; one-off</span>
+        </div>
+        <div class="pricing-price-note">
+          Use code <strong style="color:var(--teal2);">LATINOS79</strong> at checkout
+        </div>
+      </div>
+      <div class="pricing-divider"></div>
+      <ul class="pricing-features">
+        <li><span class="feat-icon">&#x25B8;</span> Everything in Free</li>
+        <li><span class="feat-icon">&#x25B8;</span> CV Tailor &mdash; unlimited</li>
+        <li><span class="feat-icon">&#x25B8;</span> Pipeline &mdash; full access</li>
+        <li><span class="feat-icon">&#x25B8;</span> JD Analyser &mdash; unlimited</li>
+        <li><span class="feat-icon">&#x25B8;</span> 30-min setup session with Johan</li>
+        <li><span class="feat-icon">&#x25B8;</span> Licence key &mdash; yours to keep</li>
+      </ul>
+      <a href="https://buy.stripe.com/test_3cIdR14bz9iIdZVcdD9EI00"
+         target="_blank" class="pricing-cta-btn cta-paid">Get Full Access &rarr;</a>
+      <div class="pricing-who">Exclusively for Latinos Encorporate members</div>
+    </div>
+
+    <!-- External -->
+    <div class="pricing-card reveal reveal-d3">
+      <span class="pricing-badge badge-external">External</span>
+      <div class="pricing-tier-name">Full Access</div>
+      <div class="pricing-price-block">
+        <div class="pricing-price-main">
+          <span class="currency" style="color:var(--amber);">$</span>
+          <span style="color:var(--bright);">375</span>
+          <span class="period">AUD &mdash; one-off</span>
+        </div>
+        <div class="pricing-price-note">
+          Outside the Latinos Encorporate community
+        </div>
+      </div>
+      <div class="pricing-divider"></div>
+      <ul class="pricing-features">
+        <li><span class="feat-icon">&#x25B8;</span> Everything in Free</li>
+        <li><span class="feat-icon">&#x25B8;</span> CV Tailor &mdash; unlimited</li>
+        <li><span class="feat-icon">&#x25B8;</span> Pipeline &mdash; full access</li>
+        <li><span class="feat-icon">&#x25B8;</span> JD Analyser &mdash; unlimited</li>
+        <li><span class="feat-icon">&#x25B8;</span> 30-min setup session with Johan</li>
+        <li><span class="feat-icon">&#x25B8;</span> Licence key &mdash; yours to keep</li>
+      </ul>
+      <a href="https://buy.stripe.com/test_3cIdR14bz9iIdZVcdD9EI00"
+         target="_blank" class="pricing-cta-btn cta-external">Get Full Access &rarr;</a>
+      <div class="pricing-who">Open to all professionals in Australia</div>
+    </div>
+
+  </div>
+</section>
+</div>
 
 <!-- ── CTA ───────────────────────────────────────────────────────────────── -->
 <div class="cta-section z">

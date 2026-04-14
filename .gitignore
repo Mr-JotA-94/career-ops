@@ -21,3 +21,5 @@ desktop.ini
 .idea/
 *.swp
 *.swo
+licences.json
+generate-key.mjs

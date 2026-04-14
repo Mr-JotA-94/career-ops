@@ -8,10 +8,27 @@
     "start": "node server.mjs",
     "dev": "node --watch server.mjs"
   },
-  "keywords": ["job-search", "australia", "immigration", "cv", "resume", "ai", "groq", "career"],
+  "keywords": [
+    "job-search",
+    "australia",
+    "immigration",
+    "cv",
+    "resume",
+    "ai",
+    "groq",
+    "career"
+  ],
   "author": "Johan Lopez",
   "license": "MIT",
   "dependencies": {
-    "docx": "^9.0.0"
-  }
+    "docx": "^9.6.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Mr-JotA-94/career-ops.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Mr-JotA-94/career-ops/issues"
+  },
+  "homepage": "https://github.com/Mr-JotA-94/career-ops#readme"
 }

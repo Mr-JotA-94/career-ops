@@ -270,6 +270,42 @@ select option { background: white; }
   .nav-link:hover { color: var(--teal); border-color: var(--teal); }
   .nav-link.active { color: var(--teal); border-color: var(--teal); background: rgba(14,155,138,0.08); }
 
+
+/* ── Licence activation ──────────────────────────────────────────────── */
+.licence-section {
+  margin: 28px auto 0; max-width: 320px; text-align: left;
+  border-top: 1px solid var(--border); padding-top: 24px;
+}
+.licence-section-title {
+  font-family: var(--sans); font-size: 10px; font-weight: 700;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--teal); margin-bottom: 10px;
+}
+.licence-activate-row { display: flex; gap: 8px; }
+.licence-key-input {
+  flex: 1; background: var(--surface); border: 1px solid var(--border);
+  border-radius: 4px; color: var(--text); font-family: var(--mono);
+  font-size: 12px; padding: 10px 14px; outline: none;
+  text-transform: uppercase; letter-spacing: 0.06em;
+  transition: border-color 0.2s;
+}
+.licence-key-input:focus { border-color: var(--teal); }
+.licence-key-input::placeholder { text-transform: none; letter-spacing: 0; color: var(--muted); }
+.btn-licence-activate {
+  padding: 10px 16px; background: var(--teal); color: white;
+  border: none; border-radius: 4px; font-family: var(--sans);
+  font-size: 11px; font-weight: 700; cursor: pointer;
+  transition: background 0.15s; white-space: nowrap;
+}
+.btn-licence-activate:hover { background: var(--teal2); }
+.btn-licence-activate:disabled { opacity: 0.5; cursor: not-allowed; }
+.licence-status { font-size: 11px; margin-top: 8px; display: none; line-height: 1.5; }
+.licence-status.ok { color: var(--green); display: block; }
+.licence-status.err { color: var(--red); display: block; }
+.licence-current {
+  font-size: 11px; color: var(--muted); margin-top: 10px; line-height: 1.6;
+}
+.licence-current strong { color: var(--teal); font-weight: 500; }
 </style>
 </head>
 <body>
@@ -578,6 +614,24 @@ select option { background: white; }
       <a class="tool-link" href="/cv-tailor.html" target="_blank">📄 CV Tailor <span>Generate tailored CV →</span></a>
       <a class="tool-link" href="/pipeline.html" target="_blank">📋 Pipeline <span>Track applications →</span></a>
     </div>
+      <!-- Licence activation -->
+      <div class="licence-section">
+        <div class="licence-section-title">Activate your licence</div>
+        <div id="licence-current-display" class="licence-current"></div>
+        <div class="licence-activate-row" id="licence-activate-row">
+          <input class="licence-key-input" id="setup-licence-input"
+                 placeholder="COPS-STU-XXXX-XXXX" maxlength="20"
+                 oninput="this.value=this.value.toUpperCase()">
+          <button class="btn-licence-activate" id="setup-activate-btn"
+                  onclick="setupActivateLicence()">Activate</button>
+        </div>
+        <div class="licence-status" id="setup-licence-status"></div>
+        <div style="font-size:10px;color:var(--muted);margin-top:10px;line-height:1.6;">
+          Don't have a key? <a href="https://buy.stripe.com/test_3cIdR14bz9iIdZVcdD9EI00"
+          target="_blank" style="color:var(--teal);text-decoration:none;">Get Full Access &rarr;</a>
+          &nbsp;&middot;&nbsp; Latinos Encorporate members: code <strong style="color:var(--text);">LATINOS79</strong> = $79 AUD
+        </div>
+      </div>
   </div>
 
 </div>
@@ -1090,11 +1144,64 @@ async function saveConfig() {
     document.getElementById(`step${currentStep}`).classList.remove('active');
     document.getElementById('complete').classList.add('show');
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    setTimeout(checkCurrentLicence, 400);
   } catch(err) {
     alert('Could not save: ' + err.message);
     btn.textContent = 'Save & Launch →'; btn.disabled = false;
   }
 }
+
+// ── Licence activation in setup ─────────────────────────────────────────
+async function checkCurrentLicence() {
+  try {
+    const r = await fetch('/api/licence');
+    const d = await r.json();
+    const el = document.getElementById('licence-current-display');
+    const row = document.getElementById('licence-activate-row');
+    if (d.tier && d.tier !== 'free') {
+      const labels = { community: 'Full Access (Community)', external: 'Full Access (External)' };
+      el.innerHTML = '<strong>' + (labels[d.tier] || d.tier) + '</strong> licence is active. All tools unlocked.';
+      el.style.color = 'var(--green)'; el.style.display = 'block';
+      row.style.display = 'none';
+    } else {
+      el.textContent = 'Free tier active. Compass and Search Kit available. Activate a key to unlock all tools.';
+      el.style.display = 'block';
+    }
+  } catch {}
+}
+
+async function setupActivateLicence() {
+  const key = document.getElementById('setup-licence-input').value.trim();
+  const btn = document.getElementById('setup-activate-btn');
+  const msg = document.getElementById('setup-licence-status');
+  if (!key) { msg.textContent = 'Enter your licence key.'; msg.className = 'activate-msg licence-status err'; return; }
+  btn.textContent = 'Checking...'; btn.disabled = true;
+  try {
+    const r = await fetch('/api/activate', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key }),
+    });
+    const d = await r.json();
+    if (d.ok) {
+      msg.textContent = '&#x2713; Licence activated! All tools are now unlocked.';
+      msg.className = 'activate-msg licence-status ok';
+      setTimeout(() => checkCurrentLicence(), 1000);
+    } else {
+      msg.textContent = d.error || 'Invalid key.';
+      msg.className = 'activate-msg licence-status err';
+      btn.textContent = 'Activate'; btn.disabled = false;
+    }
+  } catch {
+    msg.textContent = 'Could not connect. Is the server running?';
+    msg.className = 'activate-msg licence-status err';
+    btn.textContent = 'Activate'; btn.disabled = false;
+  }
+}
+
+// Check licence status when complete screen is shown
+// Check licence on page load
+checkCurrentLicence();
+
 </script>
 
 <!-- ── Attribution footer ───────────────────────── -->
