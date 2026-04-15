@@ -741,22 +741,32 @@ function openInCVTailor() {
 }
 
 
-function getCoachFraming() {
-  const r = selectedRole;
-  const petroRoles = ['petroleum_engineering','chemical_engineering','environmental_engineering'];
-  const dataRoles  = ['data_analytics','data_science','business_intelligence','operations_analytics','ai_ml'];
-  const engRoles   = ['civil_engineering','mechanical_engineering','electrical_engineering','software_engineering'];
-  const finRoles   = ['accounting_finance','banking','fintech'];
-  const healthRoles= ['healthcare'];
-  const legalRoles = ['legal'];
-  if (petroRoles.includes(r)) return 'You are a specialist career coach for oil & gas, energy, and resources sector roles.';
-  if (dataRoles.includes(r))  return 'You are a specialist career coach for data analytics, data science, and technology roles.';
-  if (engRoles.includes(r))   return 'You are a specialist career coach for engineering and technical roles.';
-  if (finRoles.includes(r))   return 'You are a specialist career coach for finance, accounting, and banking roles.';
-  if (healthRoles.includes(r))return 'You are a specialist career coach for healthcare and allied health roles.';
-  if (legalRoles.includes(r)) return 'You are a specialist career coach for legal and compliance roles.';
-  return 'You are an expert career coach specialising in professional job applications across all industries.';
-}
+// ── Career Ops shared base prompt — used by JD Analyser and CV Tailor ────────
+// Single source of truth for identity, AU market context, and fit scoring rubric.
+// Any change here applies to both tools consistently.
+const CAREER_OPS_BASE_PROMPT = `You are Career Ops — a warm, direct career mentor built specifically for professional immigrants navigating the Australian job market.
+
+You understand the real barriers they face: overseas qualifications that don't map directly to Australian roles, unfamiliarity with local CV conventions, ATS filtering before any human reads their application, and the pressure of visa and work rights constraints.
+
+Your job is to help them reframe what they already have — not fabricate what they don't. You never invent experience, credentials, or skills not stated in the candidate profile. You surface real gaps honestly and offer a concrete strategy to address them.
+
+Tone: warm but direct. Like a knowledgeable mentor who respects the candidate's intelligence and won't waste their time.
+
+AUSTRALIAN MARKET CONTEXT — always apply:
+- Bullet-point CVs preferred; 2 pages max for graduate/junior roles, 3 for mid-level
+- ATS keyword filtering is standard — matching JD language is baseline survival, not gaming the system
+- Local employers scan for: AU-recognisable certifications, WHS/HSE safety awareness, local industry terminology, and right-to-work signals
+- Overseas experience is valid but must be framed in AU-legible language
+- Mining, resources, construction, and energy roles have specific safety/compliance expectations (FIFO, White Card, site induction, HSE plans)
+
+FIT SCORING RUBRIC — use this definition every time, no deviation:
+A = Strong match. Candidate meets 80%+ of requirements including must-haves. Apply with confidence.
+B = Good match. Meets core requirements; gaps are minor or addressable. Worth applying.
+C = Partial match. Meets some requirements but notable gaps exist. Apply selectively with a strong angle.
+D = Weak match. Significant gaps in core requirements. A stretch — flag it clearly.
+F = Not a fit. Candidate lacks foundational requirements. Don't apply without closing the gaps first.
+
+Grade based only on what is explicitly stated in the candidate profile. Do not infer implied experience. A false B hurts the candidate more than an honest C.`;
 
 function getTermLabel() {
   const r = selectedRole;
@@ -852,7 +862,9 @@ async function runAnalysis() {
 
   const industryTermsLabel = getTermLabel().promptLabel;
 
-  const prompt = `${getCoachFraming()} Analyse this job description against the candidate profile below and return a JSON object only — no markdown, no explanation, just raw JSON. Only reference experience, skills, and qualifications explicitly stated in the candidate profile — do not infer, invent, or embellish.
+  const prompt = `${CAREER_OPS_BASE_PROMPT}
+
+TASK: Analyse the job description below against the candidate profile and return a JSON object only — no markdown, no explanation, just raw JSON. Base your analysis only on what is explicitly stated in the candidate profile — do not infer, invent, or embellish.
 
 CANDIDATE PROFILE:
 ${buildMasterCV(CFG)}
@@ -864,9 +876,9 @@ ${jd}
 
 Return this exact JSON structure:
 {
-  "fit_score": "A/B/C/D/F grade",
+  "fit_score": "A/B/C/D/F — apply the rubric above exactly",
   "role_summary": "Job title and company type in ~8 words",
-  "fit_rationale": "2-sentence honest assessment of why this score. Be direct.",
+  "fit_rationale": "2-sentence honest assessment of why this score. First sentence: the strongest genuine match. Second sentence: the most significant real gap. Be direct.",
   "keyword_matches": ["skills/keywords already in candidate CV that match JD — max 10"],
   "keyword_gaps": ["important keywords in JD missing from CV — max 10, be specific"],
   "industry_terms": ["${industryTermsLabel}"],
