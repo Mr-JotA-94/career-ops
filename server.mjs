@@ -14,12 +14,37 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PORT = 3131;
 const CONFIG_FILE    = path.join(__dirname, 'config.json');
 const PIPELINE_FILE  = path.join(__dirname, 'pipeline.json');
-const LICENCES_FILE  = path.join(__dirname, 'licences.json');
+
+// ── Remote licence API (Vercel) ───────────────────────────────────────────
+const LICENCE_API_URL = process.env.LICENCE_API_URL || 'https://careerops-licence-api.vercel.app';
 
 // ── Licence helpers ───────────────────────────────────────────────────────
-function loadLicences() {
-  try { return fs.existsSync(LICENCES_FILE) ? JSON.parse(fs.readFileSync(LICENCES_FILE, 'utf8')) : []; }
-  catch { return []; }
+// validateKeyRemote: calls Vercel endpoint, returns { ok, tier, error }
+function validateKeyRemote(key, email) {
+  return new Promise((resolve) => {
+    const body = JSON.stringify({ key, email });
+    const url  = new URL('/api/validate', LICENCE_API_URL);
+    const opts = {
+      hostname: url.hostname,
+      path:     url.pathname,
+      method:   'POST',
+      headers: {
+        'Content-Type':   'application/json',
+        'Content-Length': Buffer.byteLength(body),
+      },
+    };
+    const req = https.request(opts, res => {
+      let data = '';
+      res.on('data', c => data += c);
+      res.on('end', () => {
+        try { resolve(JSON.parse(data)); }
+        catch { resolve({ ok: false, error: 'Invalid response from licence server.' }); }
+      });
+    });
+    req.on('error', () => resolve({ ok: false, error: 'Could not reach licence server. Check your internet connection.' }));
+    req.write(body);
+    req.end();
+  });
 }
 
 function getLicenceTier() {
@@ -562,30 +587,35 @@ const server = http.createServer((req, res) => {
     return;
   }
 
-  // POST /api/activate → validate licence key and write tier to config
+  // POST /api/activate → validate licence key via remote Vercel API, write tier to config
   if (req.method === 'POST' && req.url === '/api/activate') {
     let body = '';
     req.on('data', c => body += c);
-    req.on('end', () => {
+    req.on('end', async () => {
       try {
         const { key } = JSON.parse(body);
         if (!key) throw new Error('No key provided');
-        const licences = loadLicences();
-        const match = licences.find(l => l.key === key.trim().toUpperCase());
-        if (!match) {
+
+        if (!LICENCE_API_URL) {
           res.writeHead(200, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ ok: false, error: 'Invalid licence key. Check the key and try again.' }));
+          res.end(JSON.stringify({ ok: false, error: 'Licence server not configured. Contact support.' }));
           return;
         }
-        if (match.used_by && match.used_by !== (loadConfig()?.personal?.email || '')) {
+
+        const email  = loadConfig()?.personal?.email || '';
+        const result = await validateKeyRemote(key.trim().toUpperCase(), email);
+
+        if (!result.ok) {
           res.writeHead(200, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ ok: false, error: 'This key has already been activated on another profile.' }));
+          res.end(JSON.stringify({ ok: false, error: result.error || 'Invalid licence key.' }));
           return;
         }
-        saveLicenceToConfig(match.tier, key.trim().toUpperCase());
-        console.log(`  ✓ Licence activated: ${key.trim().toUpperCase()} (${match.tier})`);
+
+        saveLicenceToConfig(result.tier, key.trim().toUpperCase());
+        console.log(`  ✓ Licence activated: ${key.trim().toUpperCase()} (${result.tier})`);
         res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ ok: true, tier: match.tier }));
+        res.end(JSON.stringify({ ok: true, tier: result.tier }));
+
       } catch (err) {
         res.writeHead(400, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ ok: false, error: err.message }));
@@ -878,8 +908,7 @@ server.listen(PORT, '127.0.0.1', () => {
     const name = `${cfg.personal?.first_name || ''} ${cfg.personal?.last_name || ''}`.trim();
     console.log(`  ✓  Profile : ${name}`);
     console.log(`  ✓  API key : ${hasKey ? 'loaded' : '⚠ MISSING — re-run setup'}`);
-    const licences = loadLicences();
-    console.log(`  ✓  Licences: ${licences.length} key${licences.length !== 1 ? 's' : ''} in licences.json`);
+    console.log(`  ✓  Licence : ${LICENCE_API_URL ? LICENCE_API_URL : '⚠ LICENCE_API_URL not set'}`);
     const tier = getLicenceTier();
     console.log(`  ✓  This install: ${tier.toUpperCase()} tier`);
     console.log('');
