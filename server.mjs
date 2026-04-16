@@ -4,6 +4,7 @@ import fs from 'fs';
 import path from 'path';
 import zlib from 'zlib';
 import { fileURLToPath } from 'url';
+import crypto from 'crypto';
 import {
   Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell,
   AlignmentType, BorderStyle, WidthType, ShadingType, LevelFormat,
@@ -19,10 +20,18 @@ const PIPELINE_FILE  = path.join(__dirname, 'pipeline.json');
 const LICENCE_API_URL = process.env.LICENCE_API_URL || 'https://careerops-licence-api.vercel.app';
 
 // ── Licence helpers ───────────────────────────────────────────────────────
-// validateKeyRemote: calls Vercel endpoint, returns { ok, tier, error }
-function validateKeyRemote(key, email) {
+function getOrCreateDeviceId() {
+  const cfg = loadConfig() || {};
+  if (cfg.device_id) return cfg.device_id;
+  const id = crypto.randomUUID();
+  cfg.device_id = id;
+  fs.writeFileSync(CONFIG_FILE, JSON.stringify(cfg, null, 2));
+  return id;
+}
+
+function validateKeyRemote(key, deviceId) {
   return new Promise((resolve) => {
-    const body = JSON.stringify({ key, email });
+    const body = JSON.stringify({ key, device_id: deviceId });
     const url  = new URL('/api/validate', LICENCE_API_URL);
     const opts = {
       hostname: url.hostname,
@@ -42,6 +51,34 @@ function validateKeyRemote(key, email) {
       });
     });
     req.on('error', () => resolve({ ok: false, error: 'Could not reach licence server. Check your internet connection.' }));
+    req.write(body);
+    req.end();
+  });
+}
+
+function verifyLicenceOnStartup(key, deviceId) {
+  return new Promise((resolve) => {
+    const body = JSON.stringify({ key, device_id: deviceId });
+    const url  = new URL('/api/verify', LICENCE_API_URL);
+    const opts = {
+      hostname: url.hostname,
+      path:     url.pathname,
+      method:   'POST',
+      headers: {
+        'Content-Type':   'application/json',
+        'Content-Length': Buffer.byteLength(body),
+      },
+    };
+    const req = https.request(opts, res => {
+      let data = '';
+      res.on('data', c => data += c);
+      res.on('end', () => {
+        try { resolve(JSON.parse(data)); }
+        catch { resolve(null); }
+      });
+    });
+    req.on('error', () => resolve(null)); // fail open on network error
+    req.setTimeout(4000, () => { req.destroy(); resolve(null); }); // 4s timeout
     req.write(body);
     req.end();
   });
@@ -602,8 +639,8 @@ const server = http.createServer((req, res) => {
           return;
         }
 
-        const email  = loadConfig()?.personal?.email || '';
-        const result = await validateKeyRemote(key.trim().toUpperCase(), email);
+        const deviceId = getOrCreateDeviceId();
+        const result = await validateKeyRemote(key.trim().toUpperCase(), deviceId);
 
         if (!result.ok) {
           res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -887,7 +924,7 @@ Extract only what is explicitly stated. For experience end date, use "Present" i
   fs.createReadStream(filePath).pipe(res);
 });
 
-server.listen(PORT, '127.0.0.1', () => {
+server.listen(PORT, '127.0.0.1', async () => {
   const cfg = loadConfig();
   const hasKey = !!getGroqKey();
   const base = `http://localhost:${PORT}`;
@@ -909,8 +946,21 @@ server.listen(PORT, '127.0.0.1', () => {
     console.log(`  ✓  Profile : ${name}`);
     console.log(`  ✓  API key : ${hasKey ? 'loaded' : '⚠ MISSING — re-run setup'}`);
     console.log(`  ✓  Licence : ${LICENCE_API_URL ? LICENCE_API_URL : '⚠ LICENCE_API_URL not set'}`);
+    // ── Startup licence verification ──────────────────────────────────────
     const tier = getLicenceTier();
-    console.log(`  ✓  This install: ${tier.toUpperCase()} tier`);
+    if (tier !== 'free' && cfg.licence?.key && cfg.device_id) {
+      const check = await verifyLicenceOnStartup(cfg.licence.key, cfg.device_id);
+      if (check === null) {
+        console.log('  ⚠  Licence check skipped — could not reach server');
+      } else if (!check.ok) {
+        console.log('  ⚠  Licence verification failed — reverting to free tier');
+        saveLicenceToConfig('free', '');
+      } else {
+        console.log(`  ✓  Licence : ${tier.toUpperCase()} tier verified`);
+      }
+    } else {
+      console.log(`  ✓  Licence : ${tier.toUpperCase()} tier`);
+    }
     console.log('');
     console.log('  🔗 Open in browser:');
     console.log(`     Setup      →  ${base}/setup.html`);
