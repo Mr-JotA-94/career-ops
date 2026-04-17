@@ -674,6 +674,34 @@ const server = http.createServer((req, res) => {
     return;
   }
 
+  // GET /api/key-status → silently verify saved Groq key without exposing it
+  if (req.method === 'GET' && req.url === '/api/key-status') {
+    const key = getGroqKey();
+    if (!key) {
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ ok: false, reason: 'no_key' }));
+      return;
+    }
+    const testPayload = JSON.stringify({ model: 'llama-3.3-70b-versatile', max_tokens: 10, messages: [{ role: 'user', content: 'Hi' }] });
+    const opts = {
+      hostname: 'api.groq.com', path: '/openai/v1/chat/completions', method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key}`, 'Content-Length': Buffer.byteLength(testPayload) },
+    };
+    const apiReq = https.request(opts, apiRes => {
+      let data = '';
+      apiRes.on('data', c => data += c);
+      apiRes.on('end', () => {
+        const ok = apiRes.statusCode === 200;
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ ok, reason: ok ? 'valid' : 'invalid' }));
+      });
+    });
+    apiReq.on('error', () => { res.writeHead(200); res.end(JSON.stringify({ ok: false, reason: 'network_error' })); });
+    apiReq.write(testPayload);
+    apiReq.end();
+    return;
+  }
+
   // POST /api/test-key → verify Groq key works
   if (req.method === 'POST' && req.url === '/api/test-key') {
     let body = '';
@@ -701,13 +729,18 @@ const server = http.createServer((req, res) => {
     return;
   }
 
-  // POST /api/save-config → write config.json
+  // POST /api/save-config → write config.json (preserve device_id + licence)
   if (req.method === 'POST' && req.url === '/api/save-config') {
     let body = '';
     req.on('data', c => body += c);
     req.on('end', () => {
       try {
-        const data = JSON.parse(body);
+        const incoming = JSON.parse(body);
+        const existing = loadConfig() || {};
+        // Never let the browser overwrite device_id or licence — merge them in
+        const data = { ...incoming };
+        if (existing.device_id) data.device_id = existing.device_id;
+        if (existing.licence)   data.licence   = existing.licence;
         fs.writeFileSync(CONFIG_FILE, JSON.stringify(data, null, 2));
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ ok: true }));
@@ -855,10 +888,17 @@ Return ONLY this exact JSON structure — no markdown, no explanation:
     "tools": "",
     "languages": "",
     "certifications": ""
-  }
+  },
+  "inferred_categories": [],
+  "inferred_industries": []
 }
 
-Extract only what is explicitly stated. For experience end date, use "Present" if the role is current.`;
+For inferred_categories, select only values that genuinely match from this list: petroleum_engineering, data_analytics, data_science, business_intelligence, operations_analytics, ai_ml, software_engineering, civil_engineering, mechanical_engineering, electrical_engineering, chemical_engineering, environmental_engineering, accounting_finance, hr_people, marketing, sales, supply_chain, healthcare, education, consulting, project_management, operations_management, architecture, legal, hospitality, construction, administration, customer_service
+
+For inferred_industries, select only values that genuinely match from this list: oil_gas, energy, mining, construction, manufacturing, tech, fintech, banking, consulting_industry, government, defence, healthcare, education, agriculture, transport, retail, media, real_estate, environmental, nonprofit, hospitality
+
+Only include values you are confident about based on the CV. Return empty arrays if nothing is a clear match.
+Extract only what is explicitly stated in the CV. For experience end date, use "Present" if the role is current.`;
 
         const payload = JSON.stringify({
           model: 'llama-3.3-70b-versatile',

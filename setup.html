@@ -354,15 +354,15 @@ select option { background: white; }
     <p class="step-sub">Basic contact details — these appear on every generated CV and email.</p>
 
     <div class="field-row">
-      <div><label>First Name *</label><input type="text" id="s1-fname" placeholder="Johan"></div>
-      <div><label>Last Name *</label><input type="text" id="s1-lname" placeholder="Lopez"></div>
+      <div><label>First Name *</label><input type="text" id="s1-fname" placeholder="Alex"></div>
+      <div><label>Last Name *</label><input type="text" id="s1-lname" placeholder="Smith"></div>
     </div>
     <div class="field-row">
       <div><label>Email *</label><input type="email" id="s1-email" placeholder="you@email.com"></div>
       <div><label>Phone *</label><input type="text" id="s1-phone" placeholder="04xx xxx xxx"></div>
     </div>
     <div class="field-row">
-      <div><label>City / State *</label><input type="text" id="s1-location" placeholder="Brisbane, QLD"></div>
+      <div><label>City / State *</label><input type="text" id="s1-location" placeholder="Sydney, NSW"></div>
       <div><label>LinkedIn URL</label><input type="text" id="s1-linkedin" placeholder="linkedin.com/in/yourname"></div>
     </div>
     <div class="field">
@@ -376,7 +376,7 @@ select option { background: white; }
     </div>
     <div class="field">
       <label>One-line professional tagline</label>
-      <input type="text" id="s1-tagline" placeholder="e.g. Petroleum Engineer · Data Analytics & AI">
+      <input type="text" id="s1-tagline" placeholder="e.g. Project Manager · Infrastructure & Construction">
     </div>
 
     <!-- CV Upload -->
@@ -565,11 +565,11 @@ select option { background: white; }
 
     <div class="field">
       <label>Technical Skills</label>
-      <textarea id="s6-technical" rows="3" placeholder="Python, SQL, Power BI, Reservoir simulation, Drilling hydraulics, CFD, TensorFlow, Scikit-learn..."></textarea>
+      <textarea id="s6-technical" rows="3" placeholder="e.g. Python, SQL, AutoCAD, Project scheduling, Cost estimation, Structural analysis..."></textarea>
     </div>
     <div class="field">
       <label>Tools & Software</label>
-      <textarea id="s6-tools" rows="2" placeholder="Business Central, Looker, Tableau, MATLAB, ANSYS..."></textarea>
+      <textarea id="s6-tools" rows="2" placeholder="e.g. MS Project, Primavera, SAP, Salesforce, Jira, Xero..."></textarea>
     </div>
     <div class="field">
       <label>Languages</label>
@@ -577,11 +577,11 @@ select option { background: white; }
     </div>
     <div class="field">
       <label>Certifications & Awards</label>
-      <textarea id="s6-certs" rows="3" placeholder="IBM Data Science Methodology, Study QLD Innovation Challenge 2025, Company Innovation Award FY24..."></textarea>
+      <textarea id="s6-certs" rows="3" placeholder="e.g. PMP Certification, AWS Solutions Architect, White Card, Driver Licence (Manual)..."></textarea>
     </div>
     <div class="field">
       <label>Key differentiator — what makes you unusual?</label>
-      <textarea id="s6-differentiator" rows="2" placeholder="e.g. Rare combination of petroleum engineering fundamentals and applied data analytics — can bridge operational O&G knowledge with digital tooling."></textarea>
+      <textarea id="s6-differentiator" rows="2" placeholder="e.g. Bilingual engineer with hands-on trade experience and formal degree — bridges technical and operational teams."></textarea>
     </div>
 
     <div class="step-nav">
@@ -643,6 +643,7 @@ let currentStep = 1;
 let jobCount = 0;
 let eduCount = 0;
 let apiKey = '';
+let savedKeyValid = false; // set true by silentVerifyKey if server confirms key is active
 let recommendations = [];
 
 // ── Chip toggles ───────────────────────────────────────────────────────────
@@ -723,6 +724,7 @@ function goStep(n) {
 // ── Validation ─────────────────────────────────────────────────────────────
 function validateStep(step) {
   if (step === 1) {
+    if (savedKeyValid) return true; // server already confirmed saved key is active
     const key = document.getElementById('s2-apikey').value.trim();
     if (!key || !key.startsWith('gsk_')) {
       document.getElementById('key-error').classList.add('show');
@@ -857,21 +859,21 @@ function addJob() {
       ${n > 1 ? `<button class="btn-remove" onclick="removeBlock('job-${n}')">Remove</button>` : ''}
     </div>
     <div class="field-row">
-      <div><label>Job Title</label><input type="text" id="job-${n}-title" placeholder="Operations Analyst"></div>
-      <div><label>Company</label><input type="text" id="job-${n}-company" placeholder="Microair Avionics"></div>
+      <div><label>Job Title</label><input type="text" id="job-${n}-title" placeholder="e.g. Site Engineer"></div>
+      <div><label>Company</label><input type="text" id="job-${n}-company" placeholder="e.g. Acme Construction"></div>
     </div>
     <div class="field-row">
-      <div><label>Start Date</label><input type="text" id="job-${n}-start" placeholder="Oct 2025"></div>
-      <div><label>End Date</label><input type="text" id="job-${n}-end" placeholder="Present"></div>
+      <div><label>Start Date</label><input type="text" id="job-${n}-start" placeholder="e.g. Jan 2022"></div>
+      <div><label>End Date</label><input type="text" id="job-${n}-end" placeholder="Present or e.g. Dec 2024"></div>
     </div>
     <div class="field">
       <label>Location</label>
-      <input type="text" id="job-${n}-location" placeholder="Brisbane, AU">
+      <input type="text" id="job-${n}-location" placeholder="e.g. Melbourne, VIC">
     </div>
     <div class="field">
       <label>Bullet points (one per line)</label>
-      <textarea id="job-${n}-bullets" rows="5" placeholder="Built Power BI dashboards consuming Business Central data, delivering real-time visibility across two markets.
-Mapped cross-department workflows, identifying bottlenecks and reducing manual adjustments."></textarea>
+      <textarea id="job-${n}-bullets" rows="5" placeholder="Led a team of 6 on a $2M infrastructure project, delivering on time and under budget.
+Identified process gaps that reduced rework by 30% across two project sites."></textarea>
     </div>`;
   document.getElementById('jobs-container').appendChild(div);
 }
@@ -888,19 +890,19 @@ function addEdu() {
     </div>
     <div class="field">
       <label>Degree / Qualification</label>
-      <input type="text" id="edu-${n}-degree" placeholder="Master of Information Technology — Data Analytics">
+      <input type="text" id="edu-${n}-degree" placeholder="e.g. Bachelor of Engineering (Civil)">
     </div>
     <div class="field-row">
-      <div><label>Institution</label><input type="text" id="edu-${n}-institution" placeholder="Kaplan Business School"></div>
-      <div><label>Location</label><input type="text" id="edu-${n}-location" placeholder="Brisbane, Australia"></div>
+      <div><label>Institution</label><input type="text" id="edu-${n}-institution" placeholder="e.g. University of Queensland"></div>
+      <div><label>Location</label><input type="text" id="edu-${n}-location" placeholder="e.g. Brisbane, Australia"></div>
     </div>
     <div class="field-row">
-      <div><label>Start Year</label><input type="text" id="edu-${n}-start" placeholder="2024"></div>
-      <div><label>End Year</label><input type="text" id="edu-${n}-end" placeholder="2026 (expected)"></div>
+      <div><label>Start Year</label><input type="text" id="edu-${n}-start" placeholder="e.g. 2018"></div>
+      <div><label>End Year</label><input type="text" id="edu-${n}-end" placeholder="e.g. 2022"></div>
     </div>
     <div class="field">
       <label>Key focus areas</label>
-      <input type="text" id="edu-${n}-focus" placeholder="Machine learning, data analytics, AI ethics, information systems">
+      <input type="text" id="edu-${n}-focus" placeholder="e.g. Structural design, project management, materials science">
     </div>`;
   document.getElementById('edu-container').appendChild(div);
 }
@@ -981,6 +983,7 @@ function collectData() {
 function buildReview() {
   const d = collectData();
   const p = d.personal;
+  const s = d.skills;
   const html = `
     <div class="review-section">
       <div class="review-label">Personal</div>
@@ -988,21 +991,30 @@ function buildReview() {
       <div class="review-row"><span class="review-key">Contact</span>${p.email} · ${p.phone}</div>
       <div class="review-row"><span class="review-key">Location</span>${p.location}</div>
       <div class="review-row"><span class="review-key">Tagline</span>${p.tagline || '—'}</div>
-      <div class="review-row"><span class="review-key">Availability</span>${p.availability.join(', ')}</div>
+      <div class="review-row"><span class="review-key">Availability</span>${p.availability.join(', ') || '—'}</div>
     </div>
     <div class="review-section">
       <div class="review-label">Target Roles</div>
-      <div class="review-row"><span class="review-key">Categories</span>${d.targets.categories.join(', ')}</div>
-      <div class="review-row"><span class="review-key">Seniority</span>${d.targets.seniority.join(', ')}</div>
-      <div class="review-row"><span class="review-key">Industries</span>${d.targets.industries.join(', ')}</div>
+      <div class="review-row"><span class="review-key">Categories</span>${d.targets.categories.join(', ') || '—'}</div>
+      <div class="review-row"><span class="review-key">Seniority</span>${d.targets.seniority.join(', ') || '—'}</div>
+      <div class="review-row"><span class="review-key">Industries</span>${d.targets.industries.join(', ') || '—'}</div>
+      <div class="review-row"><span class="review-key">Summary</span>${d.targets.summary ? d.targets.summary.slice(0, 120) + (d.targets.summary.length > 120 ? '…' : '') : '—'}</div>
     </div>
     <div class="review-section">
       <div class="review-label">Experience (${d.experience.length} roles)</div>
-      ${d.experience.map(j => `<div class="review-row"><span class="review-key">${j.start}–${j.end}</span>${j.title} @ ${j.company}</div>`).join('')}
+      ${d.experience.length ? d.experience.map(j => `<div class="review-row"><span class="review-key">${j.start}–${j.end}</span>${j.title} @ ${j.company}</div>`).join('') : '<div class="review-row"><span class="review-key">—</span>No roles added</div>'}
     </div>
     <div class="review-section">
       <div class="review-label">Education (${d.education.length} entries)</div>
-      ${d.education.map(e => `<div class="review-row"><span class="review-key">${e.start}–${e.end}</span>${e.degree}</div>`).join('')}
+      ${d.education.length ? d.education.map(e => `<div class="review-row"><span class="review-key">${e.start}–${e.end}</span>${e.degree}</div>`).join('') : '<div class="review-row"><span class="review-key">—</span>No education added</div>'}
+    </div>
+    <div class="review-section">
+      <div class="review-label">Skills & Credentials</div>
+      <div class="review-row"><span class="review-key">Technical</span>${s.technical || '—'}</div>
+      <div class="review-row"><span class="review-key">Tools</span>${s.tools || '—'}</div>
+      <div class="review-row"><span class="review-key">Languages</span>${s.languages || '—'}</div>
+      <div class="review-row"><span class="review-key">Certifications</span>${s.certifications || '—'}</div>
+      ${s.differentiator ? `<div class="review-row"><span class="review-key">Differentiator</span>${s.differentiator}</div>` : ''}
     </div>
     <div class="review-section">
       <div class="review-label">API Key</div>
@@ -1043,7 +1055,10 @@ async function handleCVUpload(file) {
     const data = await res.json();
     if (!data.ok) throw new Error(data.error || 'Parse failed');
     prefillFromProfile(data.profile);
-    setUploadStatus('success', `✓ CV imported — review each step before saving.`);
+    applyInferredChips(data.profile);
+    const inferCount = (data.profile?.inferred_categories?.length || 0) + (data.profile?.inferred_industries?.length || 0);
+    const inferNote = inferCount > 0 ? ` — ${inferCount} role/industry chips pre-selected from your CV` : '';
+    setUploadStatus('success', `✓ CV imported${inferNote}. Review each step before saving.`);
   } catch (err) {
     setUploadStatus('error', `Import failed: ${err.message}`);
   }
@@ -1054,6 +1069,58 @@ function setUploadStatus(type, msg) {
   el.style.display = 'block';
   el.style.color = type === 'error' ? 'var(--red)' : type === 'success' ? 'var(--green)' : 'var(--muted)';
   el.textContent = msg;
+}
+
+// ── Silent key check on page load ─────────────────────────────────────────
+async function silentVerifyKey() {
+  try {
+    const res = await fetch('/api/key-status');
+    const data = await res.json();
+    const keyInput = document.getElementById('s2-apikey');
+    const keyHint  = document.querySelector('.key-hint');
+    const errEl    = document.getElementById('key-error');
+    if (data.ok) {
+      savedKeyValid = true;
+      if (keyInput) {
+        keyInput.placeholder = '••••••••••••••••••••• (saved key active)';
+        keyInput.style.borderColor = 'var(--green)';
+      }
+      if (keyHint) {
+        keyHint.textContent = '✓ Saved API key is active — no changes needed.';
+        keyHint.style.color = 'var(--green)';
+      }
+      if (errEl) errEl.classList.remove('show');
+    } else if (data.reason === 'invalid') {
+      savedKeyValid = false;
+      if (keyInput) keyInput.classList.add('form-error');
+      if (errEl) {
+        errEl.textContent = 'Your saved key appears invalid or expired — please enter a new one.';
+        errEl.classList.add('show');
+      }
+    }
+    // reason === 'no_key' → fresh setup, do nothing
+  } catch(e) {
+    // network error — fail silently
+  }
+}
+
+// ── Apply AI-inferred chips from parse-resume response ─────────────────────
+function applyInferredChips(profile) {
+  if (!profile) return;
+  const cats = profile.inferred_categories || [];
+  const inds  = profile.inferred_industries  || [];
+  cats.forEach(val => {
+    const chip = document.querySelector(`#s3-categories [data-val="${val}"]`);
+    if (chip && !chip.classList.contains('selected')) chip.classList.add('selected');
+  });
+  inds.forEach(val => {
+    const chip = document.querySelector(`#s3-industries [data-val="${val}"]`);
+    if (chip && !chip.classList.contains('selected')) chip.classList.add('selected');
+  });
+  if (cats.length || inds.length) {
+    const sub = document.querySelector('#step3 .step-sub');
+    if (sub) sub.textContent = 'Based on your CV, we\'ve pre-selected likely matches — confirm or adjust before continuing.';
+  }
 }
 
 function prefillFromProfile(p) {
@@ -1202,6 +1269,8 @@ async function setupActivateLicence() {
 // Check licence status when complete screen is shown
 // Check licence on page load
 checkCurrentLicence();
+// Silently verify saved Groq key on page load
+silentVerifyKey();
 
 </script>
 
