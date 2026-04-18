@@ -23,3 +23,10 @@ desktop.ini
 *.swo
 licences.json
 generate-key.mjs
+#Claude Specs .md
+Specs/
+CLAUDE.md
+commits.md
+*.marketing-brief.docx
+marketing-brief*.docx
+*fixes.md

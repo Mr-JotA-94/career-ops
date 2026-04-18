@@ -230,9 +230,9 @@ SERVER_PID=$!
 sleep 2
 
 # Open browser
-open "http://localhost:3131/hub.html" 2>/dev/null || \
-xdg-open "http://localhost:3131/hub.html" 2>/dev/null || \
-echo -e "  Open this in your browser: ${BOLD}http://localhost:3131/hub.html${RESET}"
+open "http://localhost:3131/setup.html" 2>/dev/null || \
+xdg-open "http://localhost:3131/setup.html" 2>/dev/null || \
+echo -e "  Open this in your browser: ${BOLD}http://localhost:3131/setup.html${RESET}"
 
 echo ""
 echo -e "  Press ${BOLD}Ctrl+C${RESET} to stop the server when done."
