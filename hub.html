@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hub — Career Ops</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🏠%3C/text%3E%3C/svg%3E">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:     #07111E;
+  --surface:#0F1E30;
+  --card:   #142030;
+  --border: #1E3248;
+  --muted:  #4A6580;
+  --text:   #C8DDF0;
+  --bright: #EAF4FF;
+  --navy:   #0D1F35;
+  --teal:   #0E9B8A;
+  --teal2:  #07C5B0;
+  --amber:  #F5A623;
+  --red:    #E8504A;
+  --green:  #2ECC8F;
+  --purple: #9B72CF;
+  --mono:   'DM Mono', monospace;
+  --sans:   'Syne', sans-serif;
+}
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--mono);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image:
+    linear-gradient(rgba(14,155,138,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(14,155,138,0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none; z-index: 0;
+}
+
+.app { position: relative; z-index: 1; display: flex; flex-direction: column; min-height: 100vh; }
+
+/* ── Topbar ── */
+.topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 28px; border-bottom: 1px solid var(--border);
+  background: rgba(7,17,30,0.92); backdrop-filter: blur(10px);
+  position: sticky; top: 0; z-index: 100;
+}
+.topbar-left  { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.topbar-right { display: flex; align-items: center; gap: 8px; }
+.logo { font-family: var(--sans); font-size: 15px; font-weight: 800; color: var(--bright); letter-spacing: -0.02em; text-decoration: none; }
+.logo span { color: var(--teal); }
+.tool-tag {
+  font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase;
+  color: var(--teal); border: 1px solid var(--teal);
+  padding: 2px 8px; border-radius: 2px; font-family: var(--mono);
+}
+.nav-links { display: flex; gap: 4px; flex-wrap: wrap; }
+.nav-link {
+  font-size: 11px; font-family: var(--mono); color: var(--muted);
+  text-decoration: none; padding: 5px 11px;
+  border: 1px solid var(--border); border-radius: 3px;
+  transition: color 0.15s, border-color 0.15s; white-space: nowrap;
+}
+.nav-link:hover { color: var(--teal); border-color: var(--teal); }
+.nav-link.active { color: var(--teal); border-color: var(--teal); background: rgba(14,155,138,0.08); }
+
+/* ── Status badges (verbatim from pipeline.html) ── */
+.badge {
+  display: inline-block; font-size: 10px;
+  padding: 3px 9px; border-radius: 3px;
+  font-family: var(--mono); letter-spacing: 0.06em;
+  font-weight: 500; white-space: nowrap;
+}
+.badge-draft     { background: rgba(74,101,128,0.2);   color: var(--muted);  border: 1px solid var(--border); }
+.badge-applied   { background: rgba(14,155,138,0.12);  color: var(--teal);   border: 1px solid rgba(14,155,138,0.3); }
+.badge-screening { background: rgba(155,114,207,0.12); color: var(--purple); border: 1px solid rgba(155,114,207,0.3); }
+.badge-interview { background: rgba(245,166,35,0.12);  color: var(--amber);  border: 1px solid rgba(245,166,35,0.3); }
+.badge-offer     { background: rgba(46,204,143,0.12);  color: var(--green);  border: 1px solid rgba(46,204,143,0.3); }
+.badge-rejected  { background: rgba(232,80,74,0.08);   color: var(--red);    border: 1px solid rgba(232,80,74,0.3); }
+.badge-withdrawn { background: rgba(74,101,128,0.12);  color: var(--muted);  border: 1px solid var(--border); }
+
+/* ── Tier badge ── */
+.tier-badge {
+  display: inline-block; font-size: 9px; letter-spacing: 0.12em;
+  text-transform: uppercase; padding: 2px 8px; border-radius: 2px;
+  font-family: var(--mono); font-weight: 500;
+}
+.tier-free      { background: rgba(74,101,128,0.18);  color: var(--muted); border: 1px solid var(--border); }
+.tier-community { background: rgba(14,155,138,0.14);  color: var(--teal);  border: 1px solid rgba(14,155,138,0.3); }
+.tier-external  { background: rgba(245,166,35,0.12);  color: var(--amber); border: 1px solid rgba(245,166,35,0.3); }
+
+/* ── Profile strip ── */
+.profile-strip {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 28px; border-bottom: 1px solid var(--border);
+  background: var(--surface); gap: 20px; flex-wrap: wrap;
+}
+.profile-left { flex: 1; min-width: 160px; }
+.profile-name { font-family: var(--sans); font-size: 17px; font-weight: 700; color: var(--bright); }
+.profile-tagline { font-size: 12px; color: var(--muted); margin-top: 3px; }
+.profile-center {
+  display: flex; align-items: center; gap: 7px;
+  font-size: 12px; color: var(--muted); flex-wrap: wrap;
+}
+.profile-dot { color: var(--border); }
+.profile-stat { color: var(--text); }
+.profile-edit-wrap { position: relative; }
+.profile-edit {
+  font-size: 11px; color: var(--teal);
+  font-family: var(--mono); white-space: nowrap;
+  padding: 5px 12px; border: 1px solid rgba(14,155,138,0.3);
+  border-radius: 3px; transition: all 0.15s;
+  background: transparent; cursor: pointer;
+}
+.profile-edit:hover { background: rgba(14,155,138,0.08); border-color: var(--teal); }
+.edit-menu {
+  display: none; position: absolute; right: 0; top: calc(100% + 6px);
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 6px; min-width: 210px; z-index: 200;
+  overflow: hidden; box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+}
+.edit-menu.open { display: block; }
+.edit-menu a {
+  display: block; padding: 10px 16px;
+  font-size: 12px; font-family: var(--mono); color: var(--text);
+  text-decoration: none; border-bottom: 1px solid var(--border);
+  transition: background 0.12s, color 0.12s;
+}
+.edit-menu a:last-child { border-bottom: none; }
+.edit-menu a:hover { background: rgba(14,155,138,0.1); color: var(--teal); }
+
+/* ── Toast ── */
+.toast {
+  position: fixed; bottom: 28px; right: 28px; z-index: 9999;
+  background: var(--card); border: 1px solid var(--teal);
+  color: var(--teal); font-family: var(--mono); font-size: 13px;
+  padding: 12px 20px; border-radius: 6px;
+  opacity: 0; transform: translateY(8px);
+  transition: opacity 0.3s, transform 0.3s;
+  pointer-events: none;
+}
+.toast.toast-show { opacity: 1; transform: translateY(0); }
+
+/* ── Main ── */
+.main { flex: 1; padding: 32px 28px; max-width: 1100px; width: 100%; margin: 0 auto; }
+
+/* ── Section header ── */
+.section-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 16px;
+}
+.section-title {
+  font-family: var(--sans); font-size: 11px; font-weight: 700;
+  color: var(--muted); letter-spacing: 0.12em; text-transform: uppercase;
+}
+.section-link {
+  font-size: 11px; color: var(--teal); text-decoration: none;
+  font-family: var(--mono); transition: color 0.15s;
+}
+.section-link:hover { color: var(--teal2); }
+
+/* ── Tool grid ── */
+.tool-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px; margin-bottom: 40px;
+}
+
+.tool-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 8px; padding: 22px 20px 18px;
+  cursor: pointer; text-decoration: none; color: inherit;
+  transition: transform 0.18s, border-color 0.18s, box-shadow 0.18s;
+  display: flex; flex-direction: column;
+  position: relative;
+}
+.tool-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(14,155,138,0.4);
+  box-shadow: 0 10px 32px rgba(0,0,0,0.35);
+}
+.tool-card.locked { opacity: 0.52; }
+.tool-card.locked:hover {
+  transform: translateY(-2px);
+  border-color: rgba(74,101,128,0.4);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+}
+
+.tool-emoji { font-size: 26px; margin-bottom: 12px; line-height: 1; display: block; }
+.tool-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; margin-bottom: 6px; }
+.tool-name { font-family: var(--sans); font-size: 14px; font-weight: 700; color: var(--bright); }
+.lock-badge {
+  font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase;
+  background: rgba(74,101,128,0.15); color: var(--muted);
+  border: 1px solid var(--border); padding: 2px 7px; border-radius: 2px;
+  font-family: var(--mono); white-space: nowrap; flex-shrink: 0; margin-top: 2px;
+}
+.tool-desc {
+  font-size: 12px; color: var(--muted); line-height: 1.6;
+  flex: 1; margin-bottom: 16px;
+}
+.tool-divider { height: 1px; background: var(--border); margin-bottom: 12px; }
+.tool-last-used { font-size: 11px; color: var(--muted); font-family: var(--mono); }
+.tool-last-used.has-date { color: var(--text); }
+
+/* ── Recent activity ── */
+.activity-row {
+  display: flex; align-items: center; gap: 14px;
+  padding: 13px 0; border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+.activity-row:last-child { border-bottom: none; }
+.activity-company { font-family: var(--sans); font-weight: 700; color: var(--bright); font-size: 13px; min-width: 130px; }
+.activity-role { font-size: 12px; color: var(--text); flex: 1; min-width: 120px; }
+.activity-date { font-size: 11px; color: var(--muted); white-space: nowrap; }
+.activity-empty { font-size: 13px; color: var(--muted); font-style: italic; padding: 24px 0; }
+
+/* ── Upgrade modal (verbatim from pipeline.html) ── */
+.upgrade-overlay {
+  display: none; position: fixed; inset: 0; z-index: 9000;
+  background: rgba(6,14,24,0.85); backdrop-filter: blur(6px);
+  align-items: center; justify-content: center;
+}
+.upgrade-overlay.show { display: flex; animation: fadeIn 0.25s ease; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.upgrade-modal {
+  background: #0C1A28; border: 1px solid #1A3045;
+  border-radius: 10px; padding: 40px; max-width: 480px; width: 90%;
+  position: relative;
+}
+.upgrade-badge {
+  display: inline-block; font-size: 9px; letter-spacing: 0.18em;
+  text-transform: uppercase; color: #0AA898;
+  border: 1px solid rgba(10,168,152,0.35); padding: 3px 10px;
+  border-radius: 2px; margin-bottom: 16px;
+}
+.upgrade-title {
+  font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 700;
+  color: #E8F2FF; margin-bottom: 10px; line-height: 1.3;
+}
+.upgrade-sub { font-size: 13px; color: #4A6480; line-height: 1.75; margin-bottom: 28px; }
+.upgrade-options { display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; }
+.upgrade-btn-primary {
+  display: block; width: 100%; padding: 14px 20px; text-align: center;
+  background: #0AA898; color: #060E18; border: none; border-radius: 4px;
+  font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700;
+  letter-spacing: 0.05em; cursor: pointer; text-decoration: none;
+  transition: background 0.2s;
+}
+.upgrade-btn-primary:hover { background: #06D4BE; }
+.upgrade-dismiss {
+  position: absolute; top: 16px; right: 20px;
+  font-size: 18px; color: #4A6480; cursor: pointer;
+  background: none; border: none; line-height: 1;
+}
+.upgrade-dismiss:hover { color: #B8D0E8; }
+.upgrade-price { font-size: 11px; color: #4A6480; line-height: 1.6; }
+.upgrade-price strong { color: #B8D0E8; font-weight: 500; }
+.upgrade-price .scratch { text-decoration: line-through; color: #2A4060; font-size: 11px; }
+.upgrade-divider { height: 1px; background: #1A3045; margin: 16px 0; }
+.licence-row { display: flex; gap: 8px; margin-top: 16px; }
+.licence-input {
+  flex: 1; background: #060E18; border: 1px solid #1A3045;
+  border-radius: 4px; color: #B8D0E8; font-family: 'DM Mono', monospace;
+  font-size: 12px; padding: 10px 14px; outline: none;
+  text-transform: uppercase; letter-spacing: 0.08em; transition: border-color 0.2s;
+}
+.licence-input:focus { border-color: #0AA898; }
+.licence-input::placeholder { color: #2A4060; letter-spacing: 0.05em; text-transform: none; }
+.btn-activate {
+  padding: 10px 18px; background: transparent;
+  border: 1px solid #1A3045; border-radius: 4px;
+  color: #4A6480; font-family: 'DM Mono', monospace;
+  font-size: 11px; cursor: pointer; transition: all 0.15s; white-space: nowrap;
+}
+.btn-activate:hover { border-color: #0AA898; color: #0AA898; }
+.btn-activate.loading { opacity: 0.5; cursor: not-allowed; }
+.activate-msg { font-size: 11px; margin-top: 8px; display: none; }
+.activate-msg.ok { color: #1EC87A; display: block; }
+.activate-msg.err { color: #E8504A; display: block; }
+
+/* ── Responsive ── */
+@media (max-width: 860px) {
+  .tool-grid { grid-template-columns: repeat(2, 1fr); }
+  .profile-strip { flex-direction: column; align-items: flex-start; gap: 12px; }
+}
+@media (max-width: 540px) {
+  .tool-grid { grid-template-columns: 1fr; }
+  .main { padding: 20px 16px; }
+  .topbar { padding: 12px 16px; }
+  .profile-strip { padding: 14px 16px; }
+  .nav-links { display: none; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- Topbar -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <a href="/hub.html" class="logo">Career<span>Ops</span></a>
+      <span class="tool-tag">hub</span>
+      <nav class="nav-links">
+        <a class="nav-link active" href="/hub.html">Hub</a>
+        <a class="nav-link" href="/jd-analyser.html">JD Analyser</a>
+        <a class="nav-link" href="/cv-tailor.html">CV Tailor</a>
+        <a class="nav-link" href="/search-kit.html">Search Kit</a>
+        <a class="nav-link" href="/compass.html">Compass</a>
+        <a class="nav-link" href="/pipeline.html">Pipeline</a>
+      </nav>
+    </div>
+    <div class="topbar-right">
+      <span id="user-greeting" style="font-size:11px;color:var(--muted);font-family:var(--mono);"></span>
+    </div>
+  </div>
+
+  <!-- Profile strip -->
+  <div class="profile-strip">
+    <div class="profile-left">
+      <div class="profile-name" id="profile-name">—</div>
+      <div class="profile-tagline" id="profile-tagline">—</div>
+    </div>
+    <div class="profile-center" id="profile-center"></div>
+    <div class="profile-edit-wrap" id="profile-edit-wrap">
+      <button class="profile-edit" onclick="toggleEditMenu(event)" id="edit-profile-btn">Edit Profile ▾</button>
+      <div class="edit-menu" id="edit-menu">
+        <a href="/setup.html?mode=edit&step=2">Personal info</a>
+        <a href="/setup.html?mode=edit&step=3">Target roles &amp; summary</a>
+        <a href="/setup.html?mode=edit&step=4">Add / edit experience</a>
+        <a href="/setup.html?mode=edit&step=5">Add / edit education</a>
+        <a href="/setup.html?mode=edit&step=6">Skills &amp; certifications</a>
+        <a href="/setup.html?mode=edit">Full profile review</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main -->
+  <div class="main">
+
+    <div class="section-header">
+      <div class="section-title">Tools</div>
+    </div>
+    <div class="tool-grid" id="tool-grid"></div>
+
+    <div class="section-header">
+      <div class="section-title">Recent Applications</div>
+      <a href="/pipeline.html" class="section-link">View all →</a>
+    </div>
+    <div id="activity-section"></div>
+
+  </div>
+
+</div>
+
+<!-- Upgrade modal (verbatim from pipeline.html) -->
+<div class="upgrade-overlay" id="upgrade-overlay">
+  <div class="upgrade-modal">
+    <button class="upgrade-dismiss" onclick="closeUpgrade()">&#x2715;</button>
+    <div class="upgrade-badge">Career Ops</div>
+    <h2 class="upgrade-title" id="upgrade-title">Unlock full access</h2>
+    <p class="upgrade-sub" id="upgrade-sub">This feature is part of Career Ops Full Access.</p>
+    <div class="upgrade-options">
+      <a href="https://buy.stripe.com/test_3cIdR14bz9iIdZVcdD9EI00"
+         target="_blank" class="upgrade-btn-primary">Get Full Access &#x2192;</a>
+    </div>
+    <div class="upgrade-price">
+      <strong>Latinos Encorporate members:</strong> use code <strong>LATINOS79</strong> at checkout &#x2014; $79 AUD
+      &nbsp;&#xB7;&nbsp; <span class="scratch">$375 full price</span>
+    </div>
+    <div class="upgrade-price" style="margin-top:4px;">
+      Includes 30-min setup session with Johan &#xB7;
+      <a href="https://calendly.com/jlopez94f/career-ops-setup-session"
+         target="_blank" style="color:#0AA898;text-decoration:none;">Book here</a>
+    </div>
+    <div class="upgrade-divider"></div>
+    <div style="font-size:11px;color:#4A6480;margin-bottom:8px;letter-spacing:0.08em;text-transform:uppercase;">Already have a key?</div>
+    <div class="licence-row">
+      <input class="licence-input" id="licence-key-input"
+             placeholder="COPS-STU-XXXX-XXXX" maxlength="20"
+             oninput="this.value=this.value.toUpperCase()">
+      <button class="btn-activate" id="btn-activate" onclick="activateLicence()">Activate</button>
+    </div>
+    <div class="activate-msg" id="activate-msg"></div>
+  </div>
+</div>
+
+<!-- Footer (verbatim from pipeline.html) -->
+<footer style="text-align:center;padding:28px 20px;border-top:1px solid var(--border);font-size:11px;color:var(--muted);font-family:var(--mono);line-height:1.9;position:relative;z-index:1;">
+  <strong style="color:var(--text);">Career Ops</strong> &nbsp;&middot;&nbsp; Built by <strong style="color:var(--text);">Johan Lopez</strong> &nbsp;&middot;&nbsp; Australia &nbsp;&middot;&nbsp; v1.0
+  &nbsp;&middot;&nbsp; <a href="/about.html" style="color:var(--teal);text-decoration:none;">About &amp; Disclaimer</a>
+</footer>
+
+<script>
+// ── Edit Profile dropdown ────────────────────────────────────────────────────
+function toggleEditMenu(e) {
+  e.stopPropagation();
+  document.getElementById('edit-menu').classList.toggle('open');
+}
+document.addEventListener('click', () => {
+  document.getElementById('edit-menu')?.classList.remove('open');
+});
+
+// ── Toast ────────────────────────────────────────────────────────────────────
+function showToast(msg) {
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.classList.add('toast-show'), 10);
+  setTimeout(() => { t.classList.remove('toast-show'); setTimeout(() => t.remove(), 400); }, 3000);
+}
+
+// ── Licence state ────────────────────────────────────────────────────────────
+let _licenceTier = 'free';
+
+function isPaid() { return _licenceTier === 'community' || _licenceTier === 'external'; }
+
+// ── Upgrade modal (verbatim from pipeline.html) ──────────────────────────────
+function showUpgrade(title, sub) {
+  document.getElementById('upgrade-title').textContent = title || 'Unlock full access';
+  document.getElementById('upgrade-sub').textContent = sub || 'This feature is part of Career Ops Full Access.';
+  document.getElementById('upgrade-overlay').classList.add('show');
+}
+
+function closeUpgrade() {
+  document.getElementById('upgrade-overlay').classList.remove('show');
+  const msg = document.getElementById('activate-msg');
+  msg.className = 'activate-msg'; msg.textContent = '';
+  document.getElementById('licence-key-input').value = '';
+}
+
+async function activateLicence() {
+  const key = document.getElementById('licence-key-input').value.trim();
+  const btn = document.getElementById('btn-activate');
+  const msg = document.getElementById('activate-msg');
+  if (!key) { msg.textContent = 'Enter your licence key.'; msg.className = 'activate-msg err'; return; }
+  btn.textContent = 'Checking...'; btn.classList.add('loading'); btn.disabled = true;
+  try {
+    const r = await fetch('/api/activate', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key }),
+    });
+    const d = await r.json();
+    if (d.ok) {
+      msg.textContent = 'Licence activated! Reloading...';
+      msg.className = 'activate-msg ok';
+      setTimeout(() => location.reload(), 1200);
+    } else {
+      msg.textContent = d.error || 'Invalid key.';
+      msg.className = 'activate-msg err';
+      btn.textContent = 'Activate'; btn.classList.remove('loading'); btn.disabled = false;
+    }
+  } catch {
+    msg.textContent = 'Could not connect. Is the server running?';
+    msg.className = 'activate-msg err';
+    btn.textContent = 'Activate'; btn.classList.remove('loading'); btn.disabled = false;
+  }
+}
+
+// ── Tool definitions ──────────────────────────────────────────────────────────
+const TOOLS = [
+  { emoji: '🔍', name: 'JD Analyser', desc: 'Score any job description against your profile', url: '/jd-analyser.html', paid: false, lastUsedKey: 'pipeline' },
+  { emoji: '📄', name: 'CV Tailor',   desc: 'Generate a tailored CV for a specific role',      url: '/cv-tailor.html',   paid: true,  lastUsedKey: 'pipeline' },
+  { emoji: '🎯', name: 'Search Kit',  desc: 'Find roles matching your targets',                 url: '/search-kit.html',  paid: false, lastUsedKey: null },
+  { emoji: '🧭', name: 'Compass',     desc: 'Map your career direction with AI',                url: '/compass.html',     paid: false, lastUsedKey: null },
+  { emoji: '📋', name: 'Pipeline',    desc: 'Track every application and follow-up',            url: '/pipeline.html',    paid: true,  lastUsedKey: 'pipeline' },
+  { emoji: '⚙️', name: 'Setup',      desc: 'Update your profile and API keys',                 url: '/setup.html',       paid: false, lastUsedKey: null },
+];
+
+const STATUS_META = {
+  draft:     { label: 'Draft',     cls: 'badge-draft' },
+  applied:   { label: 'Applied',   cls: 'badge-applied' },
+  screening: { label: 'Screening', cls: 'badge-screening' },
+  interview: { label: 'Interview', cls: 'badge-interview' },
+  offer:     { label: 'Offer ✓',   cls: 'badge-offer' },
+  rejected:  { label: 'Rejected',  cls: 'badge-rejected' },
+  withdrawn: { label: 'Withdrawn', cls: 'badge-withdrawn' },
+};
+
+function esc(s) {
+  return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function formatDate(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  if (isNaN(d)) return iso;
+  return d.toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
+// ── Render profile strip ─────────────────────────────────────────────────────
+function renderProfile(cfg) {
+  const p = cfg.personal || {};
+  const fullName = [p.first_name, p.last_name].filter(Boolean).join(' ') || '—';
+  const tagline  = p.tagline || '';
+
+  document.getElementById('profile-name').textContent    = fullName;
+  document.getElementById('profile-tagline').textContent = tagline || 'No tagline set';
+  if (p.first_name) document.getElementById('user-greeting').textContent = `👤 ${p.first_name}`;
+
+  const rolesCount = (cfg.targets?.categories || []).length;
+  const expCount   = (cfg.experience || []).length;
+  const tier       = _licenceTier;
+  const tierClass  = tier === 'community' ? 'tier-community' : tier === 'external' ? 'tier-external' : 'tier-free';
+
+  document.getElementById('profile-center').innerHTML =
+    `<span class="profile-stat">${rolesCount} role${rolesCount !== 1 ? 's' : ''} targeted</span>` +
+    `<span class="profile-dot">·</span>` +
+    `<span class="profile-stat">${expCount} experience entr${expCount !== 1 ? 'ies' : 'y'}</span>` +
+    `<span class="profile-dot">·</span>` +
+    `<span class="tier-badge ${tierClass}">${tier.toUpperCase()}</span>`;
+}
+
+// ── Render tool grid ─────────────────────────────────────────────────────────
+function renderTools(pipeline) {
+  const lastDate = pipeline.length
+    ? [...pipeline].sort((a, b) => (b.updated || '') > (a.updated || '') ? 1 : -1)[0]?.updated || null
+    : null;
+
+  document.getElementById('tool-grid').innerHTML = TOOLS.map(t => {
+    const locked = t.paid && !isPaid();
+    const lastUsed = t.lastUsedKey ? lastDate : null;
+
+    const lastUsedHtml = lastUsed
+      ? `<div class="tool-last-used has-date">last used · ${formatDate(lastUsed)}</div>`
+      : `<div class="tool-last-used">not used yet</div>`;
+
+    const lockBadge = locked ? `<span class="lock-badge">🔒 Full Access</span>` : '';
+
+    if (locked) {
+      return `<div class="tool-card locked"
+          onclick="showUpgrade('Unlock ${esc(t.name)}', '${esc(t.desc)}. Included in Career Ops Full Access.')">
+        <span class="tool-emoji">${t.emoji}</span>
+        <div class="tool-header">
+          <div class="tool-name">${esc(t.name)}</div>
+          ${lockBadge}
+        </div>
+        <div class="tool-desc">${esc(t.desc)}</div>
+        <div class="tool-divider"></div>
+        ${lastUsedHtml}
+      </div>`;
+    }
+
+    return `<a class="tool-card" href="${t.url}">
+      <span class="tool-emoji">${t.emoji}</span>
+      <div class="tool-header">
+        <div class="tool-name">${esc(t.name)}</div>
+      </div>
+      <div class="tool-desc">${esc(t.desc)}</div>
+      <div class="tool-divider"></div>
+      ${lastUsedHtml}
+    </a>`;
+  }).join('');
+}
+
+// ── Render recent activity ───────────────────────────────────────────────────
+function renderActivity(pipeline) {
+  const section = document.getElementById('activity-section');
+
+  if (!pipeline.length) {
+    section.innerHTML = `<p class="activity-empty">Your recent applications will appear here once you start tracking.</p>`;
+    return;
+  }
+
+  const recent = [...pipeline]
+    .sort((a, b) => {
+      const av = a.updated || a.applied_date || '';
+      const bv = b.updated || b.applied_date || '';
+      return bv > av ? 1 : -1;
+    })
+    .slice(0, 3);
+
+  section.innerHTML = recent.map(r => {
+    const sm = STATUS_META[r.status] || STATUS_META.draft;
+    return `<div class="activity-row">
+      <div class="activity-company">${esc(r.company)}</div>
+      <div class="activity-role">${esc(r.role)}</div>
+      <span class="badge ${sm.cls}">${sm.label}</span>
+      <div class="activity-date">${r.applied_date || '—'}</div>
+    </div>`;
+  }).join('');
+}
+
+// ── Init ─────────────────────────────────────────────────────────────────────
+async function init() {
+  try {
+    const [cfgRes, pipelineRes, licenceRes] = await Promise.all([
+      fetch('/api/config'),
+      fetch('/api/pipeline'),
+      fetch('/api/licence'),
+    ]);
+
+    const cfg      = await cfgRes.json();
+    const pipeline = await pipelineRes.json();
+    const licence  = await licenceRes.json();
+
+    if (!cfg || !cfg.setup_complete) {
+      window.location.href = '/setup.html';
+      return;
+    }
+
+    _licenceTier = licence.tier || 'free';
+
+    renderProfile(cfg);
+    renderTools(Array.isArray(pipeline) ? pipeline : []);
+    renderActivity(Array.isArray(pipeline) ? pipeline : []);
+
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('saved') === '1') {
+      showToast('Profile updated ✓');
+      history.replaceState({}, '', '/hub.html');
+    }
+
+  } catch (err) {
+    console.error('Hub init failed:', err);
+    window.location.href = '/setup.html';
+  }
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeUpgrade(); });
+
+init();
+</script>
+</body>
+</html>

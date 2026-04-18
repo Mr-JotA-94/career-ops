@@ -145,23 +145,66 @@ Set-Location $INSTALL_DIR
 npm install --silent
 Write-OK "Dependencies installed"
 
-# ── Create Desktop shortcut ───────────────────
+# ── Create VBS launcher + Desktop shortcut ────
 Write-Step "Creating desktop shortcut..."
 
-$shortcutPath = "$env:USERPROFILE\Desktop\Launch Career Ops.bat"
-$shortcutContent = @"
-@echo off
-cd /d "%USERPROFILE%\career-ops"
-echo.
-echo   Starting Career Ops...
-echo   Open http://localhost:3131 in your browser
-echo   Press Ctrl+C to stop
-echo.
-node server.mjs
-pause
-"@
-Set-Content -Path $shortcutPath -Value $shortcutContent -Encoding ASCII
-Write-OK "Desktop shortcut created: `"Launch Career Ops`""
+# Write the VBS launcher into the app folder
+$vbsPath = "$env:USERPROFILE\career-ops\career-ops-launcher.vbs"
+$vbsContent = @'
+' Career Ops — Silent Launcher
+' Checks if server is running, starts it if not, then opens the browser.
+
+Dim serverURL
+serverURL = "http://localhost:3131/api/config"
+
+Dim appDir
+appDir = Environ("USERPROFILE") & "\career-ops"
+
+Function ServerIsRunning()
+  On Error Resume Next
+  Dim http
+  Set http = CreateObject("MSXML2.XMLHTTP")
+  http.Open "GET", serverURL, False
+  http.Send
+  If Err.Number = 0 And http.Status = 200 Then
+    ServerIsRunning = True
+  Else
+    ServerIsRunning = False
+  End If
+  On Error GoTo 0
+End Function
+
+If Not ServerIsRunning() Then
+  Dim shell
+  Set shell = CreateObject("WScript.Shell")
+  shell.Run "cmd /c cd /d """ & appDir & """ && node server.mjs", 0, False
+  ' 0 = hidden window, False = don't wait (non-blocking)
+
+  Dim attempts
+  attempts = 0
+  Do While Not ServerIsRunning() And attempts < 15
+    WScript.Sleep 1000
+    attempts = attempts + 1
+  Loop
+End If
+
+Dim ie
+Set ie = CreateObject("WScript.Shell")
+ie.Run "cmd /c start http://localhost:3131/hub.html", 0, False
+'@
+Set-Content -Path $vbsPath -Value $vbsContent -Encoding ASCII
+Write-OK "Launcher script written"
+
+# Create a proper .lnk shortcut on the Desktop
+$WshShell  = New-Object -ComObject WScript.Shell
+$shortcut  = $WshShell.CreateShortcut("$env:USERPROFILE\Desktop\Career Ops.lnk")
+$shortcut.TargetPath       = "wscript.exe"
+$shortcut.Arguments        = "`"$vbsPath`""
+$shortcut.WorkingDirectory = "$env:USERPROFILE\career-ops"
+$shortcut.Description      = "Launch Career Ops"
+$shortcut.IconLocation     = "$env:USERPROFILE\career-ops\icon.ico, 0"
+$shortcut.Save()
+Write-OK "Desktop shortcut created: Career Ops"
 
 # ── Done ──────────────────────────────────────
 Write-Host ""
@@ -173,15 +216,23 @@ Write-Host "  Starting Career Ops now..." -ForegroundColor White
 Write-Host "  Your browser will open automatically." -ForegroundColor White
 Write-Host "  The setup wizard will guide you from there." -ForegroundColor White
 Write-Host ""
-Write-Host "  Next time: double-click 'Launch Career Ops' on your Desktop." -ForegroundColor Yellow
+Write-Host "  Next time: double-click 'Career Ops' on your Desktop." -ForegroundColor Yellow
 Write-Host ""
 
-# Start server
-Start-Process "node" -ArgumentList "server.mjs" -WorkingDirectory $INSTALL_DIR -WindowStyle Normal
-Start-Sleep 3
+# Start server (skip if already responding on port 3131)
+$serverRunning = $false
+try {
+  $r = Invoke-WebRequest -Uri "http://localhost:3131/api/config" -UseBasicParsing -TimeoutSec 2 -ErrorAction Stop
+  if ($r.StatusCode -eq 200) { $serverRunning = $true }
+} catch {}
+
+if (-not $serverRunning) {
+  Start-Process "node" -ArgumentList "server.mjs" -WorkingDirectory $INSTALL_DIR -WindowStyle Hidden
+  Start-Sleep 3
+}
 
 # Open browser
-Start-Process "http://localhost:3131/setup.html"
+Start-Process "http://localhost:3131/hub.html"
 
 Write-Host "  Browser opened. Follow the setup wizard to complete installation." -ForegroundColor Cyan
 Write-Host ""

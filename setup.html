@@ -307,6 +307,17 @@ select option { background: white; }
   font-size: 11px; color: var(--muted); margin-top: 10px; line-height: 1.6;
 }
 .licence-current strong { color: var(--teal); font-weight: 500; }
+
+.edit-key-notice {
+  background: rgba(30,122,78,0.08); border: 1px solid rgba(30,122,78,0.3);
+  border-radius: 4px; padding: 10px 14px; font-size: 12px;
+  color: var(--green); margin-bottom: 14px; line-height: 1.5;
+}
+.edit-mode-notice {
+  background: rgba(26,107,94,0.06); border: 1px solid rgba(26,107,94,0.25);
+  border-radius: 4px; padding: 10px 14px; font-size: 12px;
+  color: var(--teal); margin-bottom: 14px; line-height: 1.5;
+}
 </style>
 </head>
 <body>
@@ -638,6 +649,11 @@ select option { background: white; }
 </div>
 
 <script>
+// ── Edit mode detection ────────────────────────────────────────────────────
+const _params   = new URLSearchParams(window.location.search);
+const editMode  = _params.get('mode') === 'edit';
+const jumpStep  = parseInt(_params.get('step')) || 1;
+
 // ── State ──────────────────────────────────────────────────────────────────
 let currentStep = 1;
 let jobCount = 0;
@@ -1192,6 +1208,136 @@ function setVal(id, val) {
   if (el) el.value = val;
 }
 
+function selectChip(groupId, val) {
+  const chip = document.querySelector(`#${groupId} [data-val="${val}"]`);
+  if (chip && !chip.classList.contains('selected')) chip.classList.add('selected');
+}
+
+function prefillAllFromConfig(cfg) {
+  if (!cfg) return;
+
+  // Step 2: Personal
+  const p = cfg.personal || {};
+  setVal('s1-fname',    p.first_name);
+  setVal('s1-lname',    p.last_name);
+  setVal('s1-email',    p.email);
+  setVal('s1-phone',    p.phone);
+  setVal('s1-location', p.location);
+  setVal('s1-linkedin', p.linkedin);
+  setVal('s1-tagline',  p.tagline);
+  (p.availability || []).forEach(val => selectChip('s1-availability', val));
+
+  // Step 3: Targets
+  const t = cfg.targets || {};
+  (t.categories || []).forEach(val => selectChip('s3-categories', val));
+  (t.seniority  || []).forEach(val => selectChip('s3-seniority',  val));
+  (t.industries || []).forEach(val => selectChip('s3-industries', val));
+  setVal('s3-summary', t.summary);
+
+  // Step 4: Experience
+  const jobs = cfg.experience || [];
+  if (jobs.length > 0) {
+    document.getElementById('jobs-container').innerHTML = '';
+    jobCount = 0;
+    jobs.forEach(job => {
+      addJob();
+      const n = jobCount;
+      setVal(`job-${n}-title`,    job.title);
+      setVal(`job-${n}-company`,  job.company);
+      setVal(`job-${n}-start`,    job.start);
+      setVal(`job-${n}-end`,      job.end);
+      setVal(`job-${n}-location`, job.location);
+      setVal(`job-${n}-bullets`,  Array.isArray(job.bullets) ? job.bullets.join('\n') : (job.bullets || ''));
+    });
+  }
+
+  // Step 5: Education
+  const edus = cfg.education || [];
+  if (edus.length > 0) {
+    document.getElementById('edu-container').innerHTML = '';
+    eduCount = 0;
+    edus.forEach(edu => {
+      addEdu();
+      const n = eduCount;
+      setVal(`edu-${n}-degree`,      edu.degree);
+      setVal(`edu-${n}-institution`, edu.institution);
+      setVal(`edu-${n}-location`,    edu.location);
+      setVal(`edu-${n}-start`,       edu.start);
+      setVal(`edu-${n}-end`,         edu.end);
+      setVal(`edu-${n}-focus`,       edu.focus);
+    });
+  }
+
+  // Step 6: Skills
+  const s = cfg.skills || {};
+  setVal('s6-technical',      s.technical);
+  setVal('s6-tools',          s.tools);
+  setVal('s6-languages',      s.languages);
+  setVal('s6-certs',          s.certifications);
+  setVal('s6-differentiator', s.differentiator);
+}
+
+async function initEditMode() {
+  await silentVerifyKey();
+
+  let cfg = {};
+  try {
+    const res = await fetch('/api/config');
+    cfg = await res.json();
+  } catch(e) { return; }
+
+  // Update hero text
+  const heroTitle = document.querySelector('#hero .hero-title');
+  const heroSub   = document.querySelector('#hero .hero-sub');
+  if (heroTitle) heroTitle.innerHTML = 'Update your<br><span>profile.</span>';
+  if (heroSub)   heroSub.textContent = 'Your saved profile is pre-loaded. Navigate to the section you want to update.';
+
+  // Update save button label
+  const saveBtn = document.getElementById('save-btn');
+  if (saveBtn) saveBtn.textContent = 'Save changes →';
+
+  // Hide CV upload zone on step 2, inject notice
+  const uploadZone = document.getElementById('upload-zone');
+  if (uploadZone) uploadZone.style.display = 'none';
+  const step2 = document.getElementById('step2');
+  if (step2) {
+    const notice = document.createElement('div');
+    notice.className = 'edit-mode-notice';
+    notice.textContent = '✓ Profile loaded from your saved data. Edit your personal details below.';
+    step2.insertBefore(notice, step2.firstChild);
+  }
+
+  // Step 1: show active key banner
+  if (savedKeyValid) {
+    const keyNotice = document.createElement('div');
+    keyNotice.className = 'edit-key-notice';
+    keyNotice.textContent = '✓ Your API key is active — no changes needed. You can proceed or update it below.';
+    const step1 = document.getElementById('step1');
+    if (step1) step1.insertBefore(keyNotice, step1.firstChild);
+  }
+
+  // Step 1: show licence indicator
+  const licenceTier = cfg.licence?.tier;
+  if (licenceTier && licenceTier !== 'free') {
+    const labels = { community: 'Community', external: 'External' };
+    const licenceNotice = document.createElement('div');
+    licenceNotice.className = 'edit-key-notice';
+    licenceNotice.textContent = `✓ Licence active: ${labels[licenceTier] || licenceTier} — all tools unlocked`;
+    const step1 = document.getElementById('step1');
+    if (step1) step1.appendChild(licenceNotice);
+  }
+
+  // Pre-init empty containers before prefill
+  const jobs = cfg.experience || [];
+  const edus = cfg.education  || [];
+  if (jobs.length === 0) { addJob(); addJob(); }
+  if (edus.length === 0) { addEdu(); addEdu(); }
+
+  prefillAllFromConfig(cfg);
+
+  goStep(jumpStep);
+}
+
 // ── Save config ────────────────────────────────────────────────────────────
 async function saveConfig() {
   const btn = document.getElementById('save-btn');
@@ -1206,6 +1352,11 @@ async function saveConfig() {
       body: JSON.stringify(data)
     });
     if (!res.ok) throw new Error('Save failed');
+
+    if (editMode) {
+      window.location.href = '/hub.html?saved=1';
+      return;
+    }
 
     // Hide wizard, show complete
     document.getElementById('progress-track').style.display = 'none';
@@ -1266,11 +1417,14 @@ async function setupActivateLicence() {
   }
 }
 
-// Check licence status when complete screen is shown
-// Check licence on page load
+// Check licence on page load (for the complete screen)
 checkCurrentLicence();
-// Silently verify saved Groq key on page load
-silentVerifyKey();
+
+if (editMode) {
+  initEditMode(); // calls silentVerifyKey internally, prefills, jumps to step
+} else {
+  silentVerifyKey();
+}
 
 </script>
 

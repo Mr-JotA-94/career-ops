@@ -603,11 +603,11 @@ const server = http.createServer((req, res) => {
     if (!cfg || !cfg.setup_complete) {
       res.writeHead(302, { Location: '/setup.html' }); res.end(); return;
     }
-    res.writeHead(302, { Location: '/pipeline.html' }); res.end(); return;
+    res.writeHead(302, { Location: '/hub.html' }); res.end(); return;
   }
 
   // Redirect to setup if any tool page loaded without config
-  const toolPages = ['/jd-analyser.html','/cv-tailor.html','/pipeline.html','/search-kit.html','/compass.html'];
+  const toolPages = ['/hub.html','/jd-analyser.html','/cv-tailor.html','/pipeline.html','/search-kit.html','/compass.html'];
   if (req.method === 'GET' && toolPages.includes(req.url.split('?')[0])) {
     const cfg = loadConfig();
     if (!cfg || !cfg.setup_complete) {
@@ -737,10 +737,14 @@ const server = http.createServer((req, res) => {
       try {
         const incoming = JSON.parse(body);
         const existing = loadConfig() || {};
-        // Never let the browser overwrite device_id or licence — merge them in
-        const data = { ...incoming };
-        if (existing.device_id) data.device_id = existing.device_id;
-        if (existing.licence)   data.licence   = existing.licence;
+        const data = {
+          ...existing,
+          ...incoming,
+          setup_complete: true,
+          device_id:  existing.device_id  || incoming.device_id,
+          licence:    existing.licence    || incoming.licence,
+          setup_date: existing.setup_date || new Date().toISOString(),
+        };
         fs.writeFileSync(CONFIG_FILE, JSON.stringify(data, null, 2));
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ ok: true }));

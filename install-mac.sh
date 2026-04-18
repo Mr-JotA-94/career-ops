@@ -172,23 +172,44 @@ cd "$INSTALL_DIR"
 npm install --silent
 success "Dependencies installed"
 
-# ── Create a launch shortcut ──────────────────
-step "Creating launch shortcut..."
+# ── Create desktop launcher ───────────────────
+step "Creating desktop launcher..."
 
-LAUNCH_SCRIPT="$HOME/Desktop/Launch Career Ops.command"
-cat > "$LAUNCH_SCRIPT" << 'EOF'
+# Write the launcher shell script into the app folder
+LAUNCHER_SH="$HOME/career-ops/career-ops-launcher.sh"
+cat > "$LAUNCHER_SH" << 'LAUNCHER_EOF'
 #!/bin/bash
-cd "$HOME/career-ops"
-echo ""
-echo "  Starting Career Ops..."
-echo "  Open http://localhost:3131 in your browser"
-echo "  Press Ctrl+C to stop"
-echo ""
-node server.mjs
-EOF
+APP_DIR="$HOME/career-ops"
+SERVER_URL="http://localhost:3131/api/config"
 
-chmod +x "$LAUNCH_SCRIPT"
-success "Desktop shortcut created: \"Launch Career Ops.command\""
+STATUS=$(curl -s --max-time 2 -o /dev/null -w "%{http_code}" "$SERVER_URL" 2>/dev/null)
+if [ "$STATUS" = "200" ]; then
+  open "http://localhost:3131/hub.html"
+  exit 0
+fi
+
+cd "$APP_DIR"
+nohup node server.mjs > /dev/null 2>&1 &
+
+attempts=0
+while [ $attempts -lt 15 ]; do
+  STATUS=$(curl -s --max-time 1 -o /dev/null -w "%{http_code}" "$SERVER_URL" 2>/dev/null)
+  if [ "$STATUS" = "200" ]; then
+    break
+  fi
+  sleep 1
+  attempts=$((attempts + 1))
+done
+
+open "http://localhost:3131/hub.html"
+LAUNCHER_EOF
+chmod +x "$LAUNCHER_SH"
+
+# Create a silent .app wrapper via AppleScript (no terminal window)
+APP_PATH="$HOME/Desktop/Career Ops.app"
+rm -rf "$APP_PATH"
+osacompile -o "$APP_PATH" -e "do shell script \"/bin/bash '$LAUNCHER_SH'\""
+success "Desktop launcher created: \"Career Ops\""
 
 # ── Done ──────────────────────────────────────
 echo ""
@@ -200,7 +221,7 @@ echo -e "  ${BOLD}Starting Career Ops now...${RESET}"
 echo -e "  Your browser will open automatically."
 echo -e "  The setup wizard will guide you from there."
 echo ""
-echo -e "  ${YELLOW}Next time:${RESET} double-click ${BOLD}\"Launch Career Ops\"${RESET} on your Desktop."
+echo -e "  ${YELLOW}Next time:${RESET} double-click ${BOLD}\"Career Ops\"${RESET} on your Desktop."
 echo ""
 
 # Start server and open browser
@@ -209,9 +230,9 @@ SERVER_PID=$!
 sleep 2
 
 # Open browser
-open "http://localhost:3131/setup.html" 2>/dev/null || \
-xdg-open "http://localhost:3131/setup.html" 2>/dev/null || \
-echo -e "  Open this in your browser: ${BOLD}http://localhost:3131/setup.html${RESET}"
+open "http://localhost:3131/hub.html" 2>/dev/null || \
+xdg-open "http://localhost:3131/hub.html" 2>/dev/null || \
+echo -e "  Open this in your browser: ${BOLD}http://localhost:3131/hub.html${RESET}"
 
 echo ""
 echo -e "  Press ${BOLD}Ctrl+C${RESET} to stop the server when done."
