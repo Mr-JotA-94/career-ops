@@ -239,6 +239,15 @@ select option { background: white; }
 }
 .tool-link:hover { border-color: var(--teal); color: var(--teal); transform: translateX(4px); }
 .tool-link span { font-size: 11px; color: var(--muted); }
+.tool-link-hub {
+  border-color: var(--teal); background: rgba(14,155,138,0.06);
+  margin-bottom: 4px;
+}
+.tool-link-hub .hub-label {
+  font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--teal); font-family: var(--mono); display: block; margin-bottom: 3px;
+}
+.tool-link-hub:hover { background: rgba(14,155,138,0.12); }
 
 @media(max-width:600px) {
   .field-row { grid-template-columns: 1fr; }
@@ -307,6 +316,17 @@ select option { background: white; }
   font-size: 11px; color: var(--muted); margin-top: 10px; line-height: 1.6;
 }
 .licence-current strong { color: var(--teal); font-weight: 500; }
+
+.edit-key-notice {
+  background: rgba(30,122,78,0.08); border: 1px solid rgba(30,122,78,0.3);
+  border-radius: 4px; padding: 10px 14px; font-size: 12px;
+  color: var(--green); margin-bottom: 14px; line-height: 1.5;
+}
+.edit-mode-notice {
+  background: rgba(26,107,94,0.06); border: 1px solid rgba(26,107,94,0.25);
+  border-radius: 4px; padding: 10px 14px; font-size: 12px;
+  color: var(--teal); margin-bottom: 14px; line-height: 1.5;
+}
 </style>
 </head>
 <body>
@@ -354,15 +374,15 @@ select option { background: white; }
     <p class="step-sub">Basic contact details — these appear on every generated CV and email.</p>
 
     <div class="field-row">
-      <div><label>First Name *</label><input type="text" id="s1-fname" placeholder="Johan"></div>
-      <div><label>Last Name *</label><input type="text" id="s1-lname" placeholder="Lopez"></div>
+      <div><label>First Name *</label><input type="text" id="s1-fname" placeholder="Alex"></div>
+      <div><label>Last Name *</label><input type="text" id="s1-lname" placeholder="Smith"></div>
     </div>
     <div class="field-row">
       <div><label>Email *</label><input type="email" id="s1-email" placeholder="you@email.com"></div>
       <div><label>Phone *</label><input type="text" id="s1-phone" placeholder="04xx xxx xxx"></div>
     </div>
     <div class="field-row">
-      <div><label>City / State *</label><input type="text" id="s1-location" placeholder="Brisbane, QLD"></div>
+      <div><label>City / State *</label><input type="text" id="s1-location" placeholder="Sydney, NSW"></div>
       <div><label>LinkedIn URL</label><input type="text" id="s1-linkedin" placeholder="linkedin.com/in/yourname"></div>
     </div>
     <div class="field">
@@ -376,7 +396,7 @@ select option { background: white; }
     </div>
     <div class="field">
       <label>One-line professional tagline</label>
-      <input type="text" id="s1-tagline" placeholder="e.g. Petroleum Engineer · Data Analytics & AI">
+      <input type="text" id="s1-tagline" placeholder="e.g. Project Manager · Infrastructure & Construction">
     </div>
 
     <!-- CV Upload -->
@@ -565,11 +585,11 @@ select option { background: white; }
 
     <div class="field">
       <label>Technical Skills</label>
-      <textarea id="s6-technical" rows="3" placeholder="Python, SQL, Power BI, Reservoir simulation, Drilling hydraulics, CFD, TensorFlow, Scikit-learn..."></textarea>
+      <textarea id="s6-technical" rows="3" placeholder="e.g. Python, SQL, AutoCAD, Project scheduling, Cost estimation, Structural analysis..."></textarea>
     </div>
     <div class="field">
       <label>Tools & Software</label>
-      <textarea id="s6-tools" rows="2" placeholder="Business Central, Looker, Tableau, MATLAB, ANSYS..."></textarea>
+      <textarea id="s6-tools" rows="2" placeholder="e.g. MS Project, Primavera, SAP, Salesforce, Jira, Xero..."></textarea>
     </div>
     <div class="field">
       <label>Languages</label>
@@ -577,11 +597,11 @@ select option { background: white; }
     </div>
     <div class="field">
       <label>Certifications & Awards</label>
-      <textarea id="s6-certs" rows="3" placeholder="IBM Data Science Methodology, Study QLD Innovation Challenge 2025, Company Innovation Award FY24..."></textarea>
+      <textarea id="s6-certs" rows="3" placeholder="e.g. PMP Certification, AWS Solutions Architect, White Card, Driver Licence (Manual)..."></textarea>
     </div>
     <div class="field">
       <label>Key differentiator — what makes you unusual?</label>
-      <textarea id="s6-differentiator" rows="2" placeholder="e.g. Rare combination of petroleum engineering fundamentals and applied data analytics — can bridge operational O&G knowledge with digital tooling."></textarea>
+      <textarea id="s6-differentiator" rows="2" placeholder="e.g. Bilingual engineer with hands-on trade experience and formal degree — bridges technical and operational teams."></textarea>
     </div>
 
     <div class="step-nav">
@@ -609,6 +629,7 @@ select option { background: white; }
     <h2 class="complete-title">You're all set.</h2>
     <p class="complete-sub">Your profile is saved. Every tool is now tailored to you.<br>Pick where you want to start.</p>
     <div class="tool-links">
+      <a class="tool-link tool-link-hub" href="/hub.html"><span class="hub-label">Start here</span>🏠 Dashboard <span>Your home base →</span></a>
       <a class="tool-link" href="/compass.html" target="_blank">🧭 Career Compass <span>Map your path first →</span></a>
       <a class="tool-link" href="/search-kit.html" target="_blank">🎯 Search Kit <span>Find roles to target →</span></a>
       <a class="tool-link" href="/jd-analyser.html" target="_blank">🔍 JD Analyser <span>Check fit before applying →</span></a>
@@ -638,11 +659,18 @@ select option { background: white; }
 </div>
 
 <script>
+// ── Edit mode detection ────────────────────────────────────────────────────
+const _params   = new URLSearchParams(window.location.search);
+const editMode  = _params.get('mode') === 'edit';
+const fromHub   = _params.get('from') === 'hub';
+const jumpStep  = parseInt(_params.get('step')) || 1;
+
 // ── State ──────────────────────────────────────────────────────────────────
 let currentStep = 1;
 let jobCount = 0;
 let eduCount = 0;
 let apiKey = '';
+let savedKeyValid = false; // set true by silentVerifyKey if server confirms key is active
 let recommendations = [];
 
 // ── Chip toggles ───────────────────────────────────────────────────────────
@@ -723,6 +751,7 @@ function goStep(n) {
 // ── Validation ─────────────────────────────────────────────────────────────
 function validateStep(step) {
   if (step === 1) {
+    if (savedKeyValid) return true; // server already confirmed saved key is active
     const key = document.getElementById('s2-apikey').value.trim();
     if (!key || !key.startsWith('gsk_')) {
       document.getElementById('key-error').classList.add('show');
@@ -857,21 +886,21 @@ function addJob() {
       ${n > 1 ? `<button class="btn-remove" onclick="removeBlock('job-${n}')">Remove</button>` : ''}
     </div>
     <div class="field-row">
-      <div><label>Job Title</label><input type="text" id="job-${n}-title" placeholder="Operations Analyst"></div>
-      <div><label>Company</label><input type="text" id="job-${n}-company" placeholder="Microair Avionics"></div>
+      <div><label>Job Title</label><input type="text" id="job-${n}-title" placeholder="e.g. Site Engineer"></div>
+      <div><label>Company</label><input type="text" id="job-${n}-company" placeholder="e.g. Acme Construction"></div>
     </div>
     <div class="field-row">
-      <div><label>Start Date</label><input type="text" id="job-${n}-start" placeholder="Oct 2025"></div>
-      <div><label>End Date</label><input type="text" id="job-${n}-end" placeholder="Present"></div>
+      <div><label>Start Date</label><input type="text" id="job-${n}-start" placeholder="e.g. Jan 2022"></div>
+      <div><label>End Date</label><input type="text" id="job-${n}-end" placeholder="Present or e.g. Dec 2024"></div>
     </div>
     <div class="field">
       <label>Location</label>
-      <input type="text" id="job-${n}-location" placeholder="Brisbane, AU">
+      <input type="text" id="job-${n}-location" placeholder="e.g. Melbourne, VIC">
     </div>
     <div class="field">
       <label>Bullet points (one per line)</label>
-      <textarea id="job-${n}-bullets" rows="5" placeholder="Built Power BI dashboards consuming Business Central data, delivering real-time visibility across two markets.
-Mapped cross-department workflows, identifying bottlenecks and reducing manual adjustments."></textarea>
+      <textarea id="job-${n}-bullets" rows="5" placeholder="Led a team of 6 on a $2M infrastructure project, delivering on time and under budget.
+Identified process gaps that reduced rework by 30% across two project sites."></textarea>
     </div>`;
   document.getElementById('jobs-container').appendChild(div);
 }
@@ -888,19 +917,19 @@ function addEdu() {
     </div>
     <div class="field">
       <label>Degree / Qualification</label>
-      <input type="text" id="edu-${n}-degree" placeholder="Master of Information Technology — Data Analytics">
+      <input type="text" id="edu-${n}-degree" placeholder="e.g. Bachelor of Engineering (Civil)">
     </div>
     <div class="field-row">
-      <div><label>Institution</label><input type="text" id="edu-${n}-institution" placeholder="Kaplan Business School"></div>
-      <div><label>Location</label><input type="text" id="edu-${n}-location" placeholder="Brisbane, Australia"></div>
+      <div><label>Institution</label><input type="text" id="edu-${n}-institution" placeholder="e.g. University of Queensland"></div>
+      <div><label>Location</label><input type="text" id="edu-${n}-location" placeholder="e.g. Brisbane, Australia"></div>
     </div>
     <div class="field-row">
-      <div><label>Start Year</label><input type="text" id="edu-${n}-start" placeholder="2024"></div>
-      <div><label>End Year</label><input type="text" id="edu-${n}-end" placeholder="2026 (expected)"></div>
+      <div><label>Start Year</label><input type="text" id="edu-${n}-start" placeholder="e.g. 2018"></div>
+      <div><label>End Year</label><input type="text" id="edu-${n}-end" placeholder="e.g. 2022"></div>
     </div>
     <div class="field">
       <label>Key focus areas</label>
-      <input type="text" id="edu-${n}-focus" placeholder="Machine learning, data analytics, AI ethics, information systems">
+      <input type="text" id="edu-${n}-focus" placeholder="e.g. Structural design, project management, materials science">
     </div>`;
   document.getElementById('edu-container').appendChild(div);
 }
@@ -971,9 +1000,12 @@ function collectData() {
       certifications: document.getElementById('s6-certs').value.trim(),
       differentiator: document.getElementById('s6-differentiator').value.trim(),
     },
-    groq_api_key: apiKey || document.getElementById('s2-apikey').value.trim(),
     setup_complete: true,
     setup_date: new Date().toISOString(),
+    ...((() => {
+      const k = apiKey || document.getElementById('s2-apikey').value.trim();
+      return k ? { groq_api_key: k } : {};
+    })()),
   };
 }
 
@@ -981,6 +1013,7 @@ function collectData() {
 function buildReview() {
   const d = collectData();
   const p = d.personal;
+  const s = d.skills;
   const html = `
     <div class="review-section">
       <div class="review-label">Personal</div>
@@ -988,21 +1021,30 @@ function buildReview() {
       <div class="review-row"><span class="review-key">Contact</span>${p.email} · ${p.phone}</div>
       <div class="review-row"><span class="review-key">Location</span>${p.location}</div>
       <div class="review-row"><span class="review-key">Tagline</span>${p.tagline || '—'}</div>
-      <div class="review-row"><span class="review-key">Availability</span>${p.availability.join(', ')}</div>
+      <div class="review-row"><span class="review-key">Availability</span>${p.availability.join(', ') || '—'}</div>
     </div>
     <div class="review-section">
       <div class="review-label">Target Roles</div>
-      <div class="review-row"><span class="review-key">Categories</span>${d.targets.categories.join(', ')}</div>
-      <div class="review-row"><span class="review-key">Seniority</span>${d.targets.seniority.join(', ')}</div>
-      <div class="review-row"><span class="review-key">Industries</span>${d.targets.industries.join(', ')}</div>
+      <div class="review-row"><span class="review-key">Categories</span>${d.targets.categories.join(', ') || '—'}</div>
+      <div class="review-row"><span class="review-key">Seniority</span>${d.targets.seniority.join(', ') || '—'}</div>
+      <div class="review-row"><span class="review-key">Industries</span>${d.targets.industries.join(', ') || '—'}</div>
+      <div class="review-row"><span class="review-key">Summary</span>${d.targets.summary ? d.targets.summary.slice(0, 120) + (d.targets.summary.length > 120 ? '…' : '') : '—'}</div>
     </div>
     <div class="review-section">
       <div class="review-label">Experience (${d.experience.length} roles)</div>
-      ${d.experience.map(j => `<div class="review-row"><span class="review-key">${j.start}–${j.end}</span>${j.title} @ ${j.company}</div>`).join('')}
+      ${d.experience.length ? d.experience.map(j => `<div class="review-row"><span class="review-key">${j.start}–${j.end}</span>${j.title} @ ${j.company}</div>`).join('') : '<div class="review-row"><span class="review-key">—</span>No roles added</div>'}
     </div>
     <div class="review-section">
       <div class="review-label">Education (${d.education.length} entries)</div>
-      ${d.education.map(e => `<div class="review-row"><span class="review-key">${e.start}–${e.end}</span>${e.degree}</div>`).join('')}
+      ${d.education.length ? d.education.map(e => `<div class="review-row"><span class="review-key">${e.start}–${e.end}</span>${e.degree}</div>`).join('') : '<div class="review-row"><span class="review-key">—</span>No education added</div>'}
+    </div>
+    <div class="review-section">
+      <div class="review-label">Skills & Credentials</div>
+      <div class="review-row"><span class="review-key">Technical</span>${s.technical || '—'}</div>
+      <div class="review-row"><span class="review-key">Tools</span>${s.tools || '—'}</div>
+      <div class="review-row"><span class="review-key">Languages</span>${s.languages || '—'}</div>
+      <div class="review-row"><span class="review-key">Certifications</span>${s.certifications || '—'}</div>
+      ${s.differentiator ? `<div class="review-row"><span class="review-key">Differentiator</span>${s.differentiator}</div>` : ''}
     </div>
     <div class="review-section">
       <div class="review-label">API Key</div>
@@ -1043,7 +1085,10 @@ async function handleCVUpload(file) {
     const data = await res.json();
     if (!data.ok) throw new Error(data.error || 'Parse failed');
     prefillFromProfile(data.profile);
-    setUploadStatus('success', `✓ CV imported — review each step before saving.`);
+    applyInferredChips(data.profile);
+    const inferCount = (data.profile?.inferred_categories?.length || 0) + (data.profile?.inferred_industries?.length || 0);
+    const inferNote = inferCount > 0 ? ` — ${inferCount} role/industry chips pre-selected from your CV` : '';
+    setUploadStatus('success', `✓ CV imported${inferNote}. Review each step before saving.`);
   } catch (err) {
     setUploadStatus('error', `Import failed: ${err.message}`);
   }
@@ -1054,6 +1099,58 @@ function setUploadStatus(type, msg) {
   el.style.display = 'block';
   el.style.color = type === 'error' ? 'var(--red)' : type === 'success' ? 'var(--green)' : 'var(--muted)';
   el.textContent = msg;
+}
+
+// ── Silent key check on page load ─────────────────────────────────────────
+async function silentVerifyKey() {
+  try {
+    const res = await fetch('/api/key-status');
+    const data = await res.json();
+    const keyInput = document.getElementById('s2-apikey');
+    const keyHint  = document.querySelector('.key-hint');
+    const errEl    = document.getElementById('key-error');
+    if (data.ok) {
+      savedKeyValid = true;
+      if (keyInput) {
+        keyInput.placeholder = '••••••••••••••••••••• (saved key active)';
+        keyInput.style.borderColor = 'var(--green)';
+      }
+      if (keyHint) {
+        keyHint.textContent = '✓ Saved API key is active — no changes needed.';
+        keyHint.style.color = 'var(--green)';
+      }
+      if (errEl) errEl.classList.remove('show');
+    } else if (data.reason === 'invalid') {
+      savedKeyValid = false;
+      if (keyInput) keyInput.classList.add('form-error');
+      if (errEl) {
+        errEl.textContent = 'Your saved key appears invalid or expired — please enter a new one.';
+        errEl.classList.add('show');
+      }
+    }
+    // reason === 'no_key' → fresh setup, do nothing
+  } catch(e) {
+    // network error — fail silently
+  }
+}
+
+// ── Apply AI-inferred chips from parse-resume response ─────────────────────
+function applyInferredChips(profile) {
+  if (!profile) return;
+  const cats = profile.inferred_categories || [];
+  const inds  = profile.inferred_industries  || [];
+  cats.forEach(val => {
+    const chip = document.querySelector(`#s3-categories [data-val="${val}"]`);
+    if (chip && !chip.classList.contains('selected')) chip.classList.add('selected');
+  });
+  inds.forEach(val => {
+    const chip = document.querySelector(`#s3-industries [data-val="${val}"]`);
+    if (chip && !chip.classList.contains('selected')) chip.classList.add('selected');
+  });
+  if (cats.length || inds.length) {
+    const sub = document.querySelector('#step3 .step-sub');
+    if (sub) sub.textContent = 'Based on your CV, we\'ve pre-selected likely matches — confirm or adjust before continuing.';
+  }
 }
 
 function prefillFromProfile(p) {
@@ -1125,6 +1222,148 @@ function setVal(id, val) {
   if (el) el.value = val;
 }
 
+function selectChip(groupId, val) {
+  const chip = document.querySelector(`#${groupId} [data-val="${val}"]`);
+  if (chip && !chip.classList.contains('selected')) chip.classList.add('selected');
+}
+
+function prefillAllFromConfig(cfg) {
+  if (!cfg) return;
+
+  // Step 2: Personal
+  const p = cfg.personal || {};
+  setVal('s1-fname',    p.first_name);
+  setVal('s1-lname',    p.last_name);
+  setVal('s1-email',    p.email);
+  setVal('s1-phone',    p.phone);
+  setVal('s1-location', p.location);
+  setVal('s1-linkedin', p.linkedin);
+  setVal('s1-tagline',  p.tagline);
+  (p.availability || []).forEach(val => selectChip('s1-availability', val));
+
+  // Step 3: Targets
+  const t = cfg.targets || {};
+  (t.categories || []).forEach(val => selectChip('s3-categories', val));
+  (t.seniority  || []).forEach(val => selectChip('s3-seniority',  val));
+  (t.industries || []).forEach(val => selectChip('s3-industries', val));
+  setVal('s3-summary', t.summary);
+
+  // Step 4: Experience
+  const jobs = cfg.experience || [];
+  if (jobs.length > 0) {
+    document.getElementById('jobs-container').innerHTML = '';
+    jobCount = 0;
+    jobs.forEach(job => {
+      addJob();
+      const n = jobCount;
+      setVal(`job-${n}-title`,    job.title);
+      setVal(`job-${n}-company`,  job.company);
+      setVal(`job-${n}-start`,    job.start);
+      setVal(`job-${n}-end`,      job.end);
+      setVal(`job-${n}-location`, job.location);
+      setVal(`job-${n}-bullets`,  Array.isArray(job.bullets) ? job.bullets.join('\n') : (job.bullets || ''));
+    });
+  }
+
+  // Step 5: Education
+  const edus = cfg.education || [];
+  if (edus.length > 0) {
+    document.getElementById('edu-container').innerHTML = '';
+    eduCount = 0;
+    edus.forEach(edu => {
+      addEdu();
+      const n = eduCount;
+      setVal(`edu-${n}-degree`,      edu.degree);
+      setVal(`edu-${n}-institution`, edu.institution);
+      setVal(`edu-${n}-location`,    edu.location);
+      setVal(`edu-${n}-start`,       edu.start);
+      setVal(`edu-${n}-end`,         edu.end);
+      setVal(`edu-${n}-focus`,       edu.focus);
+    });
+  }
+
+  // Step 6: Skills
+  const s = cfg.skills || {};
+  setVal('s6-technical',      s.technical);
+  setVal('s6-tools',          s.tools);
+  setVal('s6-languages',      s.languages);
+  setVal('s6-certs',          s.certifications);
+  setVal('s6-differentiator', s.differentiator);
+}
+
+async function initEditMode() {
+  await silentVerifyKey();
+
+  let cfg = {};
+  try {
+    const res = await fetch('/api/config');
+    cfg = await res.json();
+  } catch(e) { return; }
+
+  // Update hero text
+  const heroTitle = document.querySelector('#hero .hero-title');
+  const heroSub   = document.querySelector('#hero .hero-sub');
+  if (heroTitle) heroTitle.innerHTML = 'Update your<br><span>profile.</span>';
+  if (heroSub)   heroSub.textContent = 'Your saved profile is pre-loaded. Navigate to the section you want to update.';
+
+  // Update save button label
+  const saveBtn = document.getElementById('save-btn');
+  if (saveBtn) saveBtn.textContent = fromHub ? 'Save & return to Hub →' : 'Save changes →';
+
+  // Show Back to Hub link when arriving from hub
+  if (fromHub) {
+    const backLink = document.createElement('a');
+    backLink.href = '/hub.html';
+    backLink.textContent = '← Back to Hub';
+    backLink.style.cssText = 'display:inline-block;font-size:12px;font-family:var(--mono);color:var(--muted);text-decoration:none;padding:6px 0;transition:color 0.15s;';
+    backLink.onmouseover = () => backLink.style.color = 'var(--teal)';
+    backLink.onmouseout  = () => backLink.style.color = 'var(--muted)';
+    const topbar = document.querySelector('.topbar') || document.querySelector('.progress-bar-wrap') || document.body.firstElementChild;
+    if (topbar && topbar.parentNode) topbar.parentNode.insertBefore(backLink, topbar);
+  }
+
+  // Hide CV upload zone on step 2, inject notice
+  const uploadZone = document.getElementById('upload-zone');
+  if (uploadZone) uploadZone.style.display = 'none';
+  const step2 = document.getElementById('step2');
+  if (step2) {
+    const notice = document.createElement('div');
+    notice.className = 'edit-mode-notice';
+    notice.textContent = '✓ Profile loaded from your saved data. Edit your personal details below.';
+    step2.insertBefore(notice, step2.firstChild);
+  }
+
+  // Step 1: show active key banner
+  if (savedKeyValid) {
+    const keyNotice = document.createElement('div');
+    keyNotice.className = 'edit-key-notice';
+    keyNotice.textContent = '✓ Your API key is active — no changes needed. You can proceed or update it below.';
+    const step1 = document.getElementById('step1');
+    if (step1) step1.insertBefore(keyNotice, step1.firstChild);
+  }
+
+  // Step 1: show licence indicator
+  const licenceTier = cfg.licence?.tier;
+  if (licenceTier && licenceTier !== 'free') {
+    const labels = { community: 'Community', external: 'External' };
+    const licenceNotice = document.createElement('div');
+    licenceNotice.className = 'edit-key-notice';
+    licenceNotice.textContent = `✓ Licence active: ${labels[licenceTier] || licenceTier} — all tools unlocked`;
+    const step1 = document.getElementById('step1');
+    if (step1) step1.appendChild(licenceNotice);
+  }
+
+  // Pre-init empty containers before prefill
+  const jobs = cfg.experience || [];
+  const edus = cfg.education  || [];
+  if (jobs.length === 0) { addJob(); addJob(); }
+  if (edus.length === 0) { addEdu(); addEdu(); }
+
+  prefillAllFromConfig(cfg);
+
+  goStep(jumpStep);
+}
+
 // ── Save config ────────────────────────────────────────────────────────────
 async function saveConfig() {
   const btn = document.getElementById('save-btn');
@@ -1139,6 +1378,11 @@ async function saveConfig() {
       body: JSON.stringify(data)
     });
     if (!res.ok) throw new Error('Save failed');
+
+    if (editMode) {
+      window.location.href = '/hub.html?saved=1';
+      return;
+    }
 
     // Hide wizard, show complete
     document.getElementById('progress-track').style.display = 'none';
@@ -1184,7 +1428,7 @@ async function setupActivateLicence() {
     });
     const d = await r.json();
     if (d.ok) {
-      msg.textContent = '&#x2713; Licence activated! All tools are now unlocked.';
+      msg.textContent = '✓ Licence activated! All tools are now unlocked.';
       msg.className = 'activate-msg licence-status ok';
       setTimeout(() => checkCurrentLicence(), 1000);
     } else {
@@ -1199,9 +1443,14 @@ async function setupActivateLicence() {
   }
 }
 
-// Check licence status when complete screen is shown
-// Check licence on page load
+// Check licence on page load (for the complete screen)
 checkCurrentLicence();
+
+if (editMode) {
+  initEditMode(); // calls silentVerifyKey internally, prefills, jumps to step
+} else {
+  silentVerifyKey();
+}
 
 </script>
 

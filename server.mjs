@@ -4,6 +4,7 @@ import fs from 'fs';
 import path from 'path';
 import zlib from 'zlib';
 import { fileURLToPath } from 'url';
+import crypto from 'crypto';
 import {
   Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell,
   AlignmentType, BorderStyle, WidthType, ShadingType, LevelFormat,
@@ -19,10 +20,18 @@ const PIPELINE_FILE  = path.join(__dirname, 'pipeline.json');
 const LICENCE_API_URL = process.env.LICENCE_API_URL || 'https://careerops-licence-api.vercel.app';
 
 // ── Licence helpers ───────────────────────────────────────────────────────
-// validateKeyRemote: calls Vercel endpoint, returns { ok, tier, error }
-function validateKeyRemote(key, email) {
+function getOrCreateDeviceId() {
+  const cfg = loadConfig() || {};
+  if (cfg.device_id) return cfg.device_id;
+  const id = crypto.randomUUID();
+  cfg.device_id = id;
+  fs.writeFileSync(CONFIG_FILE, JSON.stringify(cfg, null, 2));
+  return id;
+}
+
+function validateKeyRemote(key, deviceId) {
   return new Promise((resolve) => {
-    const body = JSON.stringify({ key, email });
+    const body = JSON.stringify({ key, device_id: deviceId });
     const url  = new URL('/api/validate', LICENCE_API_URL);
     const opts = {
       hostname: url.hostname,
@@ -42,6 +51,34 @@ function validateKeyRemote(key, email) {
       });
     });
     req.on('error', () => resolve({ ok: false, error: 'Could not reach licence server. Check your internet connection.' }));
+    req.write(body);
+    req.end();
+  });
+}
+
+function verifyLicenceOnStartup(key, deviceId) {
+  return new Promise((resolve) => {
+    const body = JSON.stringify({ key, device_id: deviceId });
+    const url  = new URL('/api/verify', LICENCE_API_URL);
+    const opts = {
+      hostname: url.hostname,
+      path:     url.pathname,
+      method:   'POST',
+      headers: {
+        'Content-Type':   'application/json',
+        'Content-Length': Buffer.byteLength(body),
+      },
+    };
+    const req = https.request(opts, res => {
+      let data = '';
+      res.on('data', c => data += c);
+      res.on('end', () => {
+        try { resolve(JSON.parse(data)); }
+        catch { resolve(null); }
+      });
+    });
+    req.on('error', () => resolve(null)); // fail open on network error
+    req.setTimeout(4000, () => { req.destroy(); resolve(null); }); // 4s timeout
     req.write(body);
     req.end();
   });
@@ -566,11 +603,11 @@ const server = http.createServer((req, res) => {
     if (!cfg || !cfg.setup_complete) {
       res.writeHead(302, { Location: '/setup.html' }); res.end(); return;
     }
-    res.writeHead(302, { Location: '/pipeline.html' }); res.end(); return;
+    res.writeHead(302, { Location: '/hub.html' }); res.end(); return;
   }
 
   // Redirect to setup if any tool page loaded without config
-  const toolPages = ['/jd-analyser.html','/cv-tailor.html','/pipeline.html','/search-kit.html','/compass.html'];
+  const toolPages = ['/hub.html','/jd-analyser.html','/cv-tailor.html','/pipeline.html','/search-kit.html','/compass.html'];
   if (req.method === 'GET' && toolPages.includes(req.url.split('?')[0])) {
     const cfg = loadConfig();
     if (!cfg || !cfg.setup_complete) {
@@ -602,8 +639,8 @@ const server = http.createServer((req, res) => {
           return;
         }
 
-        const email  = loadConfig()?.personal?.email || '';
-        const result = await validateKeyRemote(key.trim().toUpperCase(), email);
+        const deviceId = getOrCreateDeviceId();
+        const result = await validateKeyRemote(key.trim().toUpperCase(), deviceId);
 
         if (!result.ok) {
           res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -637,6 +674,34 @@ const server = http.createServer((req, res) => {
     return;
   }
 
+  // GET /api/key-status → silently verify saved Groq key without exposing it
+  if (req.method === 'GET' && req.url === '/api/key-status') {
+    const key = getGroqKey();
+    if (!key) {
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ ok: false, reason: 'no_key' }));
+      return;
+    }
+    const testPayload = JSON.stringify({ model: 'llama-3.3-70b-versatile', max_tokens: 10, messages: [{ role: 'user', content: 'Hi' }] });
+    const opts = {
+      hostname: 'api.groq.com', path: '/openai/v1/chat/completions', method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key}`, 'Content-Length': Buffer.byteLength(testPayload) },
+    };
+    const apiReq = https.request(opts, apiRes => {
+      let data = '';
+      apiRes.on('data', c => data += c);
+      apiRes.on('end', () => {
+        const ok = apiRes.statusCode === 200;
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ ok, reason: ok ? 'valid' : 'invalid' }));
+      });
+    });
+    apiReq.on('error', () => { res.writeHead(200); res.end(JSON.stringify({ ok: false, reason: 'network_error' })); });
+    apiReq.write(testPayload);
+    apiReq.end();
+    return;
+  }
+
   // POST /api/test-key → verify Groq key works
   if (req.method === 'POST' && req.url === '/api/test-key') {
     let body = '';
@@ -664,13 +729,22 @@ const server = http.createServer((req, res) => {
     return;
   }
 
-  // POST /api/save-config → write config.json
+  // POST /api/save-config → write config.json (preserve device_id + licence)
   if (req.method === 'POST' && req.url === '/api/save-config') {
     let body = '';
     req.on('data', c => body += c);
     req.on('end', () => {
       try {
-        const data = JSON.parse(body);
+        const incoming = JSON.parse(body);
+        const existing = loadConfig() || {};
+        const data = {
+          ...existing,
+          ...incoming,
+          setup_complete: true,
+          device_id:  existing.device_id  || incoming.device_id,
+          licence:    existing.licence    || incoming.licence,
+          setup_date: existing.setup_date || new Date().toISOString(),
+        };
         fs.writeFileSync(CONFIG_FILE, JSON.stringify(data, null, 2));
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ ok: true }));
@@ -818,10 +892,17 @@ Return ONLY this exact JSON structure — no markdown, no explanation:
     "tools": "",
     "languages": "",
     "certifications": ""
-  }
+  },
+  "inferred_categories": [],
+  "inferred_industries": []
 }
 
-Extract only what is explicitly stated. For experience end date, use "Present" if the role is current.`;
+For inferred_categories, select only values that genuinely match from this list: petroleum_engineering, data_analytics, data_science, business_intelligence, operations_analytics, ai_ml, software_engineering, civil_engineering, mechanical_engineering, electrical_engineering, chemical_engineering, environmental_engineering, accounting_finance, hr_people, marketing, sales, supply_chain, healthcare, education, consulting, project_management, operations_management, architecture, legal, hospitality, construction, administration, customer_service
+
+For inferred_industries, select only values that genuinely match from this list: oil_gas, energy, mining, construction, manufacturing, tech, fintech, banking, consulting_industry, government, defence, healthcare, education, agriculture, transport, retail, media, real_estate, environmental, nonprofit, hospitality
+
+Only include values you are confident about based on the CV. Return empty arrays if nothing is a clear match.
+Extract only what is explicitly stated in the CV. For experience end date, use "Present" if the role is current.`;
 
         const payload = JSON.stringify({
           model: 'llama-3.3-70b-versatile',
@@ -887,7 +968,7 @@ Extract only what is explicitly stated. For experience end date, use "Present" i
   fs.createReadStream(filePath).pipe(res);
 });
 
-server.listen(PORT, '127.0.0.1', () => {
+server.listen(PORT, '127.0.0.1', async () => {
   const cfg = loadConfig();
   const hasKey = !!getGroqKey();
   const base = `http://localhost:${PORT}`;
@@ -909,10 +990,24 @@ server.listen(PORT, '127.0.0.1', () => {
     console.log(`  ✓  Profile : ${name}`);
     console.log(`  ✓  API key : ${hasKey ? 'loaded' : '⚠ MISSING — re-run setup'}`);
     console.log(`  ✓  Licence : ${LICENCE_API_URL ? LICENCE_API_URL : '⚠ LICENCE_API_URL not set'}`);
+    // ── Startup licence verification ──────────────────────────────────────
     const tier = getLicenceTier();
-    console.log(`  ✓  This install: ${tier.toUpperCase()} tier`);
+    if (tier !== 'free' && cfg.licence?.key && cfg.device_id) {
+      const check = await verifyLicenceOnStartup(cfg.licence.key, cfg.device_id);
+      if (check === null) {
+        console.log('  ⚠  Licence check skipped — could not reach server');
+      } else if (!check.ok) {
+        console.log('  ⚠  Licence verification failed — reverting to free tier');
+        saveLicenceToConfig('free', '');
+      } else {
+        console.log(`  ✓  Licence : ${tier.toUpperCase()} tier verified`);
+      }
+    } else {
+      console.log(`  ✓  Licence : ${tier.toUpperCase()} tier`);
+    }
     console.log('');
     console.log('  🔗 Open in browser:');
+    console.log(`     Hub        →  ${base}/hub.html   ← start here`);
     console.log(`     Setup      →  ${base}/setup.html`);
     console.log(`     JD Check   →  ${base}/jd-analyser.html`);
     console.log(`     CV Tailor  →  ${base}/cv-tailor.html`);
