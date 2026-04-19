@@ -521,12 +521,32 @@ Your output is a realistic career map — not an aspirational one. Every stage m
     document.getElementById('loading').classList.remove('show');
     document.getElementById('progress-fill').style.width = '100%';
     renderResults(pathData);
+    saveCompassRoles(pathData);
 
   } catch(err) {
     document.getElementById('loading').classList.remove('show');
     alert('Generation failed: ' + err.message);
   }
   document.getElementById('gen-btn').disabled = false;
+}
+
+// ── Persist compass roles to config ──────────────────────────────────────
+async function saveCompassRoles(data) {
+  const roles = [];
+  (data.path?.stages || []).forEach(s => {
+    if (s.role_title) roles.push({ title: s.role_title, why: s.timeframe || '' });
+  });
+  (data.hidden_roles || []).forEach(h => {
+    if (h.role_title) roles.push({ title: h.role_title, why: 'Hidden accelerator' });
+  });
+  if (!roles.length) return;
+  try {
+    await fetch('/api/save-config', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ compassRoles: roles }),
+    });
+  } catch { /* non-critical — ignore */ }
 }
 
 // ── Render ────────────────────────────────────────────────────────────────

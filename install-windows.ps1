@@ -146,23 +146,70 @@ Set-Location $INSTALL_DIR
 npm install --silent
 Write-OK "Dependencies installed"
 
-# -- Create Desktop shortcut -------------------
+# -- Create VBS launcher + Desktop shortcut ---
 Write-Step "Creating desktop shortcut..."
 
-$shortcutPath = [System.Environment]::GetFolderPath("Desktop") + "\Launch Career Ops.bat"
-$shortcutContent = @"
-@echo off
-cd /d "%USERPROFILE%\career-ops"
-echo.
-echo   Starting Career Ops...
-echo   Open http://localhost:3131 in your browser
-echo   Press Ctrl+C to stop
-echo.
-node server.mjs
-pause
+# Write the VBScript launcher — checks port, starts Node hidden, opens browser
+$vbsPath = "$INSTALL_DIR\career-ops-launcher.vbs"
+$vbsContent = @"
+Dim port, url, shell, http, i
+port = 3131
+url  = "http://localhost:" & port & "/hub.html"
+Set shell = CreateObject("WScript.Shell")
+Set http  = CreateObject("MSXML2.XMLHTTP")
+
+' Check if server already running
+Dim running : running = False
+On Error Resume Next
+http.Open "GET", "http://localhost:" & port & "/api/key-status", False
+http.Send
+If Err.Number = 0 And http.Status > 0 Then running = True
+On Error GoTo 0
+
+If Not running Then
+  ' Start node silently (hidden window)
+  shell.Run "cmd /c cd /d """ & "$INSTALL_DIR" & """ && node server.mjs", 0, False
+  ' Poll up to 15 seconds
+  For i = 1 To 15
+    WScript.Sleep 1000
+    On Error Resume Next
+    http.Open "GET", "http://localhost:" & port & "/api/key-status", False
+    http.Send
+    If Err.Number = 0 And http.Status > 0 Then running = True : Exit For
+    On Error GoTo 0
+  Next
+End If
+
+shell.Run url
 "@
-Set-Content -Path $shortcutPath -Value $shortcutContent -Encoding ASCII
-Write-OK "Desktop shortcut created: `"Launch Career Ops`""
+Set-Content -Path $vbsPath -Value $vbsContent -Encoding ASCII
+Write-OK "Launcher script created"
+
+$desktop  = [System.Environment]::GetFolderPath("Desktop")
+$lnkPath  = "$desktop\Career Ops.lnk"
+
+# Locate node.exe for icon fallback
+$nodePath = (Get-Command node -ErrorAction SilentlyContinue)?.Source
+if (-not $nodePath) { $nodePath = "$env:ProgramFiles\nodejs\node.exe" }
+
+$WshShell  = New-Object -ComObject WScript.Shell
+$shortcut  = $WshShell.CreateShortcut($lnkPath)
+$shortcut.TargetPath       = "wscript.exe"
+$shortcut.Arguments        = "`"$vbsPath`""
+$shortcut.WorkingDirectory = $INSTALL_DIR
+$shortcut.Description      = "Launch Career Ops"
+$shortcut.WindowStyle      = 1
+
+# Icon: prefer assets/icon.ico in the install dir, fall back to node.exe
+$iconPath = "$INSTALL_DIR\assets\icon.ico"
+if (Test-Path $iconPath) {
+  $shortcut.IconLocation = "$iconPath,0"
+} elseif ($nodePath -and (Test-Path $nodePath)) {
+  $shortcut.IconLocation = "$nodePath,0"
+}
+
+$shortcut.Save()
+Write-OK "Desktop shortcut created: `"Career Ops`""
 
 # -- Done --------------------------------------
 Write-Host ""
@@ -174,7 +221,7 @@ Write-Host "  Starting Career Ops now..." -ForegroundColor White
 Write-Host "  Your browser will open automatically." -ForegroundColor White
 Write-Host "  The setup wizard will guide you from there." -ForegroundColor White
 Write-Host ""
-Write-Host "  Next time: double-click 'Launch Career Ops' on your Desktop." -ForegroundColor Yellow
+Write-Host "  Next time: double-click 'Career Ops' on your Desktop." -ForegroundColor Yellow
 Write-Host ""
 
 # Start server
@@ -182,7 +229,7 @@ Start-Process "node" -ArgumentList "server.mjs" -WorkingDirectory $INSTALL_DIR -
 Start-Sleep 3
 
 # Open browser
-Start-Process "http://localhost:3131/setup.html"
+Start-Process "http://localhost:3131/hub.html"
 
 Write-Host "  Browser opened. Follow the setup wizard to complete installation." -ForegroundColor Cyan
 Write-Host ""

@@ -1007,6 +1007,7 @@ server.listen(PORT, '127.0.0.1', async () => {
     }
     console.log('');
     console.log('  🔗 Open in browser:');
+    console.log(`     Hub        →  ${base}/hub.html   ← start here`);
     console.log(`     Setup      →  ${base}/setup.html`);
     console.log(`     JD Check   →  ${base}/jd-analyser.html`);
     console.log(`     CV Tailor  →  ${base}/cv-tailor.html`);

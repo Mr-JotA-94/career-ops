@@ -239,6 +239,15 @@ select option { background: white; }
 }
 .tool-link:hover { border-color: var(--teal); color: var(--teal); transform: translateX(4px); }
 .tool-link span { font-size: 11px; color: var(--muted); }
+.tool-link-hub {
+  border-color: var(--teal); background: rgba(14,155,138,0.06);
+  margin-bottom: 4px;
+}
+.tool-link-hub .hub-label {
+  font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--teal); font-family: var(--mono); display: block; margin-bottom: 3px;
+}
+.tool-link-hub:hover { background: rgba(14,155,138,0.12); }
 
 @media(max-width:600px) {
   .field-row { grid-template-columns: 1fr; }
@@ -620,6 +629,7 @@ select option { background: white; }
     <h2 class="complete-title">You're all set.</h2>
     <p class="complete-sub">Your profile is saved. Every tool is now tailored to you.<br>Pick where you want to start.</p>
     <div class="tool-links">
+      <a class="tool-link tool-link-hub" href="/hub.html"><span class="hub-label">Start here</span>🏠 Dashboard <span>Your home base →</span></a>
       <a class="tool-link" href="/compass.html" target="_blank">🧭 Career Compass <span>Map your path first →</span></a>
       <a class="tool-link" href="/search-kit.html" target="_blank">🎯 Search Kit <span>Find roles to target →</span></a>
       <a class="tool-link" href="/jd-analyser.html" target="_blank">🔍 JD Analyser <span>Check fit before applying →</span></a>
@@ -652,6 +662,7 @@ select option { background: white; }
 // ── Edit mode detection ────────────────────────────────────────────────────
 const _params   = new URLSearchParams(window.location.search);
 const editMode  = _params.get('mode') === 'edit';
+const fromHub   = _params.get('from') === 'hub';
 const jumpStep  = parseInt(_params.get('step')) || 1;
 
 // ── State ──────────────────────────────────────────────────────────────────
@@ -989,9 +1000,12 @@ function collectData() {
       certifications: document.getElementById('s6-certs').value.trim(),
       differentiator: document.getElementById('s6-differentiator').value.trim(),
     },
-    groq_api_key: apiKey || document.getElementById('s2-apikey').value.trim(),
     setup_complete: true,
     setup_date: new Date().toISOString(),
+    ...((() => {
+      const k = apiKey || document.getElementById('s2-apikey').value.trim();
+      return k ? { groq_api_key: k } : {};
+    })()),
   };
 }
 
@@ -1294,7 +1308,19 @@ async function initEditMode() {
 
   // Update save button label
   const saveBtn = document.getElementById('save-btn');
-  if (saveBtn) saveBtn.textContent = 'Save changes →';
+  if (saveBtn) saveBtn.textContent = fromHub ? 'Save & return to Hub →' : 'Save changes →';
+
+  // Show Back to Hub link when arriving from hub
+  if (fromHub) {
+    const backLink = document.createElement('a');
+    backLink.href = '/hub.html';
+    backLink.textContent = '← Back to Hub';
+    backLink.style.cssText = 'display:inline-block;font-size:12px;font-family:var(--mono);color:var(--muted);text-decoration:none;padding:6px 0;transition:color 0.15s;';
+    backLink.onmouseover = () => backLink.style.color = 'var(--teal)';
+    backLink.onmouseout  = () => backLink.style.color = 'var(--muted)';
+    const topbar = document.querySelector('.topbar') || document.querySelector('.progress-bar-wrap') || document.body.firstElementChild;
+    if (topbar && topbar.parentNode) topbar.parentNode.insertBefore(backLink, topbar);
+  }
 
   // Hide CV upload zone on step 2, inject notice
   const uploadZone = document.getElementById('upload-zone');
