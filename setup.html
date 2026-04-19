@@ -1402,7 +1402,7 @@ async function setupActivateLicence() {
     });
     const d = await r.json();
     if (d.ok) {
-      msg.textContent = '&#x2713; Licence activated! All tools are now unlocked.';
+      msg.textContent = '✓ Licence activated! All tools are now unlocked.';
       msg.className = 'activate-msg licence-status ok';
       setTimeout(() => checkCurrentLicence(), 1000);
     } else {

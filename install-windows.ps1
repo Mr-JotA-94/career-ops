@@ -1,10 +1,10 @@
-# ─────────────────────────────────────────────
-#  Career Ops — Installer (Windows)
+﻿# ---------------------------------------------
+#  Career Ops - Installer (Windows)
 #  https://careerops.com.au
 #
 #  Run this in PowerShell as Administrator:
 #  Right-click → "Run with PowerShell"
-# ─────────────────────────────────────────────
+# ---------------------------------------------
 
 $ErrorActionPreference = "Stop"
 
@@ -13,26 +13,26 @@ $INSTALL_DIR = "$env:USERPROFILE\career-ops"
 $TMP_ZIP     = "$env:TEMP\career-ops-main.zip"
 $TMP_EXTRACT = "$env:TEMP\career-ops-extract"
 
-# ── Colours ───────────────────────────────────
+# -- Colours -----------------------------------
 function Write-Step  { param($msg) Write-Host "`n  > $msg" -ForegroundColor Cyan }
 function Write-OK    { param($msg) Write-Host "  [OK] $msg" -ForegroundColor Green }
 function Write-Warn  { param($msg) Write-Host "  [!]  $msg" -ForegroundColor Yellow }
 function Write-Fail  { param($msg) Write-Host "  [X]  $msg" -ForegroundColor Red; exit 1 }
 
-# ── Banner ────────────────────────────────────
+# -- Banner ------------------------------------
 Clear-Host
 Write-Host ""
 Write-Host "  ===========================================" -ForegroundColor Cyan
-Write-Host "   CAREER OPS  —  Installer for Windows     " -ForegroundColor Cyan
+Write-Host "   CAREER OPS  -  Installer for Windows     " -ForegroundColor Cyan
 Write-Host "   AI-powered job search toolkit             " -ForegroundColor Cyan
 Write-Host "  ===========================================" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "  This installer will set up Career Ops on your computer."
 Write-Host "  It will be installed to: $INSTALL_DIR"
 Write-Host ""
-Read-Host "  Press Enter to continue (or close this window to cancel)"
+Read-Host -Prompt "  Press Enter to continue - or close this window to cancel"
 
-# ── Check execution policy ────────────────────
+# -- Check execution policy --------------------
 Write-Step "Checking PowerShell execution policy..."
 $policy = Get-ExecutionPolicy -Scope CurrentUser
 if ($policy -eq "Restricted") {
@@ -43,7 +43,7 @@ if ($policy -eq "Restricted") {
   Write-OK "Execution policy OK ($policy)"
 }
 
-# ── Check / Install Node.js ───────────────────
+# -- Check / Install Node.js -------------------
 Write-Step "Checking Node.js..."
 
 $nodeInstalled = $false
@@ -92,7 +92,7 @@ if (-not $nodeInstalled) {
   $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
 }
 
-# ── Download Career Ops ───────────────────────
+# -- Download Career Ops -----------------------
 Write-Step "Downloading Career Ops..."
 
 if (Test-Path $INSTALL_DIR) {
@@ -118,6 +118,7 @@ if (Test-Path $INSTALL_DIR) {
   if (Test-Path "$INSTALL_DIR\pipeline.json") { Copy-Item "$INSTALL_DIR\pipeline.json" "$env:TEMP\career-ops-pipeline-backup.json" -Force; Write-OK "pipeline.json backed up" }
   if (Test-Path "$INSTALL_DIR\resumes")       { Copy-Item "$INSTALL_DIR\resumes"       "$env:TEMP\career-ops-resumes-backup"       -Recurse -Force; Write-OK "resumes folder backed up" }
 
+  Set-Location $env:TEMP
   Remove-Item $INSTALL_DIR -Recurse -Force
 }
 
@@ -139,74 +140,31 @@ if (Test-Path "$env:TEMP\career-ops-config-backup.json")   { Copy-Item "$env:TEM
 if (Test-Path "$env:TEMP\career-ops-pipeline-backup.json") { Copy-Item "$env:TEMP\career-ops-pipeline-backup.json" "$INSTALL_DIR\pipeline.json" -Force; Write-OK "pipeline.json restored" }
 if (Test-Path "$env:TEMP\career-ops-resumes-backup")       { Copy-Item "$env:TEMP\career-ops-resumes-backup"       "$INSTALL_DIR\resumes"       -Recurse -Force; Write-OK "resumes folder restored" }
 
-# ── Install dependencies ──────────────────────
+# -- Install dependencies ----------------------
 Write-Step "Installing dependencies..."
 Set-Location $INSTALL_DIR
 npm install --silent
 Write-OK "Dependencies installed"
 
-# ── Create VBS launcher + Desktop shortcut ────
+# -- Create Desktop shortcut -------------------
 Write-Step "Creating desktop shortcut..."
 
-# Write the VBS launcher into the app folder
-$vbsPath = "$env:USERPROFILE\career-ops\career-ops-launcher.vbs"
-$vbsContent = @'
-' Career Ops — Silent Launcher
-' Checks if server is running, starts it if not, then opens the browser.
+$shortcutPath = [System.Environment]::GetFolderPath("Desktop") + "\Launch Career Ops.bat"
+$shortcutContent = @"
+@echo off
+cd /d "%USERPROFILE%\career-ops"
+echo.
+echo   Starting Career Ops...
+echo   Open http://localhost:3131 in your browser
+echo   Press Ctrl+C to stop
+echo.
+node server.mjs
+pause
+"@
+Set-Content -Path $shortcutPath -Value $shortcutContent -Encoding ASCII
+Write-OK "Desktop shortcut created: `"Launch Career Ops`""
 
-Dim serverURL
-serverURL = "http://localhost:3131/api/config"
-
-Dim appDir
-appDir = Environ("USERPROFILE") & "\career-ops"
-
-Function ServerIsRunning()
-  On Error Resume Next
-  Dim http
-  Set http = CreateObject("MSXML2.XMLHTTP")
-  http.Open "GET", serverURL, False
-  http.Send
-  If Err.Number = 0 And http.Status = 200 Then
-    ServerIsRunning = True
-  Else
-    ServerIsRunning = False
-  End If
-  On Error GoTo 0
-End Function
-
-If Not ServerIsRunning() Then
-  Dim shell
-  Set shell = CreateObject("WScript.Shell")
-  shell.Run "cmd /c cd /d """ & appDir & """ && node server.mjs", 0, False
-  ' 0 = hidden window, False = don't wait (non-blocking)
-
-  Dim attempts
-  attempts = 0
-  Do While Not ServerIsRunning() And attempts < 15
-    WScript.Sleep 1000
-    attempts = attempts + 1
-  Loop
-End If
-
-Dim ie
-Set ie = CreateObject("WScript.Shell")
-ie.Run "cmd /c start http://localhost:3131/hub.html", 0, False
-'@
-Set-Content -Path $vbsPath -Value $vbsContent -Encoding ASCII
-Write-OK "Launcher script written"
-
-# Create a proper .lnk shortcut on the Desktop
-$WshShell  = New-Object -ComObject WScript.Shell
-$shortcut  = $WshShell.CreateShortcut("$env:USERPROFILE\Desktop\Career Ops.lnk")
-$shortcut.TargetPath       = "wscript.exe"
-$shortcut.Arguments        = "`"$vbsPath`""
-$shortcut.WorkingDirectory = "$env:USERPROFILE\career-ops"
-$shortcut.Description      = "Launch Career Ops"
-$shortcut.IconLocation     = "$env:USERPROFILE\career-ops\icon.ico, 0"
-$shortcut.Save()
-Write-OK "Desktop shortcut created: Career Ops"
-
-# ── Done ──────────────────────────────────────
+# -- Done --------------------------------------
 Write-Host ""
 Write-Host "  ==========================================" -ForegroundColor Green
 Write-Host "   Career Ops installed successfully!       " -ForegroundColor Green
@@ -216,23 +174,15 @@ Write-Host "  Starting Career Ops now..." -ForegroundColor White
 Write-Host "  Your browser will open automatically." -ForegroundColor White
 Write-Host "  The setup wizard will guide you from there." -ForegroundColor White
 Write-Host ""
-Write-Host "  Next time: double-click 'Career Ops' on your Desktop." -ForegroundColor Yellow
+Write-Host "  Next time: double-click 'Launch Career Ops' on your Desktop." -ForegroundColor Yellow
 Write-Host ""
 
-# Start server (skip if already responding on port 3131)
-$serverRunning = $false
-try {
-  $r = Invoke-WebRequest -Uri "http://localhost:3131/api/config" -UseBasicParsing -TimeoutSec 2 -ErrorAction Stop
-  if ($r.StatusCode -eq 200) { $serverRunning = $true }
-} catch {}
-
-if (-not $serverRunning) {
-  Start-Process "node" -ArgumentList "server.mjs" -WorkingDirectory $INSTALL_DIR -WindowStyle Hidden
-  Start-Sleep 3
-}
+# Start server
+Start-Process "node" -ArgumentList "server.mjs" -WorkingDirectory $INSTALL_DIR -WindowStyle Normal
+Start-Sleep 3
 
 # Open browser
-Start-Process "http://localhost:3131/hub.html"
+Start-Process "http://localhost:3131/setup.html"
 
 Write-Host "  Browser opened. Follow the setup wizard to complete installation." -ForegroundColor Cyan
 Write-Host ""
