@@ -1036,10 +1036,15 @@ Role: ${title} at ${company}
 Target: ${roleContextCE}
 Fit assessment: ${outputData.fit_score} — ${(outputData.fit_note || outputData.fit_rationale || '').replace(/[\n\r"]/g, ' ')}
 
+CANDIDATE MASTER CV:
+${buildMasterCV(CFG)}
+
 JOB DESCRIPTION:
 ${jd}
 
 ---
+
+GROUNDING RULE — THIS IS ABSOLUTE: Every factual claim in the cover letter and email must be directly traceable to the master CV above. Do not invent experience, tenure, company names, achievements, or skills not stated in the CV. The only exception is logical deduction: if the CV states a petroleum engineering degree with reservoir simulation coursework, it is fair to say the candidate understands reservoir systems. If the CV states a role at a named company, it is fair to reference that company. If a claim requires anything beyond what is stated or can be directly deduced, it does not belong in the letter. A fabricated claim will be spotted by the hiring manager and will cost the candidate the role.
 
 Write the cover letter and email as the candidate's own words — first person, "I", "my", "I have". The tone is confident and direct, not deferential. The candidate knows their value; they are not asking for a favour, they are making a case.
 
@@ -1055,7 +1060,7 @@ Use ${company}'s name. Use the JD's terminology. Write the way someone writes wh
 
 Return ONLY valid JSON:
 {
-  "cover_letter_opener": "Two paragraphs in first person as the candidate, addressed to the hiring manager. Paragraph 1: opens with a concrete statement — a real credential or achievement — directly connected to what you are looking for in this role. Not 'I am writing to apply'. Not 'passionate' or 'excited'. References something specific from the JD. Paragraph 2: 2-3 sentences connecting specific experience to a stated JD requirement using the JD's own language. Closes with one forward-looking sentence about what the candidate brings to your team. Example register: 'Five years working at the intersection of reservoir engineering and production data analysis has given me an unusual vantage point on the kind of problem you are describing in this role. At [previous company], I [specific achievement directly relevant to JD requirement]. I would bring that same combination of subsurface rigour and data-driven approach to your [specific team or project mentioned in JD].'",
+  "cover_letter_opener": "Two paragraphs in first person as the candidate, addressed to the hiring manager. Every claim must be directly traceable to the master CV — no invented experience, no fabricated tenure, no assumed skills. Logical deduction from stated facts is permitted; invention is not.\n\nParagraph 1: opens with a concrete statement drawn directly from the CV — a real credential, a named achievement, or a traceable capability — connected to what you are looking for in this role. Not 'I am writing to apply'. Not 'passionate' or 'excited'. References something specific from the JD using only what the CV supports.\n\nParagraph 2: 2-3 sentences connecting specific, named experience from the CV to a stated JD requirement, using the JD's own language. Closes with one forward-looking sentence about what the candidate brings to your team — stated as fact, not hope.",
   "email_subject": "Application — ${title} | ${candidateName}",
   "email_body": "Professional covering email in first person, under 200 words. Written directly to the hiring manager — 'your team', 'your organisation'. Opens by stating the role applied for. Two to three sentences of specific, direct reason — why this role at ${company}, why this candidate, grounded in the JD. Closes with CV attached and availability. Sign-off: Best regards / ${candidateName} / ${CFG?.personal?.phone || ''} / ${CFG?.personal?.email || ''}. No 'I am excited'. No 'I am passionate'. No filler."
 }`;
