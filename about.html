@@ -41,7 +41,7 @@ body::before {
 
 /* Hero */
 .eyebrow { font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--teal); margin-bottom: 14px; }
-.hero-title { font-family: var(--serif); font-size: clamp(36px, 6vw, 56px); color: var(--bright); line-height: 1.15; margin-bottom: 16px; font-style: italic; }
+.hero-title { font-family: var(--sans); font-size: clamp(36px, 6vw, 56px); color: var(--bright); line-height: 1.15; margin-bottom: 16px; font-style: italic; }
 .hero-title strong { font-style: normal; color: var(--teal); }
 .hero-sub { font-size: 14px; color: var(--muted); line-height: 1.85; max-width: 580px; margin-bottom: 48px; }
 
@@ -63,7 +63,7 @@ body::before {
 }
 .author-avatar {
   width: 60px; height: 60px; border-radius: 50%;
-  background: linear-gradient(135deg, var(--teal), #0D6B5E);
+  background: var(--teal);
   display: flex; align-items: center; justify-content: center;
   font-family: var(--sans); font-size: 22px; font-weight: 800; color: var(--bg);
   flex-shrink: 0;
@@ -83,15 +83,26 @@ body::before {
 .disclaimer-text p:last-child { margin-bottom: 0; }
 .disclaimer-text strong { color: var(--text); font-weight: 500; }
 
-/* Tool grid */
-.tool-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.tool-card {
-  background: var(--card); border: 1px solid var(--border);
-  border-radius: 8px; padding: 18px; text-decoration: none; transition: all 0.15s;
+/* Tools list */
+.tools-list {
+  border: 1px solid var(--border); border-radius: 8px; overflow: hidden;
 }
-.tool-card:hover { border-color: var(--teal); transform: translateY(-2px); }
-.tool-card-name { font-family: var(--sans); font-size: 13px; font-weight: 700; color: var(--bright); margin-bottom: 4px; }
-.tool-card-desc { font-size: 11px; color: var(--muted); line-height: 1.6; }
+.tool-row {
+  display: flex; align-items: flex-start; gap: 20px;
+  padding: 16px 20px; text-decoration: none; color: inherit;
+  border-bottom: 1px solid var(--border); transition: background 0.12s;
+}
+.tool-row:last-child { border-bottom: none; }
+.tool-row:hover { background: var(--surface); }
+.tool-row-id {
+  font-family: var(--mono); font-size: 10px; color: var(--muted);
+  width: 20px; flex-shrink: 0; padding-top: 2px;
+}
+.tool-row-body { flex: 1; }
+.tool-row-name { font-family: var(--sans); font-size: 13px; font-weight: 700; color: var(--bright); margin-bottom: 3px; }
+.tool-row-desc { font-size: 11px; color: var(--muted); line-height: 1.6; }
+.tool-row-arrow { font-size: 12px; color: var(--muted); flex-shrink: 0; padding-top: 2px; transition: color 0.12s, transform 0.12s; }
+.tool-row:hover .tool-row-arrow { color: var(--teal); transform: translateX(3px); }
 
 /* Footer */
 .site-footer {
@@ -104,7 +115,6 @@ body::before {
 
 @media(max-width: 600px) {
   .author-card { flex-direction: column; }
-  .tool-grid { grid-template-columns: 1fr; }
   .main { padding: 40px 16px 80px; }
 }
 </style>
@@ -159,30 +169,54 @@ body::before {
   <!-- What it does -->
   <div class="section">
     <div class="section-label">The tools</div>
-    <div class="tool-grid">
-      <a class="tool-card" href="/compass.html">
-        <div class="tool-card-name">🧭 Career Compass</div>
-        <div class="tool-card-desc">Maps a realistic path from where you are to where you want to be, including roles most people miss.</div>
+    <div class="tools-list">
+      <a class="tool-row" href="/compass.html">
+        <span class="tool-row-id">01</span>
+        <div class="tool-row-body">
+          <div class="tool-row-name">Career Compass</div>
+          <div class="tool-row-desc">Maps a realistic path from where you are to where you want to be, including roles most people miss.</div>
+        </div>
+        <span class="tool-row-arrow">→</span>
       </a>
-      <a class="tool-card" href="/jd-analyser.html">
-        <div class="tool-card-name">🔍 JD Analyser</div>
-        <div class="tool-card-desc">Decodes job descriptions — what's real, what's boilerplate, what's being screened for, and how well you fit.</div>
+      <a class="tool-row" href="/jd-analyser.html">
+        <span class="tool-row-id">02</span>
+        <div class="tool-row-body">
+          <div class="tool-row-name">JD Analyser</div>
+          <div class="tool-row-desc">Decodes job descriptions: what's real, what's boilerplate, what's being screened for, and how well you fit.</div>
+        </div>
+        <span class="tool-row-arrow">→</span>
       </a>
-      <a class="tool-card" href="/cv-tailor.html">
-        <div class="tool-card-name">📄 CV Tailor</div>
-        <div class="tool-card-desc">Rewrites your CV to match a specific role — in your voice, without fabrication. Downloads as a formatted .docx.</div>
+      <a class="tool-row" href="/cv-tailor.html">
+        <span class="tool-row-id">03</span>
+        <div class="tool-row-body">
+          <div class="tool-row-name">CV Tailor</div>
+          <div class="tool-row-desc">Rewrites your CV to match a specific role — in your voice, without fabrication. Downloads as a formatted .docx.</div>
+        </div>
+        <span class="tool-row-arrow">→</span>
       </a>
-      <a class="tool-card" href="/search-kit.html">
-        <div class="tool-card-name">🎯 Search Kit</div>
-        <div class="tool-card-desc">Generates targeted search strategies, cover letter frameworks, and outreach templates for Australian roles.</div>
+      <a class="tool-row" href="/search-kit.html">
+        <span class="tool-row-id">04</span>
+        <div class="tool-row-body">
+          <div class="tool-row-name">Search Kit</div>
+          <div class="tool-row-desc">Generates targeted search strategies, cover letter frameworks, and outreach templates for Australian roles.</div>
+        </div>
+        <span class="tool-row-arrow">→</span>
       </a>
-      <a class="tool-card" href="/pipeline.html">
-        <div class="tool-card-name">📋 Pipeline</div>
-        <div class="tool-card-desc">Tracks every application — status, contacts, follow-ups, and which CV version you sent.</div>
+      <a class="tool-row" href="/pipeline.html">
+        <span class="tool-row-id">05</span>
+        <div class="tool-row-body">
+          <div class="tool-row-name">Pipeline</div>
+          <div class="tool-row-desc">Tracks every application — status, contacts, follow-ups, and which CV version you sent.</div>
+        </div>
+        <span class="tool-row-arrow">→</span>
       </a>
-      <a class="tool-card" href="/setup.html">
-        <div class="tool-card-name">⚙ Setup</div>
-        <div class="tool-card-desc">One-time profile wizard. Everything the system generates is personalised to your background from here.</div>
+      <a class="tool-row" href="/setup.html">
+        <span class="tool-row-id">06</span>
+        <div class="tool-row-body">
+          <div class="tool-row-name">Setup</div>
+          <div class="tool-row-desc">One-time profile wizard. Everything the system generates is personalised to your background from here.</div>
+        </div>
+        <span class="tool-row-arrow">→</span>
       </a>
     </div>
   </div>

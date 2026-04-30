@@ -613,7 +613,7 @@ function showConfigWarning(msg) {
   if (existing) return;
   const div = document.createElement('div');
   div.id = 'config-warning';
-  div.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:rgba(245,166,35,0.12);border:1px solid rgba(245,166,35,0.4);border-radius:6px;padding:12px 20px;font-size:12px;color:var(--amber);font-family:var(--mono);z-index:9999;max-width:600px;text-align:center;box-shadow:0 4px 24px rgba(0,0,0,0.4);line-height:1.6;';
+  div.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:rgba(245,166,35,0.12);border:1px solid rgba(245,166,35,0.4);border-radius:6px;padding:12px 20px;font-size:12px;color:var(--amber);font-family:var(--mono);z-index:9999;max-width:600px;text-align:center;line-height:1.6;';
   div.innerHTML = '\u26a0 ' + msg + ' <span onclick="this.parentElement.remove()" style="cursor:pointer;margin-left:14px;opacity:0.6;font-size:14px;">\u2715</span>';
   document.body.appendChild(div);
   setTimeout(() => div.remove(), 12000);

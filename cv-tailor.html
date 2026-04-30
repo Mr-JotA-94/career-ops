@@ -354,9 +354,9 @@
   .score-circle { flex-shrink:0; width:86px; height:86px; border-radius:50%; display:flex; flex-direction:column; align-items:center; justify-content:center; font-family:var(--sans); font-weight:800; font-size:28px; border:3px solid; }
   .score-label  { font-size:10px; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; margin-top:2px; }
   .score-A { color:var(--green);  border-color:var(--green);  background:rgba(46,204,143,0.08); }
-  .score-B { color:#6BE08A;       border-color:#6BE08A;       background:rgba(107,224,138,0.08); }
+  .score-B { color:var(--score-b); border-color:var(--score-b); background:rgba(107,224,138,0.08); }
   .score-C { color:var(--amber);  border-color:var(--amber);  background:rgba(245,166,35,0.08); }
-  .score-D { color:#F07B3F;       border-color:#F07B3F;       background:rgba(240,123,63,0.08); }
+  .score-D { color:var(--score-d); border-color:var(--score-d); background:rgba(240,123,63,0.08); }
   .score-F { color:var(--red);    border-color:var(--red);    background:rgba(232,80,74,0.08); }
   .score-meta { flex:1; }
   .score-title { font-family:var(--sans); font-size:16px; font-weight:700; color:var(--bright); margin-bottom:4px; }
@@ -753,7 +753,7 @@ function renderTab(tab) {
     }
     if (d.fit_score) {
       const scoreCls = ({'A':'score-A','B':'score-B','C':'score-C','D':'score-D','F':'score-F'})[d.fit_score.toString().toUpperCase().charAt(0)] || 'score-C';
-      const sevColor  = { high:'var(--red)', medium:'var(--amber)', low:'#6BE08A' };
+      const sevColor  = { high:'var(--red)', medium:'var(--amber)', low:'var(--score-b)' };
       const sevBg     = { high:'rgba(232,80,74,0.08)', medium:'rgba(245,166,35,0.08)', low:'rgba(107,224,138,0.08)' };
       const sevBorder = { high:'rgba(232,80,74,0.3)',  medium:'rgba(245,166,35,0.3)',  low:'rgba(107,224,138,0.3)' };
 
@@ -814,7 +814,7 @@ function renderTab(tab) {
         html += `<div class="cv-bullet" style="margin-bottom:8px;"><span style="font-size:10px;color:var(--teal);margin-right:6px;">KEEP</span>${item}</div>`;
       });
       b.rewrite?.forEach(item => {
-        html += `<div style="margin-bottom:12px;padding:10px;background:var(--surface);border-radius:4px;border-left:2px solid var(--amber);">
+        html += `<div style="margin-bottom:12px;padding:10px;background:rgba(245,166,35,0.04);border-radius:4px;border:1px solid rgba(245,166,35,0.3);">
           <div style="font-size:10px;color:var(--muted);margin-bottom:4px;">ORIGINAL</div>
           <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">${item.original}</div>
           <div style="font-size:10px;color:var(--teal);margin-bottom:4px;">IMPROVED</div>
@@ -1155,7 +1155,7 @@ function showConfigWarning(msg) {
   if (existing) return;
   const div = document.createElement('div');
   div.id = 'config-warning';
-  div.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:rgba(245,166,35,0.12);border:1px solid rgba(245,166,35,0.4);border-radius:6px;padding:12px 20px;font-size:12px;color:var(--amber);font-family:var(--mono);z-index:9999;max-width:600px;text-align:center;box-shadow:0 4px 24px rgba(0,0,0,0.4);line-height:1.6;';
+  div.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:rgba(245,166,35,0.12);border:1px solid rgba(245,166,35,0.4);border-radius:6px;padding:12px 20px;font-size:12px;color:var(--amber);font-family:var(--mono);z-index:9999;max-width:600px;text-align:center;line-height:1.6;';
   div.innerHTML = '\u26a0 ' + msg + ' <span onclick="this.parentElement.remove()" style="cursor:pointer;margin-left:14px;opacity:0.6;font-size:14px;">\u2715</span>';
   document.body.appendChild(div);
   setTimeout(() => div.remove(), 12000);

@@ -30,7 +30,7 @@ body::before {
 
 /* ── Header ─────────────────────────────────────────────────────────── */
 .page-eyebrow { font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--teal); margin-bottom: 12px; }
-.page-title { font-family: var(--serif); font-size: clamp(32px, 5vw, 52px); color: var(--bright); line-height: 1.15; margin-bottom: 12px; font-style: italic; }
+.page-title { font-family: var(--sans); font-size: clamp(32px, 5vw, 52px); color: var(--bright); line-height: 1.15; margin-bottom: 12px; font-style: italic; }
 .page-title strong { font-style: normal; color: var(--teal); }
 .page-sub { font-size: 13px; color: var(--muted); line-height: 1.8; max-width: 560px; margin-bottom: 40px; }
 
@@ -115,7 +115,7 @@ textarea { resize: vertical; min-height: 80px; }
 /* ── Path diagram ───────────────────────────────────────────────────── */
 .path-section { margin-bottom: 24px; }
 .path-header { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
-.path-header-title { font-family: var(--serif); font-size: 28px; font-style: italic; color: var(--bright); }
+.path-header-title { font-family: var(--sans); font-size: 28px; font-style: italic; color: var(--bright); }
 .path-header-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
 
 .path-diagram { position: relative; }
@@ -152,15 +152,11 @@ textarea { resize: vertical; min-height: 80px; }
 
 .stage-card {
   flex: 1; background: var(--card); border: 1px solid var(--border);
-  border-radius: 8px; padding: 20px 22px; position: relative; overflow: hidden;
+  border-radius: 8px; padding: 20px 22px;
 }
-.stage-card::before {
-  content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
-}
-.stage-now    .stage-card::before { background: var(--teal); }
-.stage-bridge .stage-card::before { background: var(--amber); }
-.stage-target .stage-card::before { background: var(--green); }
-.stage-hidden .stage-card::before { background: var(--muted); }
+.stage-now    .stage-card { border-color: rgba(14,155,138,0.4); }
+.stage-bridge .stage-card { border-color: rgba(245,166,35,0.4); }
+.stage-target .stage-card { border-color: rgba(46,204,143,0.4); }
 
 .stage-label {
   font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase;
@@ -669,7 +665,7 @@ function showConfigWarning(msg) {
   if (existing) return;
   const div = document.createElement('div');
   div.id = 'config-warning';
-  div.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:rgba(245,166,35,0.12);border:1px solid rgba(245,166,35,0.4);border-radius:6px;padding:12px 20px;font-size:12px;color:var(--amber);font-family:var(--mono);z-index:9999;max-width:600px;text-align:center;box-shadow:0 4px 24px rgba(0,0,0,0.4);line-height:1.6;';
+  div.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:rgba(245,166,35,0.12);border:1px solid rgba(245,166,35,0.4);border-radius:6px;padding:12px 20px;font-size:12px;color:var(--amber);font-family:var(--mono);z-index:9999;max-width:600px;text-align:center;line-height:1.6;';
   div.innerHTML = '\u26a0 ' + msg + ' <span onclick="this.parentElement.remove()" style="cursor:pointer;margin-left:14px;opacity:0.6;font-size:14px;">\u2715</span>';
   document.body.appendChild(div);
   setTimeout(() => div.remove(), 12000);
