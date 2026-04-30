@@ -5,27 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Hub — Career Ops</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🏠%3C/text%3E%3C/svg%3E">
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/styles/tokens.css">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-:root {
-  --bg:     #07111E;
-  --surface:#0F1E30;
-  --card:   #142030;
-  --border: #1E3248;
-  --muted:  #4A6580;
-  --text:   #C8DDF0;
-  --bright: #EAF4FF;
-  --navy:   #0D1F35;
-  --teal:   #0E9B8A;
-  --teal2:  #07C5B0;
-  --amber:  #F5A623;
-  --red:    #E8504A;
-  --green:  #2ECC8F;
-  --purple: #9B72CF;
-  --mono:   'DM Mono', monospace;
-  --sans:   'Syne', sans-serif;
-}
 html { scroll-behavior: smooth; }
 body {
   background: var(--bg);
@@ -81,7 +63,7 @@ body::before {
 }
 .badge-draft     { background: rgba(74,101,128,0.2);   color: var(--muted);  border: 1px solid var(--border); }
 .badge-applied   { background: rgba(14,155,138,0.12);  color: var(--teal);   border: 1px solid rgba(14,155,138,0.3); }
-.badge-screening { background: rgba(155,114,207,0.12); color: var(--purple); border: 1px solid rgba(155,114,207,0.3); }
+.badge-screening { background: rgba(74,101,128,0.18); color: var(--status-screening); border: 1px solid var(--border); }
 .badge-interview { background: rgba(245,166,35,0.12);  color: var(--amber);  border: 1px solid rgba(245,166,35,0.3); }
 .badge-offer     { background: rgba(46,204,143,0.12);  color: var(--green);  border: 1px solid rgba(46,204,143,0.3); }
 .badge-rejected  { background: rgba(232,80,74,0.08);   color: var(--red);    border: 1px solid rgba(232,80,74,0.3); }
@@ -223,70 +205,6 @@ body::before {
 .activity-date { font-size: 11px; color: var(--muted); white-space: nowrap; }
 .activity-empty { font-size: 13px; color: var(--muted); font-style: italic; padding: 24px 0; }
 
-/* ── Upgrade modal (verbatim from pipeline.html) ── */
-.upgrade-overlay {
-  display: none; position: fixed; inset: 0; z-index: 9000;
-  background: rgba(6,14,24,0.85); backdrop-filter: blur(6px);
-  align-items: center; justify-content: center;
-}
-.upgrade-overlay.show { display: flex; animation: fadeIn 0.25s ease; }
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-.upgrade-modal {
-  background: #0C1A28; border: 1px solid #1A3045;
-  border-radius: 10px; padding: 40px; max-width: 480px; width: 90%;
-  position: relative;
-}
-.upgrade-badge {
-  display: inline-block; font-size: 9px; letter-spacing: 0.18em;
-  text-transform: uppercase; color: #0AA898;
-  border: 1px solid rgba(10,168,152,0.35); padding: 3px 10px;
-  border-radius: 2px; margin-bottom: 16px;
-}
-.upgrade-title {
-  font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 700;
-  color: #E8F2FF; margin-bottom: 10px; line-height: 1.3;
-}
-.upgrade-sub { font-size: 13px; color: #4A6480; line-height: 1.75; margin-bottom: 28px; }
-.upgrade-options { display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; }
-.upgrade-btn-primary {
-  display: block; width: 100%; padding: 14px 20px; text-align: center;
-  background: #0AA898; color: #060E18; border: none; border-radius: 4px;
-  font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700;
-  letter-spacing: 0.05em; cursor: pointer; text-decoration: none;
-  transition: background 0.2s;
-}
-.upgrade-btn-primary:hover { background: #06D4BE; }
-.upgrade-dismiss {
-  position: absolute; top: 16px; right: 20px;
-  font-size: 18px; color: #4A6480; cursor: pointer;
-  background: none; border: none; line-height: 1;
-}
-.upgrade-dismiss:hover { color: #B8D0E8; }
-.upgrade-price { font-size: 11px; color: #4A6480; line-height: 1.6; }
-.upgrade-price strong { color: #B8D0E8; font-weight: 500; }
-.upgrade-price .scratch { text-decoration: line-through; color: #2A4060; font-size: 11px; }
-.upgrade-divider { height: 1px; background: #1A3045; margin: 16px 0; }
-.licence-row { display: flex; gap: 8px; margin-top: 16px; }
-.licence-input {
-  flex: 1; background: #060E18; border: 1px solid #1A3045;
-  border-radius: 4px; color: #B8D0E8; font-family: 'DM Mono', monospace;
-  font-size: 12px; padding: 10px 14px; outline: none;
-  text-transform: uppercase; letter-spacing: 0.08em; transition: border-color 0.2s;
-}
-.licence-input:focus { border-color: #0AA898; }
-.licence-input::placeholder { color: #2A4060; letter-spacing: 0.05em; text-transform: none; }
-.btn-activate {
-  padding: 10px 18px; background: transparent;
-  border: 1px solid #1A3045; border-radius: 4px;
-  color: #4A6480; font-family: 'DM Mono', monospace;
-  font-size: 11px; cursor: pointer; transition: all 0.15s; white-space: nowrap;
-}
-.btn-activate:hover { border-color: #0AA898; color: #0AA898; }
-.btn-activate.loading { opacity: 0.5; cursor: not-allowed; }
-.activate-msg { font-size: 11px; margin-top: 8px; display: none; }
-.activate-msg.ok { color: #1EC87A; display: block; }
-.activate-msg.err { color: #E8504A; display: block; }
-
 /* ── Responsive ── */
 @media (max-width: 860px) {
   .tool-grid { grid-template-columns: repeat(2, 1fr); }
@@ -362,36 +280,7 @@ body::before {
 </div>
 
 <!-- Upgrade modal (verbatim from pipeline.html) -->
-<div class="upgrade-overlay" id="upgrade-overlay">
-  <div class="upgrade-modal">
-    <button class="upgrade-dismiss" onclick="closeUpgrade()">&#x2715;</button>
-    <div class="upgrade-badge">Career Ops</div>
-    <h2 class="upgrade-title" id="upgrade-title">Unlock full access</h2>
-    <p class="upgrade-sub" id="upgrade-sub">This feature is part of Career Ops Full Access.</p>
-    <div class="upgrade-options">
-      <a href="https://buy.stripe.com/test_3cIdR14bz9iIdZVcdD9EI00"
-         target="_blank" class="upgrade-btn-primary">Get Full Access &#x2192;</a>
-    </div>
-    <div class="upgrade-price">
-      <strong>Latinos Encorporate members:</strong> use code <strong>LATINOS79</strong> at checkout &#x2014; $79 AUD
-      &nbsp;&#xB7;&nbsp; <span class="scratch">$375 full price</span>
-    </div>
-    <div class="upgrade-price" style="margin-top:4px;">
-      Includes 30-min setup session with Johan &#xB7;
-      <a href="https://calendly.com/jlopez94f/career-ops-setup-session"
-         target="_blank" style="color:#0AA898;text-decoration:none;">Book here</a>
-    </div>
-    <div class="upgrade-divider"></div>
-    <div style="font-size:11px;color:#4A6480;margin-bottom:8px;letter-spacing:0.08em;text-transform:uppercase;">Already have a key?</div>
-    <div class="licence-row">
-      <input class="licence-input" id="licence-key-input"
-             placeholder="COPS-STU-XXXX-XXXX" maxlength="20"
-             oninput="this.value=this.value.toUpperCase()">
-      <button class="btn-activate" id="btn-activate" onclick="activateLicence()">Activate</button>
-    </div>
-    <div class="activate-msg" id="activate-msg"></div>
-  </div>
-</div>
+<script src="/styles/upgrade-modal.js"></script>
 
 <!-- Footer (verbatim from pipeline.html) -->
 <footer style="text-align:center;padding:28px 20px;border-top:1px solid var(--border);font-size:11px;color:var(--muted);font-family:var(--mono);line-height:1.9;position:relative;z-index:1;">

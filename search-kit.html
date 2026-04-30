@@ -5,25 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Search Kit — Career Ops</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🎯%3C/text%3E%3C/svg%3E">
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/styles/tokens.css">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --bg:     #07111E;
-    --surface:#0F1E30;
-    --card:   #142030;
-    --border: #1E3248;
-    --muted:  #4A6580;
-    --text:   #C8DDF0;
-    --bright: #EAF4FF;
-    --teal:   #0E9B8A;
-    --teal2:  #07C5B0;
-    --amber:  #F5A623;
-    --green:  #2ECC8F;
-    --red:    #E8504A;
-    --mono:   'DM Mono', monospace;
-    --sans:   'Syne', sans-serif;
-  }
   html { scroll-behavior: smooth; }
   body { background: var(--bg); color: var(--text); font-family: var(--mono); min-height: 100vh; }
   body::before {
@@ -55,8 +39,8 @@
   .role-card-badge {
     display: inline-block; font-size: 9px; letter-spacing: 0.08em;
     padding: 1px 6px; border-radius: 2px; margin-bottom: 5px;
-    background: rgba(155,114,207,0.12); color: #9B72CF;
-    border: 1px solid rgba(155,114,207,0.25); font-family: var(--mono);
+    background: rgba(74,101,128,0.15); color: var(--muted);
+    border: 1px solid rgba(74,101,128,0.25); font-family: var(--mono);
   }
 
   /* Generate button */

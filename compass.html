@@ -5,27 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Career Compass — Career Ops</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🧭%3C/text%3E%3C/svg%3E">
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/styles/tokens.css">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-:root {
-  --bg:     #07111E;
-  --surface:#0F1E30;
-  --card:   #142030;
-  --border: #1E3248;
-  --muted:  #4A6580;
-  --text:   #C8DDF0;
-  --bright: #EAF4FF;
-  --teal:   #0E9B8A;
-  --teal2:  #07C5B0;
-  --amber:  #F5A623;
-  --green:  #2ECC8F;
-  --red:    #E8504A;
-  --purple: #9B72CF;
-  --mono:   'DM Mono', monospace;
-  --sans:   'Syne', sans-serif;
-  --serif:  'Instrument Serif', Georgia, serif;
-}
 html { scroll-behavior: smooth; }
 body { background: var(--bg); color: var(--text); font-family: var(--mono); min-height: 100vh; overflow-x: hidden; }
 body::before {
@@ -128,7 +110,7 @@ textarea { resize: vertical; min-height: 80px; }
 .pill-ok     { background: rgba(46,204,143,0.1);  color: var(--green);  border: 1px solid rgba(46,204,143,0.25); }
 .pill-warn   { background: rgba(245,166,35,0.1);  color: var(--amber);  border: 1px solid rgba(245,166,35,0.25); }
 .pill-info   { background: rgba(14,155,138,0.08); color: var(--teal);   border: 1px solid rgba(14,155,138,0.2); }
-.pill-visa   { background: rgba(155,114,207,0.1); color: var(--purple); border: 1px solid rgba(155,114,207,0.25); }
+.pill-visa   { background: rgba(74,101,128,0.1); color: var(--muted); border: 1px solid rgba(74,101,128,0.25); }
 
 /* ── Path diagram ───────────────────────────────────────────────────── */
 .path-section { margin-bottom: 24px; }
@@ -166,7 +148,7 @@ textarea { resize: vertical; min-height: 80px; }
 .stage-now    { border-color: var(--teal);   color: var(--teal); }
 .stage-bridge { border-color: var(--amber);  color: var(--amber); }
 .stage-target { border-color: var(--green);  color: var(--green); }
-.stage-hidden { border-color: var(--purple); color: var(--purple); }
+.stage-hidden { border-color: var(--muted); color: var(--muted); }
 
 .stage-card {
   flex: 1; background: var(--card); border: 1px solid var(--border);
@@ -178,7 +160,7 @@ textarea { resize: vertical; min-height: 80px; }
 .stage-now    .stage-card::before { background: var(--teal); }
 .stage-bridge .stage-card::before { background: var(--amber); }
 .stage-target .stage-card::before { background: var(--green); }
-.stage-hidden .stage-card::before { background: var(--purple); }
+.stage-hidden .stage-card::before { background: var(--muted); }
 
 .stage-label {
   font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase;
@@ -187,7 +169,7 @@ textarea { resize: vertical; min-height: 80px; }
 .stage-now    .stage-label { color: var(--teal); }
 .stage-bridge .stage-label { color: var(--amber); }
 .stage-target .stage-label { color: var(--green); }
-.stage-hidden .stage-label { color: var(--purple); }
+.stage-hidden .stage-label { color: var(--muted); }
 
 .stage-role { font-family: var(--sans); font-size: 16px; font-weight: 700; color: var(--bright); margin-bottom: 8px; }
 .stage-why { font-size: 12px; color: var(--text); line-height: 1.7; margin-bottom: 12px; }
@@ -197,7 +179,7 @@ textarea { resize: vertical; min-height: 80px; }
 }
 .tag-time    { background: rgba(74,101,128,0.2); color: var(--muted); border: 1px solid var(--border); }
 .tag-accel   { background: rgba(14,155,138,0.1); color: var(--teal);  border: 1px solid rgba(14,155,138,0.2); }
-.tag-visa    { background: rgba(155,114,207,0.1);color: var(--purple);border: 1px solid rgba(155,114,207,0.2); }
+.tag-visa    { background: rgba(74,101,128,0.1);color: var(--muted);border: 1px solid rgba(74,101,128,0.2); }
 .tag-demand  { background: rgba(46,204,143,0.1); color: var(--green); border: 1px solid rgba(46,204,143,0.2); }
 .tag-warning { background: rgba(245,166,35,0.1); color: var(--amber); border: 1px solid rgba(245,166,35,0.2); }
 
@@ -209,7 +191,7 @@ textarea { resize: vertical; min-height: 80px; }
 .hidden-divider-line { flex: 1; height: 1px; background: var(--border); }
 .hidden-divider-label {
   font-family: var(--sans); font-size: 11px; font-weight: 700;
-  letter-spacing: 0.1em; text-transform: uppercase; color: var(--purple);
+  letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted);
   white-space: nowrap;
 }
 
@@ -616,7 +598,7 @@ function renderResults(data) {
         <div class="stage-label">Hidden Accelerator — ${h.stage_relevance === 'now' ? 'Available Now' : 'Bridge Stage'}</div>
         <div class="stage-role">${h.role_title}</div>
         <div class="stage-why">
-          <strong style="color:var(--purple);font-size:11px;display:block;margin-bottom:4px;">Why people miss it:</strong>
+          <strong style="color:var(--muted);font-size:11px;display:block;margin-bottom:4px;">Why people miss it:</strong>
           ${h.why_hidden}<br><br>
           <strong style="color:var(--teal);font-size:11px;display:block;margin-bottom:4px;">Why it's powerful for you:</strong>
           ${h.why_powerful}

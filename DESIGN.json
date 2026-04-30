@@ -1,0 +1,219 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-04-29T00:00:00Z",
+  "title": "Design System: Career Ops",
+  "extensions": {
+    "colorMeta": {
+      "bg": {
+        "role": "neutral",
+        "displayName": "Deep Ink",
+        "canonical": "oklch(9% 0.025 240)",
+        "tonalRamp": ["#07111E", "#0F1E30", "#142030", "#1E3248", "#2b4562", "#4A6580", "#C8DDF0", "#EAF4FF"]
+      },
+      "surface": {
+        "role": "neutral",
+        "displayName": "Nocturne",
+        "canonical": "oklch(13% 0.03 240)",
+        "tonalRamp": ["#07111E", "#0F1E30", "#142030", "#1E3248", "#2b4562", "#4A6580", "#C8DDF0", "#EAF4FF"]
+      },
+      "card": {
+        "role": "neutral",
+        "displayName": "Slate Well",
+        "canonical": "oklch(16% 0.025 240)",
+        "tonalRamp": ["#07111E", "#0F1E30", "#142030", "#1E3248", "#2b4562", "#4A6580", "#C8DDF0", "#EAF4FF"]
+      },
+      "border": {
+        "role": "neutral",
+        "displayName": "Reef Line",
+        "canonical": "oklch(22% 0.035 240)",
+        "tonalRamp": ["#07111E", "#0F1E30", "#142030", "#1E3248", "#2b4562", "#4A6580", "#C8DDF0", "#EAF4FF"]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Storm Gray",
+        "canonical": "oklch(43% 0.04 235)",
+        "tonalRamp": ["#07111E", "#0F1E30", "#142030", "#1E3248", "#2b4562", "#4A6580", "#C8DDF0", "#EAF4FF"]
+      },
+      "text": {
+        "role": "neutral",
+        "displayName": "Cool Mist",
+        "canonical": "oklch(86% 0.04 230)",
+        "tonalRamp": ["#07111E", "#0F1E30", "#142030", "#1E3248", "#2b4562", "#4A6580", "#C8DDF0", "#EAF4FF"]
+      },
+      "bright": {
+        "role": "neutral",
+        "displayName": "Near White",
+        "canonical": "oklch(96% 0.025 225)",
+        "tonalRamp": ["#07111E", "#0F1E30", "#142030", "#1E3248", "#2b4562", "#4A6580", "#C8DDF0", "#EAF4FF"]
+      },
+      "teal": {
+        "role": "primary",
+        "displayName": "Advisor Teal",
+        "canonical": "oklch(58% 0.12 185)",
+        "tonalRamp": ["#091c1a", "#0a2e2b", "#0a4841", "#0b6459", "#0E9B8A", "#1dbcad", "#6ed5cc", "#c0edea"]
+      },
+      "teal-highlight": {
+        "role": "primary",
+        "displayName": "Active Teal",
+        "canonical": "oklch(72% 0.14 185)",
+        "tonalRamp": ["#071e1c", "#093430", "#0a5049", "#0b6e64", "#0d8f84", "#07C5B0", "#5dddd5", "#baf2ee"]
+      },
+      "amber": {
+        "role": "tertiary",
+        "displayName": "Signal Amber",
+        "canonical": "oklch(74% 0.17 75)",
+        "tonalRamp": ["#1e0e00", "#372200", "#523700", "#704e00", "#946700", "#bc8400", "#F5A623", "#fde08a"]
+      },
+      "red": {
+        "role": "tertiary",
+        "displayName": "Decline Red",
+        "canonical": "oklch(55% 0.18 25)",
+        "tonalRamp": ["#1c0404", "#360c0b", "#531714", "#73231f", "#96302b", "#bc3e38", "#E8504A", "#f5a09c"]
+      },
+      "green": {
+        "role": "tertiary",
+        "displayName": "Progress Green",
+        "canonical": "oklch(74% 0.16 155)",
+        "tonalRamp": ["#021710", "#043020", "#074d33", "#0b6c48", "#118c5e", "#1aaf76", "#2ECC8F", "#8ee8c5"]
+      },
+      "setup-bg": {
+        "role": "neutral",
+        "displayName": "Warm Linen",
+        "canonical": "oklch(97% 0.008 85)",
+        "tonalRamp": ["#2b251f", "#473c33", "#675549", "#886f60", "#aa8e7e", "#ccb19e", "#e5d3c3", "#F7F4EF"]
+      },
+      "setup-surface": {
+        "role": "neutral",
+        "displayName": "Chalk White",
+        "canonical": "oklch(100% 0 0)",
+        "tonalRamp": ["#2b251f", "#473c33", "#675549", "#886f60", "#aa8e7e", "#ccb19e", "#e5d3c3", "#FFFFFF"]
+      }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Page-level hero titles. One per page maximum — compass path header, setup wizard welcome." },
+      "headline": { "displayName": "Headline", "purpose": "Section headings, modal titles, major card group labels." },
+      "title": { "displayName": "Title", "purpose": "Card titles, step labels, tab headings." },
+      "body": { "displayName": "Body", "purpose": "All descriptive copy. Max 65–75ch line length." },
+      "label": { "displayName": "Label", "purpose": "Metadata, chip text, input labels, nav links, status counts." },
+      "mono": { "displayName": "Mono", "purpose": "All numeric data — fit scores, dates, ATS keyword counts, IDs, generated strings. IBM Plex Mono only." }
+    },
+    "shadows": [],
+    "motion": [
+      { "name": "ease-out-expo", "value": "cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "Default easing for all state transitions. Never use bounce or elastic." },
+      { "name": "duration-fast", "value": "0.15s", "purpose": "Hover, active, focus state changes." },
+      { "name": "duration-base", "value": "0.2s", "purpose": "Component entrance, expand/collapse, modal open." },
+      { "name": "duration-slow", "value": "0.35s", "purpose": "Page-level transitions, multi-step wizard advances." }
+    ],
+    "breakpoints": [
+      { "name": "mobile", "value": "540px", "purpose": "Nav collapses, 2-col grids drop to 1-col, font sizes step down." },
+      { "name": "tablet", "value": "768px", "purpose": "3-col tool grids drop to 2-col, side panels may stack." }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Main call to action. One per screen. Always teal.",
+      "html": "<button class=\"ds-btn-primary\">Analyse job description</button>",
+      "css": ".ds-btn-primary { background: #0E9B8A; color: #EAF4FF; padding: 10px 20px; border: none; border-radius: 6px; font-family: 'IBM Plex Sans', sans-serif; font-size: 0.9375rem; font-weight: 500; line-height: 1; letter-spacing: 0.01em; cursor: pointer; transition: background 0.15s cubic-bezier(0.16, 1, 0.3, 1); } .ds-btn-primary:hover { background: #07C5B0; } .ds-btn-primary:focus-visible { outline: 2px solid #07C5B0; outline-offset: 2px; } .ds-btn-primary:active { background: #0b8278; }"
+    },
+    {
+      "name": "Ghost Button",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "Secondary and cancel actions. Transparent at rest, Nocturne on hover.",
+      "html": "<button class=\"ds-btn-ghost\">Cancel</button>",
+      "css": ".ds-btn-ghost { background: transparent; color: #C8DDF0; padding: 10px 20px; border: 1px solid #1E3248; border-radius: 6px; font-family: 'IBM Plex Sans', sans-serif; font-size: 0.9375rem; font-weight: 500; line-height: 1; cursor: pointer; transition: background 0.15s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.15s cubic-bezier(0.16, 1, 0.3, 1); } .ds-btn-ghost:hover { background: #0F1E30; border-color: #4A6580; } .ds-btn-ghost:focus-visible { outline: 2px solid #0E9B8A; outline-offset: 2px; } .ds-btn-ghost:active { background: #142030; }"
+    },
+    {
+      "name": "Chip",
+      "kind": "chip",
+      "refersTo": "chip-default",
+      "description": "Role selection, ATS keyword tags, filter pills. Two states: default and selected.",
+      "html": "<div style=\"display:flex;gap:8px\"><span class=\"ds-chip\">Product Manager</span><span class=\"ds-chip ds-chip--selected\">Software Engineer</span></div>",
+      "css": ".ds-chip { display: inline-flex; align-items: center; background: #142030; color: #C8DDF0; padding: 4px 12px; border-radius: 20px; border: 1px solid #1E3248; font-family: 'IBM Plex Sans', sans-serif; font-size: 0.75rem; font-weight: 500; line-height: 1.4; letter-spacing: 0.02em; cursor: pointer; transition: background 0.15s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.15s cubic-bezier(0.16, 1, 0.3, 1), color 0.15s cubic-bezier(0.16, 1, 0.3, 1); } .ds-chip:hover { border-color: #4A6580; color: #EAF4FF; } .ds-chip--selected { background: #0E9B8A; border-color: #0E9B8A; color: #EAF4FF; } .ds-chip--selected:hover { background: #07C5B0; border-color: #07C5B0; }"
+    },
+    {
+      "name": "Card",
+      "kind": "card",
+      "refersTo": "card-default",
+      "description": "Standard content container. Full border, 12px radius, 24px padding.",
+      "html": "<div class=\"ds-card\"><h3 class=\"ds-card__title\">CV Tailor</h3><p class=\"ds-card__body\">Rewrite your CV bullets to match any job description in seconds.</p></div>",
+      "css": ".ds-card { background: #142030; border-radius: 12px; border: 1px solid #1E3248; padding: 24px; } .ds-card__title { font-family: 'IBM Plex Sans', sans-serif; font-size: 1rem; font-weight: 600; color: #EAF4FF; margin: 0 0 8px; line-height: 1.4; } .ds-card__body { font-family: 'IBM Plex Sans', sans-serif; font-size: 0.9375rem; font-weight: 400; color: #C8DDF0; margin: 0; line-height: 1.65; }"
+    },
+    {
+      "name": "Text Field",
+      "kind": "input",
+      "refersTo": "card-default",
+      "description": "Standard labelled text input with teal focus ring.",
+      "html": "<div class=\"ds-field\"><label class=\"ds-field__label\" for=\"ds-role\">Target role</label><input class=\"ds-field__input\" id=\"ds-role\" type=\"text\" placeholder=\"e.g. Product Manager\"></div>",
+      "css": ".ds-field { display: flex; flex-direction: column; gap: 6px; } .ds-field__label { font-family: 'IBM Plex Sans', sans-serif; font-size: 0.75rem; font-weight: 500; color: #C8DDF0; letter-spacing: 0.03em; } .ds-field__input { background: #0F1E30; border: 1px solid #1E3248; border-radius: 8px; color: #EAF4FF; font-family: 'IBM Plex Sans', sans-serif; font-size: 0.9375rem; padding: 10px 14px; outline: none; transition: border-color 0.15s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.15s cubic-bezier(0.16, 1, 0.3, 1); } .ds-field__input::placeholder { color: #4A6580; } .ds-field__input:focus { border-color: #0E9B8A; box-shadow: 0 0 0 3px rgba(14, 155, 138, 0.15); }"
+    },
+    {
+      "name": "Nav Bar",
+      "kind": "nav",
+      "refersTo": "card-default",
+      "description": "Fixed top navigation with blur backdrop. Storm Gray links, Near White for active.",
+      "html": "<nav class=\"ds-topbar\"><a class=\"ds-nav-item ds-nav-item--active\" href=\"#\">Hub</a><a class=\"ds-nav-item\" href=\"#\">CV Tailor</a><a class=\"ds-nav-item\" href=\"#\">Compass</a><a class=\"ds-nav-item\" href=\"#\">Pipeline</a></nav>",
+      "css": ".ds-topbar { background: rgba(15, 30, 48, 0.92); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); display: flex; align-items: center; gap: 4px; padding: 0 24px; height: 52px; border-bottom: 1px solid #1E3248; } .ds-nav-item { font-family: 'IBM Plex Sans', sans-serif; font-size: 0.875rem; font-weight: 500; color: #4A6580; text-decoration: none; padding: 6px 10px; border-radius: 6px; transition: color 0.15s cubic-bezier(0.16, 1, 0.3, 1), background 0.15s cubic-bezier(0.16, 1, 0.3, 1); } .ds-nav-item:hover { color: #C8DDF0; background: rgba(20, 32, 48, 0.8); } .ds-nav-item--active { color: #EAF4FF; } .ds-nav-item--active:hover { background: none; } .ds-nav-item:focus-visible { outline: 2px solid #0E9B8A; outline-offset: 2px; }"
+    },
+    {
+      "name": "Kanban Card",
+      "kind": "card",
+      "refersTo": "card-default",
+      "description": "Pipeline application card. Compact layout — company, role, date, status badge in one block.",
+      "html": "<div class=\"ds-kanban-card\"><div class=\"ds-kanban-card__company\">Atlassian</div><div class=\"ds-kanban-card__role\">Senior Product Manager</div><div class=\"ds-kanban-card__meta\"><span class=\"ds-kanban-card__date\">12 Apr 2026</span><span class=\"ds-kanban-card__status ds-kanban-card__status--interview\">Interview</span></div></div>",
+      "css": ".ds-kanban-card { background: #142030; border: 1px solid #1E3248; border-radius: 8px; padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; cursor: grab; transition: border-color 0.15s cubic-bezier(0.16, 1, 0.3, 1), background 0.15s cubic-bezier(0.16, 1, 0.3, 1); } .ds-kanban-card:hover { border-color: #4A6580; background: #192840; } .ds-kanban-card__company { font-family: 'IBM Plex Sans', sans-serif; font-size: 0.75rem; font-weight: 500; color: #4A6580; letter-spacing: 0.05em; text-transform: uppercase; } .ds-kanban-card__role { font-family: 'IBM Plex Sans', sans-serif; font-size: 0.9375rem; font-weight: 600; color: #EAF4FF; line-height: 1.3; } .ds-kanban-card__meta { display: flex; align-items: center; justify-content: space-between; margin-top: 2px; } .ds-kanban-card__date { font-family: 'IBM Plex Mono', monospace; font-size: 0.75rem; color: #4A6580; } .ds-kanban-card__status { font-family: 'IBM Plex Sans', sans-serif; font-size: 0.6875rem; font-weight: 600; padding: 2px 8px; border-radius: 4px; letter-spacing: 0.04em; text-transform: uppercase; } .ds-kanban-card__status--applied { background: rgba(74, 101, 128, 0.2); color: #4A6580; } .ds-kanban-card__status--interview { background: rgba(245, 166, 35, 0.12); color: #F5A623; } .ds-kanban-card__status--offer { background: rgba(46, 204, 143, 0.12); color: #2ECC8F; } .ds-kanban-card__status--rejected { background: rgba(232, 80, 74, 0.12); color: #E8504A; }"
+    },
+    {
+      "name": "Score Circle",
+      "kind": "custom",
+      "refersTo": "card-default",
+      "description": "JD Analyser fit grade. A–F letter in a bordered circle, colour-coded by grade band.",
+      "html": "<div class=\"ds-score-circle ds-score-circle--b\"><span class=\"ds-score-circle__grade\">B</span><span class=\"ds-score-circle__label\">Fit Score</span></div>",
+      "css": ".ds-score-circle { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 88px; height: 88px; border-radius: 50%; border: 3px solid; gap: 2px; } .ds-score-circle--a { border-color: #2ECC8F; color: #2ECC8F; } .ds-score-circle--b { border-color: #07C5B0; color: #07C5B0; } .ds-score-circle--c { border-color: #F5A623; color: #F5A623; } .ds-score-circle--d { border-color: #E8504A; color: #E8504A; } .ds-score-circle--f { border-color: #E8504A; color: #E8504A; opacity: 0.7; } .ds-score-circle__grade { font-family: 'IBM Plex Sans', sans-serif; font-size: 2rem; font-weight: 700; line-height: 1; } .ds-score-circle__label { font-family: 'IBM Plex Sans', sans-serif; font-size: 0.625rem; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: #4A6580; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Quiet Counsel",
+    "overview": "Career Ops is the advisor in the room who already knows the system. It doesn't explain itself. It doesn't perform energy it hasn't earned. It gives you an edge through calm precision — one clear action at a time, no noise, no theatrics. The interface is the argument for the tool's competence. If the UI is trustworthy, the AI output is trustworthy.\n\nThe visual language is dark-first — not because dark looks technical, but because users arrive at night, after a long day of work, with a job description open in another tab. The surface should feel like a prepared desk, not a landing page. Generous spacing is not a luxury; it is a deliberate reduction of cognitive load for users navigating a stressful process in a second language, in an unfamiliar market.\n\nThis system rejects everything that signals 'someone made this to look good in a Dribbble screenshot.' No gradient text. No purple accents. No hero metrics. No identical card grids. No startup hype.",
+    "keyCharacteristics": [
+      "Dark-first, with a distinct warm-linen light theme reserved for the setup wizard",
+      "Tonal depth through four background layers — no shadows",
+      "One accent color (Advisor Teal) used sparingly; semantic colors reserved for meaning",
+      "IBM Plex Sans throughout — institutional clarity, excellent multilingual rendering",
+      "IBM Plex Mono for all data-heavy contexts: scores, IDs, dates, codes",
+      "Breathing room as a deliberate design choice — never compressed, never cluttered"
+    ],
+    "rules": [
+      { "name": "The One Voice Rule", "body": "Teal is the only accent that appears on dark-theme pages. Amber, red, and green are semantic signals — they communicate status, never decoration.", "section": "colors" },
+      { "name": "The Semantic Lock Rule", "body": "Amber, red, and green are reserved for job application status semantics: opportunity/interview/warning (amber), rejection/destructive (red), offer/success (green). Using any of these colours in a non-semantic context violates the system's trust model.", "section": "colors" },
+      { "name": "The One Family Rule", "body": "IBM Plex Sans handles every typographic role. No decorative or display serif is introduced. Weight and size create hierarchy; a second typeface is not needed.", "section": "typography" },
+      { "name": "The Depth Rule", "body": "Layer by colour, never by shadow. If you find yourself reaching for box-shadow as a decorative tool, reconsider the tonal hierarchy instead.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do use Advisor Teal (#0E9B8A) on ≤10% of any given screen. Its scarcity is what gives it authority.",
+      "Do use IBM Plex Mono for every numeric, date, score, and code context — even when the surrounding text is IBM Plex Sans.",
+      "Do apply full borders on all four sides of cards and inputs. Never a side-stripe.",
+      "Do use semantic colours (amber/red/green) only for their assigned job-search statuses. Never reuse them for decoration.",
+      "Do leave breathing room. 24px internal card padding is the minimum.",
+      "Do respect prefers-reduced-motion. All transitions should be gated.",
+      "Do use the Warm Linen light theme exclusively for setup.html. Every other page is dark.",
+      "Do provide visible focus indicators on every interactive element — outline or box-shadow in Advisor Teal."
+    ],
+    "donts": [
+      "Don't use border-left or border-right greater than 1px as a coloured accent stripe on cards, list items, callouts, or alerts.",
+      "Don't use gradient text (background-clip: text). Single solid colour only.",
+      "Don't reach for purple. Career Ops has no purple in its palette.",
+      "Don't replicate startup hype: gradient backgrounds, hero metrics, bouncing animations, social proof badge layouts.",
+      "Don't build identical card grids (same-size cards, icon + heading + body text, repeated endlessly).",
+      "Don't use bouncy or elastic easing. All motion uses ease-out curves only.",
+      "Don't animate CSS layout properties. Animate transform and opacity only.",
+      "Don't introduce a second accent colour. Amber, red, and green are semantic locks.",
+      "Don't nest cards. A card inside a card is always the wrong answer.",
+      "Don't use #000 or #FFF. The bounds are Deep Ink (#07111E) and Near White (#EAF4FF).",
+      "Don't import Syne, Instrument Serif, or Inter. IBM Plex Sans and IBM Plex Mono only."
+    ]
+  }
+}
