@@ -1,32 +1,39 @@
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400;1,600&family=IBM+Plex+Mono:wght@400;500&display=swap');
 
-/* ── Dark theme (default) ─────────────────────────────────────────────────── */
+/* ── Non-color tokens (theme-independent) ────────────────────────────────── */
 :root {
-  --bg:               #07111E;
-  --surface:          #0F1E30;
-  --card:             #142030;
-  --navy:             #0D1F35;
-  --border:           #1E3248;
-  --muted:            #4A6580;
-  --text:             #C8DDF0;
-  --bright:           #EAF4FF;
-  --teal:             #0E9B8A;
-  --teal2:            #07C5B0;
-  --amber:            #F5A623;
-  --red:              #E8504A;
-  --green:            #2ECC8F;
-  --score-b:          #6BE08A;
-  --score-d:          #F07B3F;
-  --status-screening: var(--muted);
   --sans:             'IBM Plex Sans', sans-serif;
   --mono:             'IBM Plex Mono', monospace;
+  --status-screening: var(--muted);
 }
 
-/* ── Light theme (setup.html only) ───────────────────────────────────────── */
-.light-theme {
+/* ── Dark theme (default — also FOUC fallback before JS runs) ────────────── */
+:root,
+[data-theme="dark"] {
+  --bg:      #07111E;
+  --surface: #0F1E30;
+  --card:    #142030;
+  --navy:    #0D1F35;
+  --border:  #1E3248;
+  --muted:   #4A6580;
+  --text:    #C8DDF0;
+  --bright:  #EAF4FF;
+  --teal:    #0E9B8A;
+  --teal2:   #07C5B0;
+  --amber:   #F5A623;
+  --red:     #E8504A;
+  --green:   #2ECC8F;
+  --score-b: #6BE08A;
+  --score-d: #F07B3F;
+  --nav-bg:  rgba(7,17,30,0.92);
+}
+
+/* ── Light theme ─────────────────────────────────────────────────────────── */
+[data-theme="light"] {
   --bg:      #F7F4EF;
   --surface: #FFFFFF;
   --card:    #F0EDE8;
+  --navy:    #E8E4DE;
   --border:  #DDD9D2;
   --muted:   #9B9488;
   --text:    #2C2820;
@@ -36,6 +43,32 @@
   --amber:   #C4711A;
   --red:     #B94040;
   --green:   #1E7A4E;
+  --score-b: #1A7A4E;
+  --score-d: #C4711A;
+  --nav-bg:  rgba(247,244,239,0.95);
+}
+
+/* ── Theme toggle button ─────────────────────────────────────────────────── */
+.theme-toggle {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 13px;
+  padding: 4px 9px;
+  line-height: 1;
+  transition: color 0.15s, border-color 0.15s;
+  font-family: var(--mono);
+  flex-shrink: 0;
+}
+.theme-toggle:hover {
+  color: var(--text);
+  border-color: var(--muted);
+}
+.theme-toggle:focus-visible {
+  outline: 2px solid var(--teal2);
+  outline-offset: 2px;
 }
 
 /* ── Reduced motion ───────────────────────────────────────────────────────── */

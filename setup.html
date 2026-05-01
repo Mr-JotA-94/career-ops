@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Setup — Career Ops</title>
+<script>!function(){var t=localStorage.getItem('careerops-theme')||'dark';document.documentElement.setAttribute('data-theme',t)}()</script>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E⚙️%3C/text%3E%3C/svg%3E">
 <link rel="stylesheet" href="/styles/tokens.css">
 <style>
@@ -68,9 +69,12 @@ body::before {
 .step-num { display: block; font-size: 14px; font-weight: 800; margin-bottom: 2px; }
 
 /* Step panels */
-.step-panel { display: none; animation: fadeIn 0.3s ease; }
+.step-panel { display: none; }
 .step-panel.active { display: block; }
-@keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+@media (prefers-reduced-motion: no-preference) {
+  .step-panel.active { animation: fadeIn 0.25s ease-out; }
+}
 
 .step-heading {
   font-family: var(--sans);
@@ -94,11 +98,14 @@ input[type="text"], input[type="email"], input[type="password"], textarea, selec
   font-size: 13px; padding: 10px 14px;
   outline: none; transition: border-color 0.2s;
 }
-input:focus, textarea:focus, select:focus { border-color: var(--teal); }
+input:focus, textarea:focus, select:focus {
+  border-color: var(--teal);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--teal) 18%, transparent);
+}
 input::placeholder, textarea::placeholder { color: var(--muted); }
 textarea { resize: vertical; min-height: 80px; line-height: 1.6; }
 select { cursor: pointer; }
-select option { background: white; }
+select option { background: var(--surface); }
 
 /* Toggle chips */
 .chip-group { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
@@ -109,7 +116,8 @@ select option { background: white; }
   color: var(--muted); cursor: pointer; transition: all 0.15s;
 }
 .chip-toggle:hover { border-color: var(--teal); color: var(--teal); }
-.chip-toggle.selected { background: var(--teal); border-color: var(--teal); color: white; }
+.chip-toggle.selected { background: var(--teal); border-color: var(--teal); color: var(--bg); }
+.chip-toggle:focus-visible { outline: 2px solid var(--teal2); outline-offset: 2px; }
 
 /* Job blocks */
 .job-block {
@@ -136,6 +144,7 @@ select option { background: white; }
   cursor: pointer; transition: all 0.15s; margin-top: 4px;
 }
 .btn-add-block:hover { border-color: var(--teal); color: var(--teal); }
+.btn-add-block:focus-visible { outline: 2px solid var(--teal2); outline-offset: 2px; }
 
 /* API key test */
 .key-row { display: flex; gap: 8px; }
@@ -147,13 +156,15 @@ select option { background: white; }
   cursor: pointer; transition: all 0.15s; white-space: nowrap;
 }
 .btn-test:hover { border-color: var(--teal); color: var(--teal); }
-.btn-test.success { border-color: var(--green); color: var(--green); background: rgba(30,122,78,0.06); }
-.btn-test.fail { border-color: var(--red); color: var(--red); background: rgba(185,64,64,0.06); }
+.btn-test.success { border-color: var(--green); color: var(--green); background: color-mix(in srgb, var(--green) 8%, transparent); }
+.btn-test.fail { border-color: var(--red); color: var(--red); background: color-mix(in srgb, var(--red) 8%, transparent); }
+.btn-test:focus-visible { outline: 2px solid var(--teal2); outline-offset: 2px; }
 .key-hint { font-size: 11px; color: var(--muted); margin-top: 8px; line-height: 1.6; }
 
 /* Role recommender */
 .recommend-box {
-  background: rgba(26,107,94,0.04); border: 1px solid rgba(26,107,94,0.2);
+  background: color-mix(in srgb, var(--teal) 5%, transparent);
+  border: 1px solid color-mix(in srgb, var(--teal) 22%, transparent);
   border-radius: 6px; padding: 20px; margin-top: 20px; display: none;
 }
 .recommend-box.show { display: block; }
@@ -176,6 +187,7 @@ select option { background: white; }
 }
 .btn-get-roles:hover { background: var(--teal2); }
 .btn-get-roles:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-get-roles:focus-visible { outline: 2px solid var(--teal2); outline-offset: 2px; }
 
 /* Review */
 .review-section { margin-bottom: 20px; }
@@ -192,7 +204,11 @@ select option { background: white; }
   border: none; cursor: pointer; transition: all 0.2s;
   letter-spacing: 0.05em;
 }
-.btn-next:hover { background: var(--teal2); transform: translateY(-1px); }
+.btn-next:hover { background: var(--teal2); }
+.btn-next:focus-visible { outline: 2px solid var(--teal2); outline-offset: 2px; }
+@media (prefers-reduced-motion: no-preference) {
+  .btn-next:hover { transform: translateY(-1px); }
+}
 .btn-back {
   font-family: var(--mono); font-size: 12px;
   padding: 12px 20px; border-radius: 4px;
@@ -200,6 +216,7 @@ select option { background: white; }
   border: 1px solid var(--border); cursor: pointer; transition: all 0.15s;
 }
 .btn-back:hover { color: var(--text); border-color: var(--muted); }
+.btn-back:focus-visible { outline: 2px solid var(--teal2); outline-offset: 2px; }
 
 /* Error */
 .error-msg { font-size: 11px; color: var(--red); margin-top: 6px; display: none; }
@@ -208,7 +225,10 @@ select option { background: white; }
 
 /* Complete screen */
 .complete { text-align: center; padding: 40px 0; display: none; }
-.complete.show { display: block; animation: fadeIn 0.5s ease; }
+.complete.show { display: block; }
+@media (prefers-reduced-motion: no-preference) {
+  .complete.show { animation: fadeIn 0.5s ease; }
+}
 .complete-icon { font-size: 48px; margin-bottom: 20px; }
 .complete-title { font-family: var(--sans); font-size: 36px; font-style: italic; color: var(--bright); margin-bottom: 12px; }
 .complete-sub { font-size: 13px; color: var(--muted); line-height: 1.7; margin-bottom: 32px; }
@@ -220,7 +240,10 @@ select option { background: white; }
   text-decoration: none; color: var(--text);
   font-size: 13px; transition: all 0.15s;
 }
-.tool-link:hover { border-color: var(--teal); color: var(--teal); transform: translateX(4px); }
+.tool-link:hover { border-color: var(--teal); color: var(--teal); }
+@media (prefers-reduced-motion: no-preference) {
+  .tool-link:hover { transform: translateX(4px); }
+}
 .tool-link span { font-size: 11px; color: var(--muted); }
 .tool-link-hub {
   border-color: var(--teal); background: rgba(14,155,138,0.06);
@@ -241,7 +264,7 @@ select option { background: white; }
   .topbar {
     display: flex; align-items: center; justify-content: space-between;
     padding: 14px 28px; border-bottom: 1px solid var(--border);
-    background: rgba(247,244,239,0.95); backdrop-filter: blur(10px);
+    background: var(--nav-bg); backdrop-filter: blur(10px);
     position: sticky; top: 0; z-index: 100;
   }
   .topbar-left  { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
@@ -282,7 +305,10 @@ select option { background: white; }
   text-transform: uppercase; letter-spacing: 0.06em;
   transition: border-color 0.2s;
 }
-.licence-key-input:focus { border-color: var(--teal); }
+.licence-key-input:focus {
+  border-color: var(--teal);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--teal) 18%, transparent);
+}
 .licence-key-input::placeholder { text-transform: none; letter-spacing: 0; color: var(--muted); }
 .btn-licence-activate {
   padding: 10px 16px; background: var(--teal); color: white;
@@ -301,21 +327,23 @@ select option { background: white; }
 .licence-current strong { color: var(--teal); font-weight: 500; }
 
 .edit-key-notice {
-  background: rgba(30,122,78,0.08); border: 1px solid rgba(30,122,78,0.3);
+  background: color-mix(in srgb, var(--green) 9%, transparent);
+  border: 1px solid color-mix(in srgb, var(--green) 30%, transparent);
   border-radius: 4px; padding: 10px 14px; font-size: 12px;
   color: var(--green); margin-bottom: 14px; line-height: 1.5;
 }
 .edit-mode-notice {
-  background: rgba(26,107,94,0.06); border: 1px solid rgba(26,107,94,0.25);
+  background: color-mix(in srgb, var(--teal) 7%, transparent);
+  border: 1px solid color-mix(in srgb, var(--teal) 25%, transparent);
   border-radius: 4px; padding: 10px 14px; font-size: 12px;
   color: var(--teal); margin-bottom: 14px; line-height: 1.5;
 }
 </style>
 </head>
-<body class="light-theme">
+<body>
 <div class="topbar">
     <div class="topbar-left">
-      <a href="/pipeline.html" class="logo">Career<span>Ops</span></a>
+      <a href="/hub.html" class="logo">Career<span>Ops</span></a>
       <span class="tool-tag">setup</span>
       <nav class="nav-links">
         <a class="nav-link" href="/jd-analyser.html">JD Analyser</a>
@@ -324,6 +352,9 @@ select option { background: white; }
         <a class="nav-link" href="/compass.html">Compass</a>
         <a class="nav-link" href="/pipeline.html">Pipeline</a>
       </nav>
+    </div>
+    <div class="topbar-right">
+      <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" aria-label="Toggle colour theme"></button>
     </div>
   </div>
 
@@ -1434,6 +1465,16 @@ if (editMode) {
 } else {
   silentVerifyKey();
 }
+
+// ── Theme toggle ───────────────────────────────────────────────────────────
+function toggleTheme() {
+  const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('careerops-theme', next);
+  document.getElementById('theme-toggle').textContent = next === 'dark' ? '☽' : '☀';
+}
+document.getElementById('theme-toggle').textContent =
+  (document.documentElement.getAttribute('data-theme') || 'dark') === 'dark' ? '☽' : '☀';
 
 </script>
 
