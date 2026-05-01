@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Pipeline — Career Ops</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E📊%3C/text%3E%3C/svg%3E">
+<script>!function(){var t=localStorage.getItem('careerops-theme')||'dark';document.documentElement.setAttribute('data-theme',t)}()</script>
 <link rel="stylesheet" href="/styles/tokens.css">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -134,13 +135,13 @@
     font-family: var(--mono); letter-spacing: 0.06em;
     font-weight: 500; white-space: nowrap;
   }
-  .badge-draft     { background: rgba(74,101,128,0.2);  color: var(--muted);  border: 1px solid var(--border); }
-  .badge-applied   { background: rgba(14,155,138,0.12); color: var(--teal);   border: 1px solid rgba(14,155,138,0.3); }
-  .badge-screening { background: rgba(74,101,128,0.18);color: var(--status-screening); border: 1px solid var(--border); }
-  .badge-interview { background: rgba(245,166,35,0.12); color: var(--amber);  border: 1px solid rgba(245,166,35,0.3); }
-  .badge-offer     { background: rgba(46,204,143,0.12); color: var(--green);  border: 1px solid rgba(46,204,143,0.3); }
-  .badge-rejected  { background: rgba(232,80,74,0.08);  color: var(--red);    border: 1px solid rgba(232,80,74,0.3); }
-  .badge-withdrawn { background: rgba(74,101,128,0.12); color: var(--muted);  border: 1px solid var(--border); }
+  .badge-draft     { background: color-mix(in srgb, var(--muted) 20%, transparent); color: var(--muted);             border: 1px solid var(--border); }
+  .badge-applied   { background: color-mix(in srgb, var(--teal)  12%, transparent); color: var(--teal);              border: 1px solid color-mix(in srgb, var(--teal)  30%, transparent); }
+  .badge-screening { background: color-mix(in srgb, var(--muted) 18%, transparent); color: var(--status-screening);  border: 1px solid var(--border); }
+  .badge-interview { background: color-mix(in srgb, var(--amber) 12%, transparent); color: var(--amber);             border: 1px solid color-mix(in srgb, var(--amber) 30%, transparent); }
+  .badge-offer     { background: color-mix(in srgb, var(--green) 12%, transparent); color: var(--green);             border: 1px solid color-mix(in srgb, var(--green) 30%, transparent); }
+  .badge-rejected  { background: color-mix(in srgb, var(--red)   8%,  transparent); color: var(--red);               border: 1px solid color-mix(in srgb, var(--red)   30%, transparent); }
+  .badge-withdrawn { background: color-mix(in srgb, var(--muted) 12%, transparent); color: var(--muted);             border: 1px solid var(--border); }
 
   .notes-cell { max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--muted); font-size: 11px; }
   .follow-up-cell { font-size: 11px; white-space: nowrap; }
@@ -179,9 +180,11 @@
     border-radius: 10px;
     width: 100%; max-width: 560px;
     max-height: 90vh; overflow-y: auto;
-    animation: slideUp 0.25s ease;
   }
-  @keyframes slideUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+  @media (prefers-reduced-motion: no-preference) {
+    .modal { animation: slideUp 0.25s ease; }
+    @keyframes slideUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+  }
   .modal-header {
     display: flex; align-items: center; justify-content: space-between;
     padding: 20px 24px 16px;
@@ -206,7 +209,7 @@
     color: var(--text); font-family: var(--mono); font-size: 13px;
     padding: 9px 12px; outline: none; transition: border-color 0.2s;
   }
-  input:focus, select:focus, textarea.form-ta:focus { border-color: var(--teal); }
+  input:focus, select:focus, textarea.form-ta:focus { border-color: var(--teal); box-shadow: 0 0 0 3px color-mix(in srgb, var(--teal) 18%, transparent); }
   input::placeholder, textarea.form-ta::placeholder { color: var(--muted); }
   select { cursor: pointer; }
   select option { background: var(--card); }
@@ -230,10 +233,10 @@
     font-family: var(--mono); font-size: 12px;
     padding: 10px 18px; border-radius: 4px;
     background: transparent; color: var(--red);
-    border: 1px solid rgba(232,80,74,0.3); cursor: pointer; transition: all 0.15s;
+    border: 1px solid color-mix(in srgb, var(--red) 30%, transparent); cursor: pointer; transition: all 0.15s;
     margin-right: auto;
   }
-  .btn-delete:hover { background: rgba(232,80,74,0.08); }
+  .btn-delete:hover { background: color-mix(in srgb, var(--red) 8%, transparent); }
 
   /* Kanban toggle */
   .view-toggle { display: flex; border: 1px solid var(--border); border-radius: 4px; overflow: hidden; }
@@ -270,15 +273,23 @@
     cursor: pointer; transition: all 0.15s;
     font-size: 12px;
   }
-  .kanban-card:hover { border-color: var(--teal); transform: translateY(-1px); }
+  .kanban-card:hover { border-color: var(--teal); }
+  @media (prefers-reduced-motion: no-preference) {
+    .kanban-card:hover { transform: translateY(-1px); }
+  }
   .kc-company { font-family: var(--sans); font-weight: 700; color: var(--bright); font-size: 12px; margin-bottom: 3px; }
   .kc-role { color: var(--muted); font-size: 11px; margin-bottom: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .kc-footer { display: flex; align-items: center; justify-content: space-between; }
   .kc-fit { font-family: var(--sans); font-weight: 800; font-size: 13px; }
   .kc-date { font-size: 10px; color: var(--muted); }
 
+  .btn-save:focus-visible, .btn-cancel:focus-visible, .btn-delete:focus-visible,
+  .btn-add:focus-visible, .filter-btn:focus-visible, .view-btn:focus-visible {
+    outline: 2px solid var(--teal2); outline-offset: 2px;
+  }
+
   @media(max-width: 640px) {
-  
+
     .main { padding: 16px; }
     .form-row-2 { grid-template-columns: 1fr; }
     .stats-strip { display: grid; grid-template-columns: repeat(3, 1fr); }
@@ -289,7 +300,7 @@
   .topbar {
     display: flex; align-items: center; justify-content: space-between;
     padding: 14px 28px; border-bottom: 1px solid var(--border);
-    background: rgba(7,17,30,0.92); backdrop-filter: blur(10px);
+    background: var(--nav-bg); backdrop-filter: blur(10px);
     position: sticky; top: 0; z-index: 100;
   }
   .topbar-left  { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
@@ -309,7 +320,7 @@
     transition: color 0.15s, border-color 0.15s; white-space: nowrap;
   }
   .nav-link:hover { color: var(--teal); border-color: var(--teal); }
-  .nav-link.active { color: var(--teal); border-color: var(--teal); background: rgba(14,155,138,0.08); }
+  .nav-link.active { color: var(--teal); border-color: var(--teal); background: color-mix(in srgb, var(--teal) 8%, transparent); }
 
 
 </style>
@@ -320,7 +331,7 @@
   <!-- Top bar -->
   <div class="topbar">
     <div class="topbar-left">
-      <a href="/pipeline.html" class="logo">Career<span>Ops</span></a>
+      <a href="/hub.html" class="logo">Career<span>Ops</span></a>
       <span class="tool-tag">pipeline</span>
       <nav class="nav-links">
         <a class="nav-link" href="/jd-analyser.html">JD Analyser</a>
@@ -330,7 +341,7 @@
         <a class="nav-link active" href="/pipeline.html">Pipeline</a>
       </nav>
     </div>
-    <div class="topbar-right"><span id="user-greeting" style="font-size:11px;color:var(--muted);font-family:var(--mono);"></span><div class="view-toggle" style="display:flex;gap:4px;"><button class="view-btn active" id="vbtn-table" onclick="setView('table')">≡ List</button><button class="view-btn" id="vbtn-kanban" onclick="setView('kanban')">⬛ Board</button></div><button class="btn-add" onclick="openModal()">+ Add Role</button></div>
+    <div class="topbar-right"><span id="user-greeting" style="font-size:11px;color:var(--muted);font-family:var(--mono);"></span><button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" aria-label="Toggle colour theme"></button><div class="view-toggle" style="display:flex;gap:4px;"><button class="view-btn active" id="vbtn-table" onclick="setView('table')">≡ List</button><button class="view-btn" id="vbtn-kanban" onclick="setView('kanban')">⬛ Board</button></div><button class="btn-add" onclick="openModal()">+ Add Role</button></div>
   </div>
 
   <!-- Stats -->
@@ -858,7 +869,7 @@ function showConfigWarning(msg) {
   if (existing) return;
   const div = document.createElement('div');
   div.id = 'config-warning';
-  div.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:rgba(245,166,35,0.12);border:1px solid rgba(245,166,35,0.4);border-radius:6px;padding:12px 20px;font-size:12px;color:var(--amber);font-family:var(--mono);z-index:9999;max-width:600px;text-align:center;line-height:1.6;';
+  div.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:color-mix(in srgb, var(--amber) 12%, transparent);border:1px solid color-mix(in srgb, var(--amber) 40%, transparent);border-radius:6px;padding:12px 20px;font-size:12px;color:var(--amber);font-family:var(--mono);z-index:9999;max-width:600px;text-align:center;line-height:1.6;';
   div.innerHTML = '\u26a0 ' + msg + ' <span onclick="this.parentElement.remove()" style="cursor:pointer;margin-left:14px;opacity:0.6;font-size:14px;">\u2715</span>';
   document.body.appendChild(div);
   setTimeout(() => div.remove(), 12000);
@@ -920,6 +931,15 @@ async function activateLicence() {
     btn.textContent = 'Activate'; btn.classList.remove('loading'); btn.disabled = false;
   }
 }
+
+function toggleTheme() {
+  const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('careerops-theme', next);
+  document.getElementById('theme-toggle').textContent = next === 'dark' ? '☽' : '☀';
+}
+document.getElementById('theme-toggle').textContent =
+  (document.documentElement.getAttribute('data-theme') || 'dark') === 'dark' ? '☽' : '☀';
 
 // ── Pipeline gate ───────────────────────────────────────────────────────
 const _pipelineOriginalInit = init;

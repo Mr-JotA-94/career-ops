@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Hub — Career Ops</title>
+<script>!function(){var t=localStorage.getItem('careerops-theme')||'dark';document.documentElement.setAttribute('data-theme',t)}()</script>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🏠%3C/text%3E%3C/svg%3E">
 <link rel="stylesheet" href="/styles/tokens.css">
 <style>
@@ -32,7 +33,7 @@ body::before {
 .topbar {
   display: flex; align-items: center; justify-content: space-between;
   padding: 14px 28px; border-bottom: 1px solid var(--border);
-  background: rgba(7,17,30,0.92); backdrop-filter: blur(10px);
+  background: var(--nav-bg); backdrop-filter: blur(10px);
   position: sticky; top: 0; z-index: 100;
 }
 .topbar-left  { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
@@ -52,7 +53,8 @@ body::before {
   transition: color 0.15s, border-color 0.15s; white-space: nowrap;
 }
 .nav-link:hover { color: var(--teal); border-color: var(--teal); }
-.nav-link.active { color: var(--teal); border-color: var(--teal); background: rgba(14,155,138,0.08); }
+.nav-link.active { color: var(--teal); border-color: var(--teal); background: color-mix(in srgb, var(--teal) 9%, transparent); }
+.nav-link:focus-visible { outline: 2px solid var(--teal2); outline-offset: 2px; }
 
 /* ── Status badges (verbatim from pipeline.html) ── */
 .badge {
@@ -62,11 +64,11 @@ body::before {
   font-weight: 500; white-space: nowrap;
 }
 .badge-draft     { background: rgba(74,101,128,0.2);   color: var(--muted);  border: 1px solid var(--border); }
-.badge-applied   { background: rgba(14,155,138,0.12);  color: var(--teal);   border: 1px solid rgba(14,155,138,0.3); }
+.badge-applied   { background: color-mix(in srgb, var(--teal)  13%, transparent); color: var(--teal);  border: 1px solid color-mix(in srgb, var(--teal)  30%, transparent); }
 .badge-screening { background: rgba(74,101,128,0.18); color: var(--status-screening); border: 1px solid var(--border); }
-.badge-interview { background: rgba(245,166,35,0.12);  color: var(--amber);  border: 1px solid rgba(245,166,35,0.3); }
-.badge-offer     { background: rgba(46,204,143,0.12);  color: var(--green);  border: 1px solid rgba(46,204,143,0.3); }
-.badge-rejected  { background: rgba(232,80,74,0.08);   color: var(--red);    border: 1px solid rgba(232,80,74,0.3); }
+.badge-interview { background: color-mix(in srgb, var(--amber) 13%, transparent); color: var(--amber); border: 1px solid color-mix(in srgb, var(--amber) 30%, transparent); }
+.badge-offer     { background: color-mix(in srgb, var(--green) 13%, transparent); color: var(--green); border: 1px solid color-mix(in srgb, var(--green) 30%, transparent); }
+.badge-rejected  { background: color-mix(in srgb, var(--red)   9%,  transparent); color: var(--red);   border: 1px solid color-mix(in srgb, var(--red)   30%, transparent); }
 .badge-withdrawn { background: rgba(74,101,128,0.12);  color: var(--muted);  border: 1px solid var(--border); }
 
 /* ── Tier badge ── */
@@ -76,8 +78,8 @@ body::before {
   font-family: var(--mono); font-weight: 500;
 }
 .tier-free      { background: rgba(74,101,128,0.18);  color: var(--muted); border: 1px solid var(--border); }
-.tier-community { background: rgba(14,155,138,0.14);  color: var(--teal);  border: 1px solid rgba(14,155,138,0.3); }
-.tier-external  { background: rgba(245,166,35,0.12);  color: var(--amber); border: 1px solid rgba(245,166,35,0.3); }
+.tier-community { background: color-mix(in srgb, var(--teal)  15%, transparent); color: var(--teal);  border: 1px solid color-mix(in srgb, var(--teal)  30%, transparent); }
+.tier-external  { background: color-mix(in srgb, var(--amber) 13%, transparent); color: var(--amber); border: 1px solid color-mix(in srgb, var(--amber) 30%, transparent); }
 
 /* ── Profile strip ── */
 .profile-strip {
@@ -98,11 +100,12 @@ body::before {
 .profile-edit {
   font-size: 11px; color: var(--teal);
   font-family: var(--mono); white-space: nowrap;
-  padding: 5px 12px; border: 1px solid rgba(14,155,138,0.3);
+  padding: 5px 12px; border: 1px solid color-mix(in srgb, var(--teal) 30%, transparent);
   border-radius: 3px; transition: all 0.15s;
   background: transparent; cursor: pointer;
 }
-.profile-edit:hover { background: rgba(14,155,138,0.08); border-color: var(--teal); }
+.profile-edit:hover { background: color-mix(in srgb, var(--teal) 9%, transparent); border-color: var(--teal); }
+.profile-edit:focus-visible { outline: 2px solid var(--teal2); outline-offset: 2px; }
 .edit-menu {
   display: none; position: absolute; right: 0; top: calc(100% + 6px);
   background: var(--card); border: 1px solid var(--border);
@@ -117,7 +120,8 @@ body::before {
   transition: background 0.12s, color 0.12s;
 }
 .edit-menu a:last-child { border-bottom: none; }
-.edit-menu a:hover { background: rgba(14,155,138,0.1); color: var(--teal); }
+.edit-menu a:hover { background: color-mix(in srgb, var(--teal) 11%, transparent); color: var(--teal); }
+.edit-menu a:focus-visible { outline: 2px solid var(--teal2); outline-offset: -2px; }
 
 /* ── Toast ── */
 .toast {
@@ -125,11 +129,14 @@ body::before {
   background: var(--card); border: 1px solid var(--teal);
   color: var(--teal); font-family: var(--mono); font-size: 13px;
   padding: 12px 20px; border-radius: 6px;
-  opacity: 0; transform: translateY(8px);
-  transition: opacity 0.3s, transform 0.3s;
+  opacity: 0; transition: opacity 0.3s, transform 0.3s;
   pointer-events: none;
 }
-.toast.toast-show { opacity: 1; transform: translateY(0); }
+@media (prefers-reduced-motion: no-preference) {
+  .toast { transform: translateY(8px); }
+  .toast.toast-show { transform: translateY(0); }
+}
+.toast.toast-show { opacity: 1; }
 
 /* ── Main ── */
 .main { flex: 1; padding: 32px 28px; max-width: 1100px; width: 100%; margin: 0 auto; }
@@ -165,14 +172,14 @@ body::before {
   position: relative;
 }
 .tool-card:hover {
-  transform: translateY(-2px);
-  border-color: rgba(14,155,138,0.5);
-  background: rgba(14,155,138,0.03);
+  border-color: color-mix(in srgb, var(--teal) 50%, transparent);
+  background: color-mix(in srgb, var(--teal) 4%, transparent);
 }
 .tool-card.locked { opacity: 0.52; }
-.tool-card.locked:hover {
-  transform: translateY(-1px);
-  border-color: rgba(74,101,128,0.5);
+.tool-card.locked:hover { border-color: color-mix(in srgb, var(--muted) 50%, transparent); }
+@media (prefers-reduced-motion: no-preference) {
+  .tool-card:hover { transform: translateY(-2px); }
+  .tool-card.locked:hover { transform: translateY(-1px); }
 }
 
 .tool-emoji { font-size: 26px; margin-bottom: 12px; line-height: 1; display: block; }
@@ -237,6 +244,7 @@ body::before {
     </div>
     <div class="topbar-right">
       <span id="user-greeting" style="font-size:11px;color:var(--muted);font-family:var(--mono);"></span>
+      <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" aria-label="Toggle colour theme"></button>
     </div>
   </div>
 
@@ -515,6 +523,16 @@ async function init() {
 }
 
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeUpgrade(); });
+
+// ── Theme toggle ───────────────────────────────────────────────────────────
+function toggleTheme() {
+  const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('careerops-theme', next);
+  document.getElementById('theme-toggle').textContent = next === 'dark' ? '☽' : '☀';
+}
+document.getElementById('theme-toggle').textContent =
+  (document.documentElement.getAttribute('data-theme') || 'dark') === 'dark' ? '☽' : '☀';
 
 init();
 </script>
