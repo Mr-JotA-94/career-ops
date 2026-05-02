@@ -84,7 +84,7 @@ body::before {
 /* ── Profile strip ── */
 .profile-strip {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 16px 28px; border-bottom: 1px solid var(--border);
+  padding: 20px 28px; border-bottom: 1px solid var(--border);
   background: var(--surface); gap: 20px; flex-wrap: wrap;
 }
 .profile-left { flex: 1; min-width: 160px; }
@@ -144,7 +144,7 @@ body::before {
 /* ── Section header ── */
 .section-header {
   display: flex; align-items: center; justify-content: space-between;
-  margin-bottom: 16px;
+  margin-bottom: 24px;
 }
 .section-title {
   font-family: var(--sans); font-size: 11px; font-weight: 700;
@@ -160,12 +160,12 @@ body::before {
 .tool-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 14px; margin-bottom: 40px;
+  gap: 16px; margin-bottom: 40px;
 }
 
 .tool-card {
   background: var(--card); border: 1px solid var(--border);
-  border-radius: 8px; padding: 22px 20px 18px;
+  border-radius: 8px; padding: 24px;
   cursor: pointer; text-decoration: none; color: inherit;
   transition: transform 0.18s, border-color 0.18s, background 0.18s;
   display: flex; flex-direction: column;
@@ -202,7 +202,7 @@ body::before {
 /* ── Recent activity ── */
 .activity-row {
   display: flex; align-items: center; gap: 14px;
-  padding: 13px 0; border-bottom: 1px solid var(--border);
+  padding: 16px 0; border-bottom: 1px solid var(--border);
   flex-wrap: wrap;
 }
 .activity-row:last-child { border-bottom: none; }
