@@ -73,7 +73,7 @@
   /* Board tabs */
   .board-tabs { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 24px; overflow-x: auto; }
   .board-tab {
-    padding: 10px 20px; font-size: 11px; font-family: var(--mono);
+    padding: 16px 20px; font-size: 11px; font-family: var(--mono);
     letter-spacing: 0.08em; color: var(--muted); cursor: pointer;
     border-bottom: 2px solid transparent; transition: all 0.15s;
     text-transform: uppercase; white-space: nowrap;
@@ -191,12 +191,13 @@
   .nav-links { display: flex; gap: 4px; flex-wrap: wrap; }
   .nav-link {
     font-size: 11px; font-family: var(--mono); color: var(--muted);
-    text-decoration: none; padding: 5px 11px;
+    text-decoration: none; padding: 16px 12px;
     border: 1px solid var(--border); border-radius: 3px;
     transition: color 0.15s, border-color 0.15s; white-space: nowrap;
   }
   .nav-link:hover { color: var(--teal); border-color: var(--teal); }
   .nav-link.active { color: var(--teal); border-color: var(--teal); background: color-mix(in srgb, var(--teal) 8%, transparent); }
+  .nav-link:focus-visible { outline: 2px solid var(--teal2); outline-offset: 2px; }
 
 </style>
 </head>

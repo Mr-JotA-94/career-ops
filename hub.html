@@ -48,7 +48,7 @@ body::before {
 .nav-links { display: flex; gap: 4px; flex-wrap: wrap; }
 .nav-link {
   font-size: 11px; font-family: var(--mono); color: var(--muted);
-  text-decoration: none; padding: 5px 11px;
+  text-decoration: none; padding: 16px 12px;
   border: 1px solid var(--border); border-radius: 3px;
   transition: color 0.15s, border-color 0.15s; white-space: nowrap;
 }
@@ -320,18 +320,46 @@ let _licenceTier = 'free';
 
 function isPaid() { return _licenceTier === 'community' || _licenceTier === 'external'; }
 
-// ── Upgrade modal (verbatim from pipeline.html) ──────────────────────────────
+// ── Upgrade modal focus management ──────────────────────────────────────────
+let _upgradeTrigger = null;
+let _trapHandler = null;
+
+function trapFocus(dialogEl) {
+  const sel = 'a[href], button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])';
+  const nodes = () => [...dialogEl.querySelectorAll(sel)];
+  _trapHandler = e => {
+    if (e.key !== 'Tab') return;
+    const focusable = nodes();
+    const first = focusable[0], last = focusable[focusable.length - 1];
+    if (e.shiftKey) {
+      if (document.activeElement === first) { e.preventDefault(); last.focus(); }
+    } else {
+      if (document.activeElement === last) { e.preventDefault(); first.focus(); }
+    }
+  };
+  dialogEl.addEventListener('keydown', _trapHandler);
+  const focusable = nodes();
+  if (focusable[0]) focusable[0].focus();
+}
+
+// ── Upgrade modal ────────────────────────────────────────────────────────────
 function showUpgrade(title, sub) {
+  _upgradeTrigger = document.activeElement;
   document.getElementById('upgrade-title').textContent = title || 'Unlock full access';
   document.getElementById('upgrade-sub').textContent = sub || 'This feature is part of Career Ops Full Access.';
-  document.getElementById('upgrade-overlay').classList.add('show');
+  const overlay = document.getElementById('upgrade-overlay');
+  overlay.classList.add('show');
+  trapFocus(overlay);
 }
 
 function closeUpgrade() {
-  document.getElementById('upgrade-overlay').classList.remove('show');
+  const overlay = document.getElementById('upgrade-overlay');
+  overlay.classList.remove('show');
+  if (_trapHandler) { overlay.removeEventListener('keydown', _trapHandler); _trapHandler = null; }
   const msg = document.getElementById('activate-msg');
   msg.className = 'activate-msg'; msg.textContent = '';
   document.getElementById('licence-key-input').value = '';
+  if (_upgradeTrigger) { _upgradeTrigger.focus(); _upgradeTrigger = null; }
 }
 
 async function activateLicence() {

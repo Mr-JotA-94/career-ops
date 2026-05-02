@@ -59,7 +59,7 @@ textarea { resize: vertical; min-height: 80px; }
 
 .horizon-row { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
 .horizon-btn {
-  font-family: var(--mono); font-size: 11px; padding: 7px 16px;
+  font-family: var(--mono); font-size: 11px; padding: 16px 16px;
   border-radius: 3px; border: 1px solid var(--border);
   background: transparent; color: var(--muted); cursor: pointer; transition: all 0.15s;
 }
@@ -249,12 +249,13 @@ textarea { resize: vertical; min-height: 80px; }
   .nav-links { display: flex; gap: 4px; flex-wrap: wrap; }
   .nav-link {
     font-size: 11px; font-family: var(--mono); color: var(--muted);
-    text-decoration: none; padding: 5px 11px;
+    text-decoration: none; padding: 16px 12px;
     border: 1px solid var(--border); border-radius: 3px;
     transition: color 0.15s, border-color 0.15s; white-space: nowrap;
   }
   .nav-link:hover { color: var(--teal); border-color: var(--teal); }
   .nav-link.active { color: var(--teal); border-color: var(--teal); background: color-mix(in srgb, var(--teal) 8%, transparent); }
+  .nav-link:focus-visible { outline: 2px solid var(--teal2); outline-offset: 2px; }
 
 </style>
 </head>

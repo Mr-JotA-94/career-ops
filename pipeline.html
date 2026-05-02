@@ -76,7 +76,7 @@
 
   .filter-btn {
     font-family: var(--mono); font-size: 11px;
-    padding: 7px 14px; border-radius: 3px;
+    padding: 16px 14px; border-radius: 3px;
     border: 1px solid var(--border);
     background: transparent; color: var(--muted);
     cursor: pointer; transition: all 0.15s;
@@ -241,7 +241,7 @@
   /* Kanban toggle */
   .view-toggle { display: flex; border: 1px solid var(--border); border-radius: 4px; overflow: hidden; }
   .view-btn {
-    padding: 6px 12px; font-size: 11px; font-family: var(--mono);
+    padding: 16px 12px; font-size: 11px; font-family: var(--mono);
     background: transparent; color: var(--muted);
     border: none; cursor: pointer; transition: all 0.15s;
   }
@@ -315,12 +315,13 @@
   .nav-links { display: flex; gap: 4px; flex-wrap: wrap; }
   .nav-link {
     font-size: 11px; font-family: var(--mono); color: var(--muted);
-    text-decoration: none; padding: 5px 11px;
+    text-decoration: none; padding: 16px 12px;
     border: 1px solid var(--border); border-radius: 3px;
     transition: color 0.15s, border-color 0.15s; white-space: nowrap;
   }
   .nav-link:hover { color: var(--teal); border-color: var(--teal); }
   .nav-link.active { color: var(--teal); border-color: var(--teal); background: color-mix(in srgb, var(--teal) 8%, transparent); }
+  .nav-link:focus-visible { outline: 2px solid var(--teal2); outline-offset: 2px; }
 
 
 </style>
@@ -393,10 +394,10 @@
 
 <!-- Modal -->
 <div class="modal-overlay" id="modal-overlay" onclick="closeModalOutside(event)">
-  <div class="modal" id="modal">
+  <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
     <div class="modal-header">
       <div class="modal-title" id="modal-title">Add Application</div>
-      <button class="modal-close" onclick="closeModal()">×</button>
+      <button class="modal-close" onclick="closeModal()" aria-label="Close">×</button>
     </div>
     <div class="modal-body">
       <input type="hidden" id="edit-id">
@@ -679,8 +680,29 @@ function renderKanban(rows) {
   board.innerHTML = cols.join('');
 }
 
+// ── Focus-trap utility ─────────────────────────────────────────────────────
+function makeTrap(dialogEl) {
+  const sel = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+  const nodes = () => [...dialogEl.querySelectorAll(sel)];
+  const handler = e => {
+    if (e.key !== 'Tab') return;
+    const focusable = nodes();
+    const first = focusable[0], last = focusable[focusable.length - 1];
+    if (e.shiftKey) {
+      if (document.activeElement === first) { e.preventDefault(); last.focus(); }
+    } else {
+      if (document.activeElement === last) { e.preventDefault(); first.focus(); }
+    }
+  };
+  dialogEl.addEventListener('keydown', handler);
+  return handler;
+}
+
 // ── Modal ──────────────────────────────────────────────────────────────────
+let _modalTrigger = null, _modalTrap = null;
+
 function openModal(id = null) {
+  _modalTrigger = document.activeElement;
   clearForm();
   const overlay = document.getElementById('modal-overlay');
   const delBtn = document.getElementById('btn-delete');
@@ -709,10 +731,16 @@ function openModal(id = null) {
   }
 
   overlay.classList.add('show');
-  setTimeout(() => document.getElementById('f-company').focus(), 100);
+  _modalTrap = makeTrap(document.getElementById('modal'));
+  setTimeout(() => document.getElementById('f-company').focus(), 50);
 }
 
-function closeModal() { document.getElementById('modal-overlay').classList.remove('show'); }
+function closeModal() {
+  const overlay = document.getElementById('modal-overlay');
+  overlay.classList.remove('show');
+  if (_modalTrap) { document.getElementById('modal').removeEventListener('keydown', _modalTrap); _modalTrap = null; }
+  if (_modalTrigger) { _modalTrigger.focus(); _modalTrigger = null; }
+}
 function closeModalOutside(e) { if (e.target === document.getElementById('modal-overlay')) closeModal(); }
 
 function clearForm() {
@@ -766,9 +794,9 @@ async function deleteEntry() {
   render();
 }
 
-// ── Keyboard shortcut ──────────────────────────────────────────────────────
+// ── Keyboard shortcuts ──────────────────────────────────────────────────────
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') closeModal();
+  if (e.key === 'Escape') { closeModal(); closeUpgrade(); }
   if ((e.metaKey || e.ctrlKey) && e.key === 'k') { e.preventDefault(); openModal(); }
 });
 
@@ -891,17 +919,27 @@ async function loadLicence() {
 
 function isPaid() { return _licenceTier === 'community' || _licenceTier === 'external'; }
 
+let _upgradeTrigger = null, _upgradeTrap = null;
+
 function showUpgrade(title, sub) {
+  _upgradeTrigger = document.activeElement;
   document.getElementById('upgrade-title').textContent = title || 'Unlock full access';
   document.getElementById('upgrade-sub').textContent = sub || 'This feature is part of Career Ops Full Access.';
-  document.getElementById('upgrade-overlay').classList.add('show');
+  const overlay = document.getElementById('upgrade-overlay');
+  overlay.classList.add('show');
+  _upgradeTrap = makeTrap(overlay);
+  const first = overlay.querySelector('a[href], button:not([disabled]), input:not([disabled])');
+  if (first) first.focus();
 }
 
 function closeUpgrade() {
-  document.getElementById('upgrade-overlay').classList.remove('show');
+  const overlay = document.getElementById('upgrade-overlay');
+  overlay.classList.remove('show');
+  if (_upgradeTrap) { overlay.removeEventListener('keydown', _upgradeTrap); _upgradeTrap = null; }
   const msg = document.getElementById('activate-msg');
   msg.className = 'activate-msg'; msg.textContent = '';
   document.getElementById('licence-key-input').value = '';
+  if (_upgradeTrigger) { _upgradeTrigger.focus(); _upgradeTrigger = null; }
 }
 
 async function activateLicence() {
