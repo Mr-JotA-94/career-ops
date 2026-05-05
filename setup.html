@@ -444,7 +444,18 @@ select option { background: var(--surface); }
     <p class="step-sub">CareerOps uses Groq's free AI API. Get your key at <strong>console.groq.com</strong> → API Keys. It stays on your machine — never sent anywhere else.</p>
 
     <div class="field">
-      <label>Groq API Key *</label>
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
+        <label style="margin-bottom:0;">Groq API Key *</label>
+        <a href="https://console.groq.com/keys" target="_blank" rel="noopener noreferrer"
+           style="font-size:11px; font-family:var(--mono); color:var(--teal);
+                  text-decoration:none; border:1px solid var(--teal);
+                  border-radius:3px; padding:3px 10px;
+                  transition:background 0.15s; white-space:nowrap;"
+           onmouseover="this.style.background='color-mix(in srgb, var(--teal) 12%, transparent)'"
+           onmouseout="this.style.background='transparent'">
+          Get free key ↗
+        </a>
+      </div>
       <div class="key-row">
         <input type="password" id="s2-apikey" placeholder="gsk_...">
         <button class="btn-test" id="test-btn" onclick="testApiKey()">Test Key</button>
