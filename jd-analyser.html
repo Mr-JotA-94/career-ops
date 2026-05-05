@@ -391,6 +391,7 @@
       <a href="/hub.html" class="logo">Career<span>Ops</span></a>
       <span class="tool-tag">jd-analyser</span>
       <nav class="nav-links">
+        <a class="nav-link" href="/hub.html">🏠 Hub</a>
         <a class="nav-link active" href="/jd-analyser.html">JD Analyser</a>
         <a class="nav-link" href="/cv-tailor.html">CV Tailor</a>
         <a class="nav-link" href="/search-kit.html">Search Kit</a>
@@ -997,13 +998,13 @@ async function activateLicence() {
 }
 
 // ── JD Analyser gate ────────────────────────────────────────────────────
-const JD_FREE_LIMIT = 3;
+const JD_FREE_LIMIT = 10;
 
 async function runAnalysisGated() {
   await loadLicence();
   if (!isPaid() && _jdUses >= JD_FREE_LIMIT) {
     showUpgrade(
-      'You have used your 3 free analyses.',
+      'You have used your 10 free analyses.',
       'Unlimited JD Analyser access — plus CV Tailor and Pipeline — is included in Career Ops Full Access.'
     );
     return;

@@ -564,5 +564,139 @@ document.getElementById('theme-toggle').textContent =
 
 init();
 </script>
+
+<!-- ── Feedback trigger ── -->
+<button
+  id="feedback-trigger"
+  onclick="openFeedback()"
+  aria-label="Share feedback"
+  style="position:fixed;bottom:24px;left:24px;z-index:800;display:flex;align-items:center;gap:8px;padding:10px 18px;background:var(--surface);border:1px solid var(--border);border-radius:4px;color:var(--muted);font-family:var(--mono);font-size:11px;cursor:pointer;transition:color 0.15s,border-color 0.15s,box-shadow 0.15s;letter-spacing:0.06em;text-transform:uppercase;"
+  onmouseover="this.style.color='var(--teal)';this.style.borderColor='var(--teal)';this.style.boxShadow='0 4px 20px rgba(14,155,138,0.15)'"
+  onmouseout="this.style.color='var(--muted)';this.style.borderColor='var(--border)';this.style.boxShadow='none'"
+>
+  <span style="font-size:14px;line-height:1;">✦</span> Share feedback
+</button>
+
+<!-- ── Feedback overlay ── -->
+<div id="feedback-overlay" role="dialog" aria-modal="true" aria-label="Pilot feedback"
+  style="display:none;position:fixed;inset:0;z-index:9000;background:rgba(7,17,30,0.88);backdrop-filter:blur(8px);align-items:center;justify-content:center;">
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;width:min(580px,94vw);max-height:88vh;display:flex;flex-direction:column;overflow:hidden;animation:feedbackIn 0.25s ease;">
+
+    <!-- Header -->
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:20px 28px;border-bottom:1px solid var(--border);flex-shrink:0;">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <span style="font-size:9px;letter-spacing:0.18em;text-transform:uppercase;color:var(--teal);border:1px solid rgba(14,155,138,0.35);padding:3px 10px;border-radius:2px;font-family:var(--mono);">Career Ops · Pilot</span>
+        <span style="font-family:var(--sans);font-size:15px;font-weight:600;color:var(--bright);">Share your feedback</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <span id="feedback-theme-hint" style="display:none;align-items:center;gap:8px;">
+          <span style="font-size:10px;color:var(--muted);font-family:var(--mono);white-space:nowrap;">☽ Looks better in dark mode</span>
+          <button onclick="switchToDark()"
+            style="font-size:10px;font-family:var(--mono);color:var(--teal);background:transparent;border:1px solid rgba(14,155,138,0.35);padding:3px 10px;border-radius:3px;cursor:pointer;white-space:nowrap;transition:background 0.15s;"
+            onmouseover="this.style.background='rgba(14,155,138,0.1)'"
+            onmouseout="this.style.background='transparent'"
+          >Switch →</button>
+        </span>
+        <button onclick="closeFeedback()" aria-label="Close"
+          style="background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer;line-height:1;padding:4px;transition:color 0.15s;"
+          onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--muted)'">&#x2715;</button>
+      </div>
+    </div>
+
+    <!-- Tally iframe — src set dynamically on open based on theme -->
+    <div style="flex:1;overflow:hidden;min-height:420px;position:relative;">
+      <div id="feedback-loading" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;color:var(--muted);font-family:var(--mono);font-size:12px;background:var(--surface);z-index:2;">
+        <div style="width:32px;height:32px;border:2px solid var(--border);border-top-color:var(--teal);border-radius:50%;animation:spin 0.8s linear infinite;"></div>
+        Loading...
+      </div>
+      <iframe
+        id="feedback-iframe"
+        src=""
+        width="100%" height="100%" frameborder="0" marginheight="0" marginwidth="0"
+        title="Career Ops pilot feedback"
+        style="display:block;width:100%;height:100%;min-height:420px;border:none;background:transparent;">
+      </iframe>
+    </div>
+
+    <!-- Footer note -->
+    <div style="padding:14px 28px;border-top:1px solid var(--border);font-size:11px;color:var(--muted);font-family:var(--mono);flex-shrink:0;line-height:1.6;">
+      Takes ~2 minutes &nbsp;·&nbsp; Goes directly to Johan &nbsp;·&nbsp; Anonymous is fine
+    </div>
+  </div>
+</div>
+
+<style>
+  @keyframes feedbackIn {
+    from { opacity:0; transform:translateY(12px) scale(0.98); }
+    to   { opacity:1; transform:translateY(0) scale(1); }
+  }
+  @keyframes spin { to { transform:rotate(360deg); } }
+
+  /* Force Tally iframe text to be readable in dark theme */
+  /* Tally respects CSS vars on the parent page via transparentBackground */
+  /* We override their default dark text by wrapping with a themed container */
+  #feedback-iframe-wrap {
+    background: var(--surface);
+    color-scheme: dark;
+  }
+  [data-theme="light"] #feedback-iframe-wrap {
+    color-scheme: light;
+  }
+</style>
+
+<script>
+  // Tally colour map per theme — transparentBackground means their bg goes clear
+  // but their text still uses their own defaults. We swap the embed URL per theme.
+  const TALLY_BASE = 'https://tally.so/embed/Me8PvM?alignLeft=1&hideTitle=1&dynamicHeight=1';
+  const TALLY_DARK  = TALLY_BASE + '&transparentBackground=1';
+  const TALLY_LIGHT = TALLY_BASE + '&transparentBackground=1';
+
+  function openFeedback() {
+    const overlay = document.getElementById('feedback-overlay');
+    const loading = document.getElementById('feedback-loading');
+    const iframe  = document.getElementById('feedback-iframe');
+    // Set iframe src based on current theme — reload only if theme changed
+    const isDark = (document.documentElement.getAttribute('data-theme') || 'dark') === 'dark';
+    const src = isDark ? TALLY_DARK : TALLY_LIGHT;
+    if (iframe.getAttribute('data-loaded-theme') !== (isDark ? 'dark' : 'light')) {
+      iframe.src = src;
+      iframe.setAttribute('data-loaded-theme', isDark ? 'dark' : 'light');
+    }
+    overlay.style.display = 'flex';
+    loading.style.display = 'flex';
+    _updateFeedbackHint();
+    // Tally iframes don't reliably fire onload — hide spinner after 2.5s max
+    const t = setTimeout(() => { loading.style.display = 'none'; }, 2500);
+    iframe.onload = () => { clearTimeout(t); loading.style.display = 'none'; };
+    document.addEventListener('keydown', _fbEsc);
+  }
+  function closeFeedback() {
+    document.getElementById('feedback-overlay').style.display = 'none';
+    document.removeEventListener('keydown', _fbEsc);
+  }
+  function _fbEsc(e) { if (e.key === 'Escape') closeFeedback(); }
+  function switchToDark() {
+    document.documentElement.setAttribute('data-theme', 'dark');
+    localStorage.setItem('careerops-theme', 'dark');
+    const toggle = document.getElementById('theme-toggle');
+    if (toggle) toggle.textContent = '☽';
+    document.getElementById('feedback-theme-hint').style.display = 'none';
+    // Reload the iframe with dark theme
+    const iframe = document.getElementById('feedback-iframe');
+    iframe.removeAttribute('data-loaded-theme');
+    openFeedback();
+  }
+
+  function _updateFeedbackHint() {
+    const hint = document.getElementById('feedback-theme-hint');
+    if (!hint) return;
+    const isDark = (document.documentElement.getAttribute('data-theme') || 'dark') === 'dark';
+    hint.style.display = isDark ? 'none' : 'flex';
+  }
+  document.getElementById('feedback-overlay').addEventListener('click', function(e) {
+    if (e.target === this) closeFeedback();
+  });
+</script>
+
 </body>
 </html>
