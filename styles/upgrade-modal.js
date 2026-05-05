@@ -7,7 +7,7 @@
     <h2 class="upgrade-title" id="upgrade-title">Unlock full access</h2>
     <p class="upgrade-sub" id="upgrade-sub">This feature is part of Career Ops Full Access.</p>
     <div class="upgrade-options">
-      <a href="https://buy.stripe.com/test_3cIdR14bz9iIdZVcdD9EI00"
+      <a href="https://buy.stripe.com/7sY14f0JpcLGbydfd61ck01"
          target="_blank" class="upgrade-btn-primary">Get Full Access &#x2192;</a>
     </div>
     <div class="upgrade-price">
